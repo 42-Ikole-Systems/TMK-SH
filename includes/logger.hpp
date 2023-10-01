@@ -1,30 +1,50 @@
 #pragma once
 
-enum class LogLevel { None, Info, Warning, Debug };
+#include "print.hpp"
 
-namespace shell {
+#ifdef DEBUG
+# define LOG_ERROR(format, ...) shell::Logger::getInstance().write(shell::Logger::LogLevel::Error, format, ##__VA_ARGS__)
+# define LOG_WARNING(format, ...) shell::Logger::getInstance().write(shell::Logger::LogLevel::Warning, format, ##__VA_ARGS__)
+# define LOG_INFO(format, ...) shell::Logger::getInstance().write(shell::Logger::LogLevel::Info, format, ##__VA_ARGS__)
+#else
+# define LOG_ERROR(format, ...)
+# define LOG_Warning(format, ...)
+# define LOG_INFO(format, ...)
+#endif
 
-class Logger {
-private:
-	Logger(LogLevel global_log_level_) : global_log_level(global_log_level_) {
-	}
+
+namespace shell
+{
+
+class Logger
+{
+	Logger() = default;
 
 public:
-	LogLevel global_log_level;
 
-	template <typename T>
-	Logger &operator<<(const T &value) {
-		std::err << value;
-		return *this;
+	enum class LogLevel { Info, Warning, Error };
+
+	template<class... Args>
+	void write(LogLevel logLevel, const char* format, Args&&... args)
+	{
+		switch(logLevel)
+		{
+			case LogLevel::Info:
+				tprintf("[Info]: ");
+				break;
+			case LogLevel::Warning:
+				tprintf("[Warning]: ");
+				break;
+			case LogLevel::Error:
+				tprintf("[Error]: ");
+				break;
+		};
+		tprintf(format, std::forward<Args>(args)...);
 	}
 
-	static Logger &Log(LogLevel log_level) {
-		static Logger logger(log_level);
-
-		constexpr if (log_level < global_log_level) {
-			// disable logger?
-		}
-
+	static Logger& getInstance()
+	{
+		static Logger logger;
 		return logger;
 	}
 };
