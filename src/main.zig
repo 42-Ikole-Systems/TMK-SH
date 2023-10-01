@@ -1,5 +1,11 @@
 const std = @import("std");
-const LineReader = @import("io/LineReader.zig");
+const LineReader = @import("io/line_reader.zig");
+const Lexer = @import("parser/lexer.zig");
+
+fn s() *u8 {
+    var x = 'a';
+    return &x;
+}
 
 pub fn main() !void {
     var argv = std.process.args();
@@ -8,37 +14,28 @@ pub fn main() !void {
         std.debug.print("{s}\n", .{arg});
     }
 
+    var buffered_reader = std.io.bufferedReader(std.io.getStdIn().reader());
+    var reader = buffered_reader.reader();
+    _ = reader;
+
     const allocator = std.heap.page_allocator;
+    var stdin_reader = std.io.getStdIn().reader();
 
-    var bufreader = std.io.bufferedReader(std.io.getStdIn().reader());
-    var reader = bufreader.reader();
-    var line_reader = LineReader.init(allocator, reader);
+    var line_reader = LineReader.new(allocator, stdin_reader);
 
+    std.debug.print("Start\n", .{});
     while (try line_reader.next()) |line| {
         std.debug.print("{s}\n", .{line});
     }
-}
 
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
-}
-
-test "shell tokenizer" {
-    const BUFFER_SIZE = 2048;
-    _ = BUFFER_SIZE;
-    const allocator = std.heap.page_allocator;
-    const stdin = std.io.getStdIn().reader();
-
-    while (true) {
-        const line = try stdin.readAllAlloc(allocator, 0);
-        if (line.len == 0) break;
-        // Do something with the line, e.g., print it
-        const lineSlice = line[0 .. line.len - 1]; // Remove the trailing newline
-        std.debug.print("Read line: {s}\n", .{lineSlice});
-
-        allocator.free(line); // Release the allocated memory
-    }
+    // var lexer = Lexer.init(line_reader);
+    // var parser = Parser.init(lexer);
+    // while (true) {
+    //     var ast: AST = parser.parse() orelse break;
+    //     // todo: expander
+    //     executor.execute(tree);
+    //     std.debug.print("TMK: ", .{});
+    //     var line = try line_reader.next();
+    //     std.debug.print("{s}\n", .{line});
+    // }
 }
