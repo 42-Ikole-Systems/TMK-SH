@@ -5,7 +5,7 @@
 
 namespace shell {
 
-StdinReader::StdinReader(const string &prompt): prompt(prompt) {}
+StdinReader::StdinReader(const string &prompt): prompt(prompt), line(nullopt) {}
 
 StdinReader::~StdinReader() {}
 
@@ -18,6 +18,20 @@ optional<string> StdinReader::nextLine() {
     string result = string(line);
     free(line);
     return result;
+}
+
+char StdinReader::nextChar() {
+    if (!line.has_value() || index >= line->length()) {
+        line = nextLine();
+        index = 0;
+    }
+    if (!line.has_value()) {
+        return 0; // EOF
+    }
+    if (line->length() == 0) {
+        return '\n';
+    }
+    return line->at(index++);
 }
 
 } //namespace shell

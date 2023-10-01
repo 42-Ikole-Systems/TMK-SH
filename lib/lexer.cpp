@@ -1,15 +1,27 @@
-#include "lexer.hpp"
+#include "lexer/lexer.hpp"
 #include <stdexcept>
 #include "util.hpp"
+#include <stdio.h>
 
 namespace shell {
 
-Lexer::Lexer(unique_ptr<Reader> reader) : reader(std::move(reader)) {}
+Lexer::Lexer(Reader& reader) : reader(reader) {}
 
-Lexer::Lexer(Lexer&& other): reader(std::move(other.reader)) {}
+optional<Token> Lexer::getNextToken() {
+    while (true) {
+        char ch = reader.nextChar();
+        if (ch == 0 || ch == '\n') {
+            break;
+        }
+        printf("%c", ch);
+        // token_parser->process(ch);
+    }
+    printf("\n");
+    return nullopt;
+}
 
-Lexer::Token Lexer::getNextToken() {
-    throw std::runtime_error("not implemented");
+vector<Token> Lexer::lexTokens(const string& line) {
+    return {};
 }
 
 }; //namespace shell

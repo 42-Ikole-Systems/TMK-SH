@@ -4,10 +4,8 @@
 
 namespace shell {
 
-Parser::Parser(Lexer &&lexer): lexer(std::move(lexer)) {}
-
-Parser::AST Parser::getNextCommand() {
-    throw std::runtime_error("not implemented");
+Parser::AST Parser::getNextCommand(vector<Token> tokens) {
+    return AST();
 }
 
 }

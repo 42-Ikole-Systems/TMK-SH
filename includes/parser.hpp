@@ -1,19 +1,17 @@
 #pragma once
 
-#include "lexer.hpp"
+#include "lexer/token.hpp"
+#include "util.hpp"
 
 namespace shell {
 
 class Parser {
 private:
-	Lexer lexer;
 
 public:
 	struct AST {};
 
-	Parser(Lexer &&lexer);
-
-	AST getNextCommand();
+	AST getNextCommand(vector<Token> tokens);
 };
 
 } // namespace shell
