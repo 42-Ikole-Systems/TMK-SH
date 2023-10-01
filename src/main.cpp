@@ -29,10 +29,14 @@ static int run(int argc, char *argv[], char *env[]) {
 		if (!line.has_value()) {
 			break;
 		}
-		tprintf("%s\n", line.value());
-		vector<Token> tokens = lexer.lexTokens(line.value());
+		tprintf("%\n", line.value());
+		vector<Token> tokens = lexer.tokenize(line.value());
+		for (const Token& token : tokens) {
+			token.print();
+		}
 		Parser::AST ast = parser.getNextCommand(tokens);
 	}
+	tprintf("\n");
 	return 0;
 }
 

@@ -4,6 +4,13 @@
 
 namespace shell {
 
+/*
+
+; -> Sequence
+    <left>
+    <right>
+*/
+
 Parser::AST Parser::getNextCommand(vector<Token> tokens) {
     return AST();
 }
