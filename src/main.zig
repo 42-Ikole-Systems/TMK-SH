@@ -2,11 +2,6 @@ const std = @import("std");
 const LineReader = @import("io/line_reader.zig");
 const Lexer = @import("parser/lexer.zig");
 
-fn s() *u8 {
-    var x = 'a';
-    return &x;
-}
-
 pub fn main() !void {
     var argv = std.process.args();
     _ = argv.skip();
@@ -15,13 +10,8 @@ pub fn main() !void {
     }
 
     var buffered_reader = std.io.bufferedReader(std.io.getStdIn().reader());
-    var reader = buffered_reader.reader();
-    _ = reader;
-
     const allocator = std.heap.page_allocator;
-    var stdin_reader = std.io.getStdIn().reader();
-
-    var line_reader = LineReader.new(allocator, stdin_reader);
+    var line_reader = LineReader.new(allocator, buffered_reader.reader());
 
     std.debug.print("Start\n", .{});
     while (try line_reader.next()) |line| {
