@@ -2,28 +2,40 @@
 
 #include "print.hpp"
 
-#ifdef DEBUG
+# define LOG_INFO(format, ...) shell::Logger::getInstance().write(shell::Logger::LogLevel::Info, format, ##__VA_ARGS__)
 # define LOG_ERROR(format, ...) shell::Logger::getInstance().write(shell::Logger::LogLevel::Error, format, ##__VA_ARGS__)
 # define LOG_WARNING(format, ...) shell::Logger::getInstance().write(shell::Logger::LogLevel::Warning, format, ##__VA_ARGS__)
-# define LOG_INFO(format, ...) shell::Logger::getInstance().write(shell::Logger::LogLevel::Info, format, ##__VA_ARGS__)
+
+#ifdef DEBUG
+# define LOG_DEBUG(format, ...) shell::Logger::getInstance().write(shell::Logger::LogLevel::Debug, format, ##__VA_ARGS__)
 #else
-# define LOG_ERROR(format, ...)
-# define LOG_Warning(format, ...)
-# define LOG_INFO(format, ...)
+# define LOG_DEBUG(format, ...)
 #endif
 
 
 namespace shell
 {
 
+/*!
+ * @brief Manages Logging.
+*/
 class Logger
 {
 	Logger() = default;
 
 public:
 
-	enum class LogLevel { Info, Warning, Error };
+	/*!
+	 * @brief -.
+	*/
+	enum class LogLevel { Info, Warning, Error, Debug };
 
+	/*!
+	 * @brief Writes message like printf but with loglevel prefix.
+	 * @param logLevel
+	 * @param format
+	 * @param args
+	*/
 	template<class... Args>
 	void write(LogLevel logLevel, const char* format, Args&&... args)
 	{
@@ -38,10 +50,17 @@ public:
 			case LogLevel::Error:
 				tprintf("[Error]: ");
 				break;
+			case LogLevel::Debug:
+				tprintf("[Debug]: ");
+				break;
 		};
 		tprintf(format, std::forward<Args>(args)...);
 	}
 
+	/*!
+	 * @brief Get singleton instance.
+	 * @return
+	*/
 	static Logger& getInstance()
 	{
 		static Logger logger;
