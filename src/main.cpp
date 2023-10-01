@@ -7,6 +7,7 @@
 
 namespace shell {
 
+// todo: parse PS1
 static string prompt = "";
 
 static void initialize() {
@@ -18,7 +19,7 @@ static void initialize() {
 static int run(int argc, char *argv[], char *env[]) {
 	initialize();
 
-	unique_ptr<StdinReader> reader = make_unique<StdinReader>(prompt);
+	auto reader = make_unique<StdinReader>(prompt);
 	Lexer lexer = Lexer(std::move(reader));
 	Parser parser = Parser(std::move(lexer));
 	while (true) {
