@@ -1,45 +1,64 @@
 #pragma once
 
 #include "util.hpp"
+#include <variant>
 
 namespace shell {
 
 class Ast {
 public:
-    class Node {
-        public:
-            enum class Type { SeparatorOp, Command };
-            virtual ~Node() {}
-            virtual Type getType() const = 0;
-            virtual void print(int level) const = 0;
-    };
+    class Node;
 
-    struct Command: public Node {
-        Command(vector<string>&& args);
-        ~Command();
+    struct Command {
+        Command(Command&& other);
+		Command(vector<string> &&args);
+		~Command();
 
-        Type getType() const override;
-        void print(int level) const override;
+		void print(int level) const;
+		vector<string> args; // args[0] == program name
+	};
 
-        vector<string> args; // args[0] == program name
-    };
+	struct SeparatorOp {
+		SeparatorOp() = default;
+        SeparatorOp(SeparatorOp&& other);
+		~SeparatorOp();
 
-    struct SeparatorOp: public Node {
-        ~SeparatorOp();
+		void print(int level) const;
+		unique_ptr<Node> left;
+		unique_ptr<Node> right;
+	};
 
-        Type getType() const override;
-        void print(int level) const override;
-        // ; &
-        unique_ptr<Node> left;
-        unique_ptr<Node> right;
-    };
+	class Node {
+	public:
+		enum class Type { SeparatorOp, Command };
+
+    private:
+        Type type;
+        std::variant<Command, SeparatorOp> variant;
+    
+    public:
+        Node(Node&& other);
+        Node(Command&& command);
+        Node(SeparatorOp&& separator_op);
+
+        Type getType();
+    
+        const SeparatorOp& getSeparatorOp() const;
+        SeparatorOp& getSeparatorOp();
+        const Command& getCommand() const;
+        Command& getCommand();
+
+        void print(int level) const;
+	};
+
+
 
 public:
-    Ast(unique_ptr<Node> root);
+	Ast(unique_ptr<Node> root);
 
-    unique_ptr<Node> root;
+	unique_ptr<Node> root;
 
-    void print() const;
+	void print() const;
 };
 
-}
+} // namespace shell

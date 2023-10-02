@@ -10,7 +10,7 @@ public:
 
 	/**
 	 * @brief Returns the n'th token without consuming it
-	 * 
+	 *
 	 * @param n Number of tokens to look forward (default: 0 = next token)
 	 * @return T
 	 */
@@ -18,7 +18,7 @@ public:
 
 	/**
 	 * @brief Returns the n'th token, consuming up to and including the n'th token
-	 * 
+	 *
 	 * @param n Number of T to consume (i.e. ignore) (default: 0 = next token)
 	 * 			the last consumed T will be returned
 	 * @return T

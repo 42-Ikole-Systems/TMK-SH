@@ -42,11 +42,6 @@ void Parser::setState(size_t state) {
     token_position = state;
 }
 
-void Parser::setParsedNode(unique_ptr<Ast::Node> node) {
-    parsed = std::move(node);
-}
-
-
 /*
 a ; b ; c ; d => SeparatorOp (
     Command(a),
@@ -64,68 +59,65 @@ If there is no next or previous separatorOp, it is simply a command.
 If the separatorOp == &, the command becomes `Detach` NodeType, which has Command as a child
 */
 Ast Parser::getNextCommand() {
-    if (!parseList()) {
+    optional<Ast::Node> listNode = parseList();
+    if (!listNode.has_value()) {
         return Ast(nullptr);
     }
-    return Ast(std::move(parsed));
+    return Ast(make_unique<Ast::Node>(std::move(listNode.value())));
 }
 
-bool Parser::parseList() {
-    bool result = parseCommand();
-    if (!result) {
-        return false;
+optional<Ast::Node> Parser::parseList() {
+    auto command = parseCommand();
+    if (!command.has_value()) {
+        return nullopt;
     }
-    auto command = std::move(parsed);
     auto state = saveState();
-    if (parseSeparatorOp()) {
-        unique_ptr<Ast::Node> op = std::move(parsed);
-        if (!parseList()) {
-            // not an error: undo operator parsing
-            setState(state);
-            setParsedNode(std::move(command));
-        } else {
-            auto list = std::move(parsed);
-            Ast::SeparatorOp* separator = dynamic_cast<Ast::SeparatorOp*>(op.get());
-            separator->left = std::move(command);
-            separator->right = std::move(list);
-            setParsedNode(std::move(op));
-        }
-    } else {
-        setParsedNode(std::move(command));
+    optional<Ast::SeparatorOp> separator = parseSeparatorOp();
+    if (!separator.has_value()) {
+        return Ast::Node(std::move(command.value()));
     }
-    return true;
+
+    optional<Ast::Node> list = parseList();
+    if (!list.has_value()) {
+        setState(state); // undo parsing of separator
+        return Ast::Node(std::move(command.value()));
+    }
+
+    separator->left = make_unique<Ast::Node>(Ast::Node(std::move(command.value())));
+    separator->right = make_unique<Ast::Node>(std::move(list.value()));
+    return separator;
 }
 
-bool Parser::parseSeparatorOp() {
+optional<Ast::SeparatorOp> Parser::parseSeparatorOp() {
     auto token = peekToken();
     if (!token.has_value()) {
-        return false;
+        return nullopt;
     }
     if (token->type != Token::Type::Operator ||
         !(token->operator_token.type == OperatorToken::Type::Semicolon || token->operator_token.type == OperatorToken::Type::Ampersand)) {
-        return false;
+        return nullopt;
     }
-    setParsedNode(make_unique<Ast::SeparatorOp>());
     consumeToken();
-    return true;
+    return Ast::SeparatorOp();
 }
 
 // just parses a list of words for now
-bool Parser::parseCommand() {
+optional<Ast::Command> Parser::parseCommand() {
     vector<string> words;
     while (true) {
         auto token = peekToken();
-        if (!token.has_value() || token->type != Token::Type::Word) {
+        if (!token.has_value()) {
+            break;
+        } else if (token->type != Token::Type::Word) {
             break;
         }
         words.emplace_back(token->word_token.value);
         consumeToken();
     }
     if (words.empty()) {
-        return false;
+        return nullopt;
     }
-    setParsedNode(make_unique<Ast::Command>(std::move(words)));
-    return true;
+    return Ast::Command(std::move(words));
 }
 
 }

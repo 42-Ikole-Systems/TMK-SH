@@ -9,7 +9,7 @@
 
 namespace shell {
 
-class Lexer: public Provider<optional<Token>> {
+class Lexer : public Provider<optional<Token>> {
 public:
 	enum State { Empty, Done, Word, Operator };
 
@@ -19,15 +19,15 @@ private:
 	};
 
 private:
-	Provider<char>& chars; // kind of unsafe to only have a reference
+	Provider<char> &chars; // kind of unsafe to only have a reference
 	State state;
 	StateData state_data;
 	optional<Token> token;
 	std::deque<Token> tokens;
 
 public:
-	Lexer(Provider<char>& chars);
-	Lexer(Provider<char>& chars, State initial);
+	Lexer(Provider<char> &chars);
+	Lexer(Provider<char> &chars, State initial);
 
 	/**
 	 * @brief Lex line into list of tokens
@@ -40,7 +40,7 @@ public:
 	// vector<Token> tokenize(const string &line);
 
 private:
-	void delimit(Token&& token);
+	void delimit(Token &&token);
 	void generateTokens(size_t n);
 
 	std::function<State(Lexer &)> getStateHandler();

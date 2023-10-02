@@ -5,14 +5,15 @@
 
 namespace shell {
 
-class LineCharProvider: public Provider<char> {
+class LineCharProvider : public Provider<char> {
 private:
-    string line;
-    size_t index;
+	string line;
+	size_t index;
+
 public:
-    LineCharProvider(const string& line);
-    char peek(size_t n = 0) override;
-    char consume(size_t n = 0) override;
+	LineCharProvider(const string &line);
+	char peek(size_t n = 0) override;
+	char consume(size_t n = 0) override;
 };
 
-}
+} // namespace shell
