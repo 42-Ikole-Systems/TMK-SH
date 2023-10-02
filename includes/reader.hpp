@@ -18,7 +18,7 @@ public:
 
 	/**
 	 * @brief Gets char from source
-	 * 
+	 *
 	 * @return char 0 on EOF
 	 */
 	virtual char nextChar() = 0;

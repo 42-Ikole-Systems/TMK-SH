@@ -31,10 +31,11 @@ static int run(int argc, char *argv[], char *env[]) {
 		}
 		tprintf("%\n", line.value());
 		vector<Token> tokens = lexer.tokenize(line.value());
-		for (const Token& token : tokens) {
+		for (const Token &token : tokens) {
 			token.print();
 		}
-		Parser::AST ast = parser.getNextCommand(tokens);
+		Parser::Ast ast = parser.getNextCommand(tokens);
+		ast.print();
 	}
 	tprintf("\n");
 	return 0;

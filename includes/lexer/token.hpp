@@ -5,36 +5,31 @@
 namespace shell {
 
 struct WordToken {
-    string value;
+	string value;
 
-    void print() const;
+	void print() const;
 };
 
 struct OperatorToken {
-    enum class Type {
-        Semicolon
-    };
+	enum class Type { Semicolon };
 
-    Type type;
+	Type type;
 
-    void print() const;
+	void print() const;
 };
 
 // std::variant?
 struct Token {
-    enum class Type {
-        Word,
-        Operator
-    };
+	enum class Type { Word, Operator };
 
-    Type type;
-    // cannot have optional of a union type, or complex constructor inside of union type
-    // union {
-        WordToken word_token;
-        OperatorToken operator_token;
-    // };
+	Type type;
+	// cannot have optional of a union type, or complex constructor inside of union type
+	// union {
+	WordToken word_token;
+	OperatorToken operator_token;
+	// };
 
-    void print() const;
+	void print() const;
 };
 
-}
+} // namespace shell
