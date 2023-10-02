@@ -1,3 +1,5 @@
+add_subdirectory(lexer)
+
 add_library(
     lib
     OBJECT
