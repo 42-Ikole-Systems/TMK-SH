@@ -19,7 +19,6 @@ private:
 	};
 
 private:
-	// Reader &reader;
 	Provider<char>& chars; // kind of unsafe to only have a reference
 	State state;
 	StateData state_data;

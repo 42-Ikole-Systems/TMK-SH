@@ -23,7 +23,6 @@ static int run(int argc, char *argv[], char *env[]) {
 	initialize();
 
 	using_history();
-
 	StdinReader reader = StdinReader(prompt);
 	// Lexer lexer = Lexer(reader);
 	// Parser parser = Parser();
@@ -37,7 +36,7 @@ static int run(int argc, char *argv[], char *env[]) {
 		auto chars = LineCharProvider(line.value());
 		auto lexer = Lexer(chars);
 		auto parser = Parser(lexer);
-		Parser::Ast ast = parser.getNextCommand();
+		Ast ast = parser.getNextCommand();
 		ast.print();
 	}
 	tprintf("\n");
