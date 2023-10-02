@@ -7,8 +7,8 @@
 
 namespace shell {
 
-Lexer::Lexer(CharProvider& chars, State state) : chars(chars), state(state) {}
-Lexer::Lexer(CharProvider& chars) : Lexer(chars, State::Empty) {}
+Lexer::Lexer(Provider<char>& chars, State state) : chars(chars), state(state) {}
+Lexer::Lexer(Provider<char>& chars) : Lexer(chars, State::Empty) {}
 
 optional<Token> Lexer::peek() {
     if (!token.has_value()) {
@@ -28,15 +28,19 @@ optional<Token> Lexer::nextToken() {
     while (state != State::Done) {
         auto handler = getStateHandler();
         state = handler(*this);
-        if (!state_data.tokens.empty()) {
-            assert(state_data.tokens.size() == 1); // disallow state to add multiple tokens?
+        if (!tokens.empty()) {
+            assert(tokens.size() == 1); // disallow state to add multiple tokens?
             // pop next token from queue and return it
-            Token token = state_data.tokens.front();
-            state_data.tokens.pop();
+            Token token = tokens.front();
+            tokens.pop();
             return token;
         }
     }
     return nullopt;
+}
+
+void Lexer::delimit(Token&& token) {
+    tokens.emplace(token);
 }
 
 std::function<Lexer::State(Lexer&)> Lexer::getStateHandler() {
@@ -76,7 +80,7 @@ Lexer::State Lexer::wordState() {
         return State::Word;
     }
 
-    state_data.tokens.push(Token {
+    delimit(Token {
         .type = Token::Type::Word,
         .word_token = WordToken {
             .value = std::move(state_data.word)
@@ -90,7 +94,7 @@ Lexer::State Lexer::operatorState() {
     // todo: multiple operator types
     char ch = chars.consume();
     assert(isMetaCharacter(ch));
-    state_data.tokens.push(Token {
+    delimit(Token {
         .type = Token::Type::Operator,
         .operator_token = {
             .type = OperatorToken::Type::Semicolon

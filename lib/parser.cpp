@@ -5,7 +5,7 @@
 
 namespace shell {
 
-Parser::Parser(Lexer& lexer): lexer(lexer) {}
+Parser::Parser(Provider<optional<Token>>& tokens): tokens(tokens) {}
 
 Parser::Sequence::Sequence() : left(nullptr), right(nullptr) {}
 Parser::Sequence::Sequence(Node* left, Node* right) : left(left), right(right) {}
@@ -42,8 +42,8 @@ If there is no next or previous sequence, it is simply a command.
 If the separatorOp == &, the command becomes `Detach` NodeType, which has Command as a child
 */
 Parser::Ast Parser::getNextCommand() {
-    while (lexer.peek().has_value()) {
-        Token token = lexer.consume().value();
+    while (tokens.peek().has_value()) {
+        Token token = tokens.consume().value();
         token.print();
     }
     return Ast(nullptr);

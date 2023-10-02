@@ -1,11 +1,11 @@
 #pragma once
 
-#include "lexer/lexer.hpp"
 #include "util.hpp"
+#include "interfaces/provider.hpp"
 
 namespace shell {
 
-class LineCharProvider: public CharProvider {
+class LineCharProvider: public Provider<char> {
 private:
     string line;
     size_t index;

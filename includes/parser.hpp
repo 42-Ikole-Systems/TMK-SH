@@ -1,7 +1,7 @@
 #pragma once
 
+#include "interfaces/provider.hpp"
 #include "lexer/token.hpp"
-#include "lexer/lexer.hpp"
 #include "util.hpp"
 
 namespace shell {
@@ -9,10 +9,10 @@ namespace shell {
 
 class Parser {
 private:
-	Lexer& lexer;
+	Provider<optional<Token>>& tokens;
 
 public:
-	Parser(Lexer& lexer);
+	Parser(Provider<optional<Token>>& tokens);
 
 	struct Node;
 
