@@ -11,7 +11,12 @@ struct WordToken {
 };
 
 struct OperatorToken {
-	enum class Type { Semicolon };
+	enum class Type {
+		Semicolon, Ampersand, Unknown
+	};
+
+	OperatorToken();
+	OperatorToken(char ch);
 
 	Type type;
 

@@ -5,7 +5,7 @@
 #include "token.hpp"
 #include "interfaces/provider.hpp"
 #include <functional>
-#include <queue>
+#include <deque>
 
 namespace shell {
 
@@ -23,7 +23,7 @@ private:
 	State state;
 	StateData state_data;
 	optional<Token> token;
-	std::queue<Token> tokens;
+	std::deque<Token> tokens;
 
 public:
 	Lexer(Provider<char>& chars);
@@ -35,13 +35,13 @@ public:
 	 * @param line line to be lexed
 	 * @return vector<Token> vector of tokens resulting from lexing
 	 */
-	optional<Token> peek();
-	optional<Token> consume();
+	optional<Token> peek(size_t n = 0);
+	optional<Token> consume(size_t n = 0);
 	// vector<Token> tokenize(const string &line);
 
 private:
 	void delimit(Token&& token);
-	optional<Token> nextToken();
+	void generateTokens(size_t n);
 
 	std::function<State(Lexer &)> getStateHandler();
 	State emptyState();

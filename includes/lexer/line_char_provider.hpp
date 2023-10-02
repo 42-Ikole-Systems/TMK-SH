@@ -11,8 +11,8 @@ private:
     size_t index;
 public:
     LineCharProvider(const string& line);
-    char peek() override;
-    char consume() override;
+    char peek(size_t n = 0) override;
+    char consume(size_t n = 0) override;
 };
 
 }

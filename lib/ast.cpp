@@ -5,6 +5,18 @@ namespace shell {
 
 Ast::Ast(unique_ptr<Node> root): root(std::move(root)) {}
 
+Ast::Command::Command(vector<string>&& args): args(args) {}
+Ast::Command::~Command() {}
+Ast::SeparatorOp::~SeparatorOp() {}
+
+Ast::Node::Type Ast::Command::getType() const {
+    return Type::Command;
+}
+
+Ast::Node::Type Ast::SeparatorOp::getType() const {
+    return Type::SeparatorOp;
+}
+
 void Ast::print() const {
     if (root == nullptr) {
         tprintf("<null>\n");
@@ -15,11 +27,13 @@ void Ast::print() const {
 
 static void printLevel(int level) {
     for (int i = 0; i < level; i++) {
-        tprintf("  ");
+        tprintf("    ");
     }
 }
 
 void Ast::Command::print(int level) const {
+    printLevel(level);
+
     tprintf("Command:\n");
     printLevel(level + 1);
     tprintf("Args: [ ");
@@ -33,14 +47,18 @@ void Ast::Command::print(int level) const {
 
 }
 
-void Ast::Sequence::print(int level) const {
-    tprintf("Sequence:\n");
+void Ast::SeparatorOp::print(int level) const {
+    printLevel(level);
+
+    tprintf("SeparatorOp:\n");
     if (left == nullptr) {
+        printLevel(level + 1);
         tprintf("<null>\n");
     } else {
         left->print(level + 1);
     }
     if (right == nullptr) {
+        printLevel(level + 1);
         tprintf("<null>\n");
     } else {
         right->print(level + 1);

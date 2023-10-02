@@ -10,37 +10,40 @@ namespace shell {
 Lexer::Lexer(Provider<char>& chars, State initial) : chars(chars), state(initial) {}
 Lexer::Lexer(Provider<char>& chars) : Lexer(chars, State::Empty) {}
 
-optional<Token> Lexer::peek() {
-    if (!token.has_value()) {
-        token = nextToken();
+optional<Token> Lexer::peek(size_t n) {
+    generateTokens(n + 1);
+    if (tokens.size() < n + 1) {
+        return nullopt;
     }
+    return tokens[n];
+}
+
+// consume n tokens and return the last
+optional<Token> Lexer::consume(size_t n) {
+    generateTokens(n + 1);
+    if (tokens.size() < n + 1) {
+        return nullopt;
+    }
+    tokens.erase(tokens.begin(), tokens.begin() + n);
+    Token token = tokens.front();
+    tokens.pop_front();
     return token;
 }
 
-optional<Token> Lexer::consume() {
-    // exchange
-    optional<Token> next = nullopt;
-    token.swap(next);
-    return next;
-}
-
-optional<Token> Lexer::nextToken() {
-    while (state != State::Done) {
+/**
+ * @brief Generates tokens until tokens.size() >= n or EOF is reached
+ * 
+ * @param n number of tokens to generate
+ */
+void Lexer::generateTokens(size_t n) {
+    while (state != State::Done && tokens.size() < n) {
         auto handler = getStateHandler();
         state = handler(*this);
-        if (!tokens.empty()) {
-            assert(tokens.size() == 1); // disallow state to add multiple tokens ...
-            // pop next token from queue and return it
-            Token token = tokens.front();
-            tokens.pop();
-            return token;
-        }
     }
-    return nullopt;
 }
 
 void Lexer::delimit(Token&& token) {
-    tokens.emplace(token);
+    tokens.emplace_back(token);
 }
 
 std::function<Lexer::State(Lexer&)> Lexer::getStateHandler() {
@@ -96,9 +99,7 @@ Lexer::State Lexer::operatorState() {
     assert(isMetaCharacter(ch));
     delimit(Token {
         .type = Token::Type::Operator,
-        .operator_token = {
-            .type = OperatorToken::Type::Semicolon
-        }
+        .operator_token = OperatorToken(ch)
     });
     return State::Empty;
 }
@@ -106,7 +107,7 @@ Lexer::State Lexer::operatorState() {
 // https://www.gnu.org/software/bash/manual/bash.html#index-metacharacter
 constexpr const char* WHITESPACE = " \n\t";
 // constexpr const char* METACHARACTERS = " \n\t|&;()<>";
-constexpr const char* METACHARACTERS = ";";
+constexpr const char* METACHARACTERS = ";&";
 
 static bool contains(const char* s, char ch) {
     return strchr(s, ch) != nullptr;

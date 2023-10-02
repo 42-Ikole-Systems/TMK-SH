@@ -5,17 +5,18 @@ namespace shell {
 
 LineCharProvider::LineCharProvider(const string& line): line(line), index(0) {}
 
-char LineCharProvider::peek() {
-    if (index >= line.length()) {
+char LineCharProvider::peek(size_t n) {
+    if (n > line.length() || index + n >= line.length()) {
         return EOF;
     }
-    return line[index];
+    return line[index + n];
 }
 
-char LineCharProvider::consume() {
-    if (index >= line.length()) {
+char LineCharProvider::consume(size_t n) {
+    if (n > line.length() || index + n >= line.length()) {
         return EOF;
     }
+    index += n;
     return line[index++];
 }
 
