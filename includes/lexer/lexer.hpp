@@ -28,7 +28,7 @@ private:
 
 public:
 	Lexer(Provider<char>& chars);
-	Lexer(Provider<char>& chars, State state);
+	Lexer(Provider<char>& chars, State initial);
 
 	/**
 	 * @brief Lex line into list of tokens

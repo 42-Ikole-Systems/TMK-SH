@@ -7,7 +7,7 @@
 
 namespace shell {
 
-Lexer::Lexer(Provider<char>& chars, State state) : chars(chars), state(state) {}
+Lexer::Lexer(Provider<char>& chars, State initial) : chars(chars), state(initial) {}
 Lexer::Lexer(Provider<char>& chars) : Lexer(chars, State::Empty) {}
 
 optional<Token> Lexer::peek() {
@@ -29,7 +29,7 @@ optional<Token> Lexer::nextToken() {
         auto handler = getStateHandler();
         state = handler(*this);
         if (!tokens.empty()) {
-            assert(tokens.size() == 1); // disallow state to add multiple tokens?
+            assert(tokens.size() == 1); // disallow state to add multiple tokens ...
             // pop next token from queue and return it
             Token token = tokens.front();
             tokens.pop();

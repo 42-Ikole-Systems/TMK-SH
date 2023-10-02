@@ -22,6 +22,8 @@ static void initialize() {
 static int run(int argc, char *argv[], char *env[]) {
 	initialize();
 
+	using_history();
+
 	StdinReader reader = StdinReader(prompt);
 	// Lexer lexer = Lexer(reader);
 	// Parser parser = Parser();
@@ -30,7 +32,8 @@ static int run(int argc, char *argv[], char *env[]) {
 		if (!line.has_value()) {
 			break;
 		}
-		tprintf("%\n", line.value());
+		add_history(line.value().c_str());
+
 		auto chars = LineCharProvider(line.value());
 		auto lexer = Lexer(chars);
 		auto parser = Parser(lexer);
