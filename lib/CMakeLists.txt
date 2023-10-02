@@ -5,6 +5,7 @@ add_library(
     parser.cpp
     stdin_reader.cpp
     token.cpp
+    line_char_provider.cpp
 )
 
 # Forward the declared variable to the parent scope

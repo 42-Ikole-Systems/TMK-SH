@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lexer/token.hpp"
+#include "lexer/lexer.hpp"
 #include "util.hpp"
 
 namespace shell {
@@ -8,7 +9,11 @@ namespace shell {
 
 class Parser {
 private:
+	Lexer& lexer;
+
 public:
+	Parser(Lexer& lexer);
+
 	struct Node;
 
 	// have to use pointers/new+delete cuz it's a self-referential data structure
@@ -55,7 +60,7 @@ public:
 		void print() const;
 	};
 
-	Ast getNextCommand(vector<Token> tokens);
+	Ast getNextCommand();
 };
 
 } // namespace shell

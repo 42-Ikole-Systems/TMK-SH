@@ -4,6 +4,7 @@
 #include "util.hpp"
 #include "token.hpp"
 #include <functional>
+#include <queue>
 
 namespace shell {
 
@@ -11,26 +12,34 @@ class CharProvider {
 public:
 	virtual ~CharProvider() {
 	}
+	// EOF when there are no chars left to provide
 	virtual char peek() = 0;
 	virtual char consume() = 0;
 };
 
 class Lexer {
-private:
-	Reader &reader;
-
+public:
 	enum State { Empty, Done, Word, Operator };
 
+private:
 	struct StateData {
-		StateData(CharProvider &provider);
-
-		vector<Token> tokens;
-		string word;
-		CharProvider &chars;
+		// optional<Token> nextToken;
+		// vector<Token> tokens;
+		std::queue<Token> tokens;
+		string word; // is this enough state?
+		// CharProvider &chars;
 	};
 
+private:
+	// Reader &reader;
+	CharProvider& chars; // kind of unsafe to only have a reference
+	State state;
+	StateData state_data;
+	optional<Token> token;
+
 public:
-	Lexer(Reader &reader);
+	Lexer(CharProvider& chars);
+	Lexer(CharProvider& chars, State state);
 
 	/**
 	 * @brief Lex line into list of tokens
@@ -38,13 +47,16 @@ public:
 	 * @param line line to be lexed
 	 * @return vector<Token> vector of tokens resulting from lexing
 	 */
-	vector<Token> tokenize(const string &line);
+	optional<Token> peek();
+	optional<Token> consume();
+	// vector<Token> tokenize(const string &line);
 
 private:
-	std::function<State(Lexer &, StateData &)> getStateHandler(State state);
-	State emptyState(StateData &data);
-	State wordState(StateData &data);
-	State operatorState(StateData &data);
+	optional<Token> nextToken();
+	std::function<State(Lexer &)> getStateHandler();
+	State emptyState();
+	State wordState();
+	State operatorState();
 };
 
 /*

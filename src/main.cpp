@@ -4,6 +4,7 @@
 #include "parser.hpp"
 #include "util.hpp"
 #include "lexer/lexer.hpp"
+#include "lexer/line_char_provider.hpp"
 #include <utility>
 #include "print.hpp"
 
@@ -22,19 +23,18 @@ static int run(int argc, char *argv[], char *env[]) {
 	initialize();
 
 	StdinReader reader = StdinReader(prompt);
-	Lexer lexer = Lexer(reader);
-	Parser parser = Parser();
+	// Lexer lexer = Lexer(reader);
+	// Parser parser = Parser();
 	while (true) {
 		auto line = reader.nextLine();
 		if (!line.has_value()) {
 			break;
 		}
 		tprintf("%\n", line.value());
-		vector<Token> tokens = lexer.tokenize(line.value());
-		for (const Token &token : tokens) {
-			token.print();
-		}
-		Parser::Ast ast = parser.getNextCommand(tokens);
+		auto chars = LineCharProvider(line.value());
+		auto lexer = Lexer(chars);
+		auto parser = Parser(lexer);
+		Parser::Ast ast = parser.getNextCommand();
 		ast.print();
 	}
 	tprintf("\n");

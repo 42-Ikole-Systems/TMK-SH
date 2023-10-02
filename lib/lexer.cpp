@@ -3,48 +3,44 @@
 #include "util.hpp"
 #include <stdio.h>
 #include <cassert>
+#include "logger.hpp"
 
 namespace shell {
 
-Lexer::Lexer(Reader& reader) : reader(reader) {}
+Lexer::Lexer(CharProvider& chars, State state) : chars(chars), state(state) {}
+Lexer::Lexer(CharProvider& chars) : Lexer(chars, State::Empty) {}
 
-Lexer::StateData::StateData(CharProvider& chars): chars(chars) {}
-
-class LineCharProvider: public CharProvider {
-private:
-    string line;
-    size_t index;
-public:
-    LineCharProvider(const string& line): line(line), index(0) {}
-
-    char peek() override {
-        if (index >= line.length()) {
-            return EOF;
-        }
-        return line[index];
+optional<Token> Lexer::peek() {
+    if (!token.has_value()) {
+        token = nextToken();
     }
-
-    char consume() override {
-        if (index >= line.length()) {
-            return EOF;
-        }
-        return line[index++];
-    }
-};
-
-vector<Token> Lexer::tokenize(const string& line) {
-    auto chars = LineCharProvider(line);
-    auto state_data = StateData(chars);
-    State state = State::Empty;
-    while (state != State::Done) {
-        auto handler = getStateHandler(state);
-        state = handler(*this, state_data);
-    }
-    return state_data.tokens;
+    return token;
 }
 
-std::function<Lexer::State(Lexer&, Lexer::StateData&)> Lexer::getStateHandler(State state) {
-    static const std::function<State(Lexer&, StateData&)> handlers[] = {
+optional<Token> Lexer::consume() {
+    // exchange
+    optional<Token> next = nullopt;
+    token.swap(next);
+    return next;
+}
+
+optional<Token> Lexer::nextToken() {
+    while (state != State::Done) {
+        auto handler = getStateHandler();
+        state = handler(*this);
+        if (!state_data.tokens.empty()) {
+            assert(state_data.tokens.size() == 1); // disallow state to add multiple tokens?
+            // pop next token from queue and return it
+            Token token = state_data.tokens.front();
+            state_data.tokens.pop();
+            return token;
+        }
+    }
+    return nullopt;
+}
+
+std::function<Lexer::State(Lexer&)> Lexer::getStateHandler() {
+    static const std::function<State(Lexer&)> handlers[] = {
         [Empty] = &Lexer::emptyState,
         [Word] = &Lexer::wordState,
         [Operator] = &Lexer::operatorState,
@@ -52,12 +48,12 @@ std::function<Lexer::State(Lexer&, Lexer::StateData&)> Lexer::getStateHandler(St
     return handlers[state];
 }
 
-Lexer::State Lexer::emptyState(StateData& data) {
-    char ch = data.chars.peek();
+Lexer::State Lexer::emptyState() {
+    char ch = chars.peek();
     if (ch == EOF) {
         return State::Done;
     } else if (isSpace(ch)) {
-        data.chars.consume();
+        chars.consume();
         return State::Empty;
     } else if (isMetaCharacter(ch)) {
         return State::Operator;
@@ -66,34 +62,35 @@ Lexer::State Lexer::emptyState(StateData& data) {
     }
 }
 
-Lexer::State Lexer::wordState(StateData& data) {
+Lexer::State Lexer::wordState() {
     State state = State::Word;
-    char ch = data.chars.peek();
+    char ch = chars.peek();
     if (isSpace(ch) || ch == EOF) {
-        data.chars.consume();
+        chars.consume();
         state = State::Empty;
     } else if (isMetaCharacter(ch)) {
         state = State::Operator;
     } else {
-        data.word.push_back(data.chars.consume());
+        state_data.word.push_back(ch);
+        chars.consume();
         return State::Word;
     }
 
-    data.tokens.push_back(Token {
+    state_data.tokens.push(Token {
         .type = Token::Type::Word,
         .word_token = WordToken {
-            .value = std::move(data.word)
+            .value = std::move(state_data.word)
         }
     });
-    data.word.clear();
+    state_data.word.clear();
     return state;
 }
 
-Lexer::State Lexer::operatorState(StateData& data) {
+Lexer::State Lexer::operatorState() {
     // todo: multiple operator types
-    char ch = data.chars.consume();
+    char ch = chars.consume();
     assert(isMetaCharacter(ch));
-    data.tokens.push_back(Token {
+    state_data.tokens.push(Token {
         .type = Token::Type::Operator,
         .operator_token = {
             .type = OperatorToken::Type::Semicolon

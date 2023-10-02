@@ -1,5 +1,5 @@
 #include "lexer/token.hpp"
-#include "print.hpp"
+#include "logger.hpp"
 
 namespace shell {
 
@@ -15,7 +15,7 @@ void Token::print() const {
 }
 
 void WordToken::print() const {
-    tprintf("Word(%)\n", value);
+    LOG_DEBUG("Word(%)\n", value);
 }
 
 static char getChar(OperatorToken::Type operator_type) {
@@ -26,7 +26,7 @@ static char getChar(OperatorToken::Type operator_type) {
 }
 
 void OperatorToken::print() const {
-    tprintf("Operator(%)\n", getChar(type));
+    LOG_DEBUG("Operator(%)\n", getChar(type));
 }
 
 }

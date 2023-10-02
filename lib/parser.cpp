@@ -5,6 +5,7 @@
 
 namespace shell {
 
+Parser::Parser(Lexer& lexer): lexer(lexer) {}
 
 Parser::Sequence::Sequence() : left(nullptr), right(nullptr) {}
 Parser::Sequence::Sequence(Node* left, Node* right) : left(left), right(right) {}
@@ -40,27 +41,11 @@ Or the command becomes the right side of the previous sequence.
 If there is no next or previous sequence, it is simply a command.
 If the separatorOp == &, the command becomes `Detach` NodeType, which has Command as a child
 */
-Parser::Ast Parser::getNextCommand(vector<Token> tokens) {
-    // for (const Token& token : tokens) {
-    //     switch (token.type) {
-    //         case Token::Type::Word:
-    //             if (current == nullptr) {
-    //                 current = new Node(Command());
-    //                 current->command.program = token.word_token.value;
-    //                 current->command.args.push_back(token.word_token.value);
-    //             } else {
-    //                 current->command.args.push_back(token.word_token.value);
-    //             }
-    //             break;
-    //         case Token::Type::Operator:
-    //             if (current == nullptr) {
-    //                 throw std::runtime_error("must have left side of sequence");
-    //             }
-    //             auto sequence = Sequence(current, nullptr);
-    //             current = new Node(std::move(sequence));
-    //             break;
-    //     }
-    // }
+Parser::Ast Parser::getNextCommand() {
+    while (lexer.peek().has_value()) {
+        Token token = lexer.consume().value();
+        token.print();
+    }
     return Ast(nullptr);
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "settings.hpp"
 #include "print.hpp"
 
 #define LOG_INFO(format, ...)  shell::Logger::getInstance().write(shell::Logger::LogLevel::Info, format, ##__VA_ARGS__)
@@ -8,6 +9,7 @@
 	shell::Logger::getInstance().write(shell::Logger::LogLevel::Warning, format, ##__VA_ARGS__)
 
 #ifdef DEBUG
+// todo only print `[DEBUG]` at start of line (i.e. handle flushing)
 #define LOG_DEBUG(format, ...) shell::Logger::getInstance().write(shell::Logger::LogLevel::Debug, format, ##__VA_ARGS__)
 #else
 #define LOG_DEBUG(format, ...)
