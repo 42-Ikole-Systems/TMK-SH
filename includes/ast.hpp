@@ -7,10 +7,10 @@ namespace shell {
 
 class Ast {
 public:
-    class Node;
+	class Node;
 
-    struct Command {
-        Command(Command&& other);
+	struct Command {
+		Command(Command &&other);
 		Command(vector<string> &&args);
 		~Command();
 
@@ -20,7 +20,7 @@ public:
 
 	struct SeparatorOp {
 		SeparatorOp() = default;
-        SeparatorOp(SeparatorOp&& other);
+		SeparatorOp(SeparatorOp &&other);
 		~SeparatorOp();
 
 		void print(int level) const;
@@ -32,26 +32,24 @@ public:
 	public:
 		enum class Type { SeparatorOp, Command };
 
-    private:
-        Type type;
-        std::variant<Command, SeparatorOp> variant;
-    
-    public:
-        Node(Node&& other);
-        Node(Command&& command);
-        Node(SeparatorOp&& separator_op);
+	private:
+		Type type;
+		std::variant<Command, SeparatorOp> variant;
 
-        Type getType();
-    
-        const SeparatorOp& getSeparatorOp() const;
-        SeparatorOp& getSeparatorOp();
-        const Command& getCommand() const;
-        Command& getCommand();
+	public:
+		Node(Node &&other);
+		Node(Command &&command);
+		Node(SeparatorOp &&separator_op);
 
-        void print(int level) const;
+		Type getType();
+
+		const SeparatorOp &getSeparatorOp() const;
+		SeparatorOp &getSeparatorOp();
+		const Command &getCommand() const;
+		Command &getCommand();
+
+		void print(int level) const;
 	};
-
-
 
 public:
 	Ast(unique_ptr<Node> root);
