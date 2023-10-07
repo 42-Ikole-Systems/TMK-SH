@@ -17,13 +17,13 @@ struct IoNumber {
 	void print() const;
 };
 
-struct NewLine {
+struct Newline {
 	void print() const;
 };
 
 struct Token {
 public:
-	using Variant = std::variant<WordToken, OperatorToken, IoNumber, NewLine>;
+	using Variant = std::variant<WordToken, OperatorToken, IoNumber, Newline>;
 
 	// https://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_10_01
 	enum class Type {

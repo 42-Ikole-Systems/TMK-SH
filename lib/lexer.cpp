@@ -26,6 +26,7 @@ optional<Token> Lexer::consume() {
 	// move constructs other if present
 	optional<Token> other = nullopt;
 	token.swap(other);
+	other.value().print();
 	return other;
 }
 
@@ -58,6 +59,10 @@ Lexer::State Lexer::emptyState() {
 	char ch = chars.peek();
 	if (ch == EOF) {
 		return State::Done;
+	} else if (ch == '\n') {
+		delimit(Token {Token::Type::Newline, Newline()});
+		chars.consume();
+		return State::Empty;
 	} else if (isSpace(ch)) {
 		chars.consume();
 		return State::Empty;
@@ -72,7 +77,6 @@ Lexer::State Lexer::wordState() {
 	State state = State::Word;
 	char ch = chars.peek();
 	if (isSpace(ch) || ch == EOF) {
-		chars.consume();
 		state = State::Empty;
 	} else if (isMetaCharacter(ch)) {
 		state = State::Operator;

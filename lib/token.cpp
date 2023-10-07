@@ -26,6 +26,9 @@ void Token::print() const {
 		case Token::Type::And:
 			LOG_DEBUG("Operator(%)\n", getOperatorChar(type));
 			break;
+		case Token::Type::Newline:
+			LOG_DEBUG("Newline(\\n)\n");
+			break;
 		default:
 			throw std::runtime_error("token not supported");
 	}
