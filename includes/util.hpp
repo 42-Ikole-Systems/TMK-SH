@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <optional>
 #include <memory>
+#include <variant>
 
 namespace shell {
 using std::make_unique;
@@ -20,5 +21,6 @@ using std::string;
 using std::unique_ptr;
 using std::unordered_map;
 using std::unordered_set;
+using std::variant;
 using std::vector;
 } // namespace shell

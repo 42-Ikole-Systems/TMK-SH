@@ -10,7 +10,7 @@ add_library(
     assert.cpp
 )
 
-add_subdirectory(rules)
+add_subdirectory(grammar)
 add_subdirectory(executor)
 
 # Forward the declared variable to the parent scope

@@ -11,7 +11,7 @@ namespace shell {
 
 class Lexer : public Provider<optional<Token>> {
 public:
-	enum State { Empty, Done, Word, Operator };
+	enum class State : uint8_t { Empty, Done, Word, Operator };
 
 private:
 	struct StateData {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "grammar.hpp"
+#include "grammar/rule.hpp"
 #include <optional>
 #include "ast.hpp"
 
@@ -8,8 +8,8 @@ namespace shell {
 
 class ListRule {
 public:
-	static GrammarRule make();
-	static vector<GrammarRule::Option> options();
+	static Rule make();
+	static vector<Rule::Option> options();
 
 private:
 	static optional<Ast::Node> separatedList(const vector<Ast::Node> &nodes);

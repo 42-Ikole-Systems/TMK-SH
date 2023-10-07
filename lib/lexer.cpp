@@ -50,11 +50,11 @@ void Lexer::delimit(Token &&token) {
 
 std::function<Lexer::State(Lexer &)> Lexer::getStateHandler() {
 	static const std::function<State(Lexer &)> handlers[] = {
-	    [Empty] = &Lexer::emptyState,
-	    [Word] = &Lexer::wordState,
-	    [Operator] = &Lexer::operatorState,
+	    [(int)Lexer::State::Empty] = &Lexer::emptyState,
+	    [(int)Lexer::State::Word] = &Lexer::wordState,
+	    [(int)Lexer::State::Operator] = &Lexer::operatorState,
 	};
-	return handlers[state];
+	return handlers[(int)state];
 }
 
 Lexer::State Lexer::emptyState() {
