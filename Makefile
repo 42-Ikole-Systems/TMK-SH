@@ -1,10 +1,15 @@
 all: debug
 
 GENERATOR ?=
+NAME := app
+TARGET := build/debug/$(NAME)
 
 ifeq ($(GEN),ninja)
 	GENERATOR=-G "Ninja"
 endif
+
+run: all
+	$(TARGET)
 
 release:
 	@mkdir -p build/release && \

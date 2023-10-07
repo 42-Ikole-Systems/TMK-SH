@@ -41,12 +41,17 @@ public:
 		Node(Command &&command);
 		Node(SeparatorOp &&separator_op);
 
-		Type getType();
+		Type getType() const;
 
-		const SeparatorOp &getSeparatorOp() const;
-		SeparatorOp &getSeparatorOp();
-		const Command &getCommand() const;
-		Command &getCommand();
+		template <typename T>
+		const T &get() const {
+			return std::get<T>(variant);
+		}
+
+		template <typename T>
+		T &get() {
+			return std::get<T>(variant);
+		}
 
 		void print(int level) const;
 	};

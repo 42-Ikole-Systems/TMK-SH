@@ -25,6 +25,10 @@ Ast::SeparatorOp::SeparatorOp(SeparatorOp &&other) : left(std::move(other.left))
 Ast::SeparatorOp::~SeparatorOp() {
 }
 
+Ast::Node::Type Ast::Node::getType() const {
+	return type;
+}
+
 void Ast::print() const {
 	if (root == nullptr) {
 		tprintf("<null>\n");
@@ -43,28 +47,12 @@ void Ast::Node::print(int level) const {
 	printLevel(level);
 	switch (type) {
 	case Type::Command:
-		getCommand().print(level);
+		get<Command>().print(level);
 		break;
 	case Type::SeparatorOp:
-		getSeparatorOp().print(level);
+		get<SeparatorOp>().print(level);
 		break;
 	}
-}
-
-Ast::SeparatorOp &Ast::Node::getSeparatorOp() {
-	return std::get<SeparatorOp>(variant);
-}
-
-const Ast::SeparatorOp &Ast::Node::getSeparatorOp() const {
-	return std::get<SeparatorOp>(variant);
-}
-
-Ast::Command &Ast::Node::getCommand() {
-	return std::get<Command>(variant);
-}
-
-const Ast::Command &Ast::Node::getCommand() const {
-	return std::get<Command>(variant);
 }
 
 void Ast::Command::print(int level) const {

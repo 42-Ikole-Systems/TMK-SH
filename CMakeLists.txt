@@ -7,11 +7,14 @@ project(app)
 # Set C/C++ standards
 set(CMAKE_CXX_STANDARD 17)
 
+# set(CMAKE_VERBOSE_MAKEFILE on)
+
 include_directories(${CMAKE_SOURCE_DIR}/includes)
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
   set(CMAKE_CXX_FLAGS_DEBUG
-      "${CMAKE_CXX_FLAGS_DEBUG} -g3 -Wall -Wextra -Werror -fsanitize=address")
+      "${CMAKE_CXX_FLAGS_DEBUG} -g3 -Wall -Wextra -Werror -fsanitize=address -DDEBUG"
+  )
   set(CMAKE_CXX_FLAGS_DEBUG
       "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused -Wno-unused-parameter")
 endif()

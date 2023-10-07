@@ -7,9 +7,11 @@ add_library(
     token.cpp
     line_char_provider.cpp
     ast.cpp
+    assert.cpp
 )
 
 add_subdirectory(rules)
+add_subdirectory(executor)
 
 # Forward the declared variable to the parent scope
 set(ALL_OBJECT_FILES

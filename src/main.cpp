@@ -7,6 +7,7 @@
 #include "lexer/line_char_provider.hpp"
 #include <utility>
 #include "print.hpp"
+#include "executor/executor.hpp"
 
 namespace shell {
 
@@ -19,7 +20,7 @@ static void initialize() {
 	}
 }
 
-static int run(int argc, char *argv[], char *env[]) {
+static int run(int argc, const char **argv, char *const *envp) {
 	initialize();
 
 	using_history();
@@ -38,6 +39,8 @@ static int run(int argc, char *argv[], char *env[]) {
 		auto parser = Parser(lexer);
 		Ast ast = parser.getNextCommand();
 		ast.print();
+		auto executor = Executor(envp);
+		executor.execute(ast);
 	}
 	tprintf("\n");
 	return 0;
@@ -45,6 +48,6 @@ static int run(int argc, char *argv[], char *env[]) {
 
 } // namespace shell
 
-int main(int argc, char *argv[], char *envp[]) {
+int main(int argc, const char **argv, char *const *envp) {
 	return shell::run(argc, argv, envp);
 }
