@@ -9,19 +9,16 @@ public:
 	}
 
 	/**
-	 * @brief Returns the n'th token without consuming it
+	 * @brief view next item in stream, without removing it
 	 *
-	 * @param n Number of tokens to look forward (default: 0 = next token)
-	 * @return T
+	 * @return T next item in stream
 	 */
-	virtual T peek(size_t n = 0) = 0;
+	virtual T peek() = 0;
 
 	/**
-	 * @brief Returns the n'th token, consuming up to and including the n'th token
+	 * @brief remove T from stream
 	 *
-	 * @param n Number of T to consume (i.e. ignore) (default: 0 = next token)
-	 * 			the last consumed T will be returned
-	 * @return T
+	 * @return T that was removed
 	 */
-	virtual T consume(size_t n = 0) = 0;
+	virtual T consume() = 0;
 };

@@ -12,24 +12,21 @@ Lexer::Lexer(Provider<char> &chars, State initial) : chars(chars), state(initial
 Lexer::Lexer(Provider<char> &chars) : Lexer(chars, State::Empty) {
 }
 
-optional<Token> Lexer::peek(size_t n) {
-	generateTokens(n + 1);
-	if (tokens.size() < n + 1) {
-		return nullopt;
+optional<Token> Lexer::peek() {
+	if (!token.has_value()) {
+		nextToken();
 	}
-	return tokens[n];
+	return token;
 }
 
-// consume n tokens and return the last
-optional<Token> Lexer::consume(size_t n) {
-	generateTokens(n + 1);
-	if (tokens.size() < n + 1) {
-		return nullopt;
+optional<Token> Lexer::consume() {
+	if (!token.has_value()) {
+		nextToken();
 	}
-	tokens.erase(tokens.begin(), tokens.begin() + n);
-	Token token = tokens.front();
-	tokens.pop_front();
-	return token;
+	// move constructs other if present
+	optional<Token> other = nullopt;
+	token.swap(other);
+	return other;
 }
 
 /**
@@ -37,15 +34,15 @@ optional<Token> Lexer::consume(size_t n) {
  *
  * @param n number of tokens to generate
  */
-void Lexer::generateTokens(size_t n) {
-	while (state != State::Done && tokens.size() < n) {
+void Lexer::nextToken() {
+	while (state != State::Done && !token.has_value()) {
 		auto handler = getStateHandler();
 		state = handler(*this);
 	}
 }
 
 void Lexer::delimit(Token &&token) {
-	tokens.emplace_back(token);
+	this->token = std::move(token);
 }
 
 std::function<Lexer::State(Lexer &)> Lexer::getStateHandler() {

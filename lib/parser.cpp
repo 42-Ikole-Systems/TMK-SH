@@ -5,33 +5,33 @@
 
 namespace shell {
 
-Parser::Parser(Provider<optional<Token>> &tokens) : tokens(tokens), token_position(0) {
+Parser::Parser(TokenProvider &tokens) : tokens(tokens), token_position(0) {
 }
 
-optional<Token> Parser::peekToken(size_t n) {
-	if (!retrieveTokens(n)) {
+// Warning: nullptr if no more tokens left
+optional<Token> Parser::peekToken() {
+	if (!nextToken()) {
 		return nullopt;
 	}
-	return fetched.at(token_position + n);
+	return fetched.at(token_position);
 }
 
-optional<Token> Parser::consumeToken(size_t n) {
-	if (!retrieveTokens(n)) {
+optional<Token> Parser::consumeToken() {
+	if (!nextToken()) {
 		return nullopt;
 	}
-	token_position += n;
 	return fetched.at(token_position++);
 }
 
-bool Parser::retrieveTokens(size_t n) {
-	while (unconsumedTokens() < (n + 1)) {
-		auto next = tokens.consume();
-		if (!next.has_value()) {
-			token_position = fetched.size();
-			return false;
-		}
-		fetched.emplace_back(next.value());
+bool Parser::nextToken() {
+	if (unconsumedTokens() != 0) {
+		return true;
 	}
+	auto next = tokens.consume();
+	if (!next.has_value()) {
+		return false;
+	}
+	fetched.emplace_back(std::move(next.value()));
 	return true;
 }
 

@@ -3,13 +3,14 @@
 #include "reader.hpp"
 #include "util.hpp"
 #include "token.hpp"
+#include "token_provider.hpp"
 #include "interfaces/provider.hpp"
 #include <functional>
 #include <deque>
 
 namespace shell {
 
-class Lexer : public Provider<optional<Token>> {
+class Lexer : public TokenProvider {
 public:
 	enum State { Empty, Done, Word, Operator };
 
@@ -23,25 +24,17 @@ private:
 	State state;
 	StateData state_data;
 	optional<Token> token;
-	std::deque<Token> tokens;
 
 public:
 	Lexer(Provider<char> &chars);
 	Lexer(Provider<char> &chars, State initial);
 
-	/**
-	 * @brief Lex line into list of tokens
-	 *
-	 * @param line line to be lexed
-	 * @return vector<Token> vector of tokens resulting from lexing
-	 */
-	optional<Token> peek(size_t n = 0);
-	optional<Token> consume(size_t n = 0);
-	// vector<Token> tokenize(const string &line);
+	optional<Token> peek() override;
+	optional<Token> consume() override;
 
 private:
 	void delimit(Token &&token);
-	void generateTokens(size_t n);
+	void nextToken();
 
 	std::function<State(Lexer &)> getStateHandler();
 	State emptyState();
