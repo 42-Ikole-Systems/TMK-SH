@@ -46,12 +46,12 @@ static void printLevel(int level) {
 void Ast::Node::print(int level) const {
 	printLevel(level);
 	switch (type) {
-	case Type::Command:
-		get<Command>().print(level);
-		break;
-	case Type::SeparatorOp:
-		get<SeparatorOp>().print(level);
-		break;
+		case Type::Command:
+			get<Command>().print(level);
+			break;
+		case Type::SeparatorOp:
+			get<SeparatorOp>().print(level);
+			break;
 	}
 }
 

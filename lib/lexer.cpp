@@ -2,8 +2,8 @@
 #include <stdexcept>
 #include "util.hpp"
 #include <stdio.h>
-#include <cassert>
 #include "logger.hpp"
+#include "assert.hpp"
 
 namespace shell {
 
@@ -85,16 +85,23 @@ Lexer::State Lexer::wordState() {
 		return State::Word;
 	}
 
-	delimit(Token {.type = Token::Type::Word, .word_token = WordToken {.value = std::move(state_data.word)}});
+	delimit(Token {.type = TokenType::Word, .word_token = WordToken {.value = std::move(state_data.word)}});
 	state_data.word.clear();
 	return state;
 }
 
 Lexer::State Lexer::operatorState() {
-	// todo: multiple operator types
 	char ch = chars.consume();
-	assert(isMetaCharacter(ch));
-	delimit(Token {.type = Token::Type::Operator, .operator_token = OperatorToken(ch)});
+	D_ASSERT(isMetaCharacter(ch));
+	TokenType type;
+	if (ch == ';') {
+		type = TokenType::Semicolon;
+	} else if (ch == '&') {
+		type = TokenType::And;
+	} else {
+		throw std::runtime_error("not implemented");
+	}
+	delimit(Token {.type = type, .operator_token = OperatorToken()});
 	return State::Empty;
 }
 

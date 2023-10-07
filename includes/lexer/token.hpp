@@ -4,6 +4,42 @@
 
 namespace shell {
 
+// https://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_10_01
+enum class TokenType {
+	/* token / word */
+	Token, // Word, Name, or Assignment depending on context
+	Word,
+	AssignmentWord, // Assignment (?)
+	Name,
+
+	IoNumber, // e.g. 5>
+	Newline,
+
+	/* operators */
+	Semicolon,        // ;
+	And,              // &
+	Pipe,             // | (pipe?)
+	PipeAnd,          // |&
+	ParenthesisOpen,  // (
+	ParenthesisClose, // )
+
+	AndIf,           // &&
+	OrIf,            // ||
+	DoubleSemicolon, // ;;
+	DoubleLess,      // <<
+	DoubleGreat,     // >>
+	LessAnd,         // <&
+	GreatAnd,        // >&
+	LessGreat,       // <>
+	DoubleLessDash,  // <<-
+	Clobber,         // >|
+
+	/* not sure if these are operators? referenced: https://www.gnu.org/software/bash/manual/bash.html#Definitions as
+	   control operators*/
+	// SemicolonAnd, // ;&
+	// DoubleSemicolonAnd, // ;;&
+};
+
 struct WordToken {
 	string value;
 
@@ -11,22 +47,15 @@ struct WordToken {
 };
 
 struct OperatorToken {
-	enum class Type { Semicolon, Ampersand, Unknown };
-
 	OperatorToken();
-	OperatorToken(char ch);
-
-	Type type;
-
-	void print() const;
+	void print(TokenType type) const;
 };
 
 // std::variant?
 struct Token {
-	enum class Type { Word, Operator };
+	TokenType type;
 
-	Type type;
-	// cannot have optional of a union type, or complex constructor inside of union type
+	// todo: variant type
 	// union {
 	WordToken word_token;
 	OperatorToken operator_token;

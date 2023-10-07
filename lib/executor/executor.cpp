@@ -20,15 +20,15 @@ ResultCode Executor::execute(Ast::Node &node) {
 	// expander.expand(node); // correct place to expand? `$(ls)`
 	// "$( echo "abc" )" -> "abc" -> abc
 	switch (node.getType()) {
-	case NodeType::SeparatorOp: {
-		return execute(node.get<Ast::SeparatorOp>());
-	}
-	case NodeType::Command: {
-		return execute(node.get<Ast::Command>());
-	}
-	default: {
-		throw std::runtime_error("Unimplemented type for Ast::Node in Executor::execute");
-	}
+		case NodeType::SeparatorOp: {
+			return execute(node.get<Ast::SeparatorOp>());
+		}
+		case NodeType::Command: {
+			return execute(node.get<Ast::Command>());
+		}
+		default: {
+			throw std::runtime_error("Unimplemented type for Ast::Node in Executor::execute");
+		}
 	}
 }
 

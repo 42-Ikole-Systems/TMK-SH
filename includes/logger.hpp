@@ -38,18 +38,18 @@ public:
 	template <class... Args>
 	void write(LogLevel logLevel, const char *format, Args &&...args) {
 		switch (logLevel) {
-		case LogLevel::Info:
-			tprintf("[Info]: ");
-			break;
-		case LogLevel::Warning:
-			tprintf("[Warning]: ");
-			break;
-		case LogLevel::Error:
-			tprintf("[Error]: ");
-			break;
-		case LogLevel::Debug:
-			tprintf("[Debug]: ");
-			break;
+			case LogLevel::Info:
+				tprintf("[Info]: ");
+				break;
+			case LogLevel::Warning:
+				tprintf("[Warning]: ");
+				break;
+			case LogLevel::Error:
+				tprintf("[Error]: ");
+				break;
+			case LogLevel::Debug:
+				tprintf("[Debug]: ");
+				break;
 		};
 		tprintf(format, std::forward<Args>(args)...);
 	}
