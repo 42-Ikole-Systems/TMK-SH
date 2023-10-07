@@ -26,6 +26,7 @@ private:
 	optional<Token> consumeToken(size_t n = 0);
 	size_t saveState();
 	void setState(size_t state);
+	size_t unconsumedTokens();
 
 	optional<Ast::Node> parseList();
 	optional<Ast::SeparatorOp> parseSeparatorOp();

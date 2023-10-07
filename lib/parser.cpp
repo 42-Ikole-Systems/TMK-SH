@@ -24,7 +24,7 @@ optional<Token> Parser::consumeToken(size_t n) {
 }
 
 bool Parser::retrieveTokens(size_t n) {
-	while ((fetched.size() - token_position) < (n + 1)) {
+	while (unconsumedTokens() < (n + 1)) {
 		auto next = tokens.consume();
 		if (!next.has_value()) {
 			token_position = fetched.size();
@@ -33,6 +33,10 @@ bool Parser::retrieveTokens(size_t n) {
 		fetched.emplace_back(next.value());
 	}
 	return true;
+}
+
+size_t Parser::unconsumedTokens() {
+	return fetched.size() - token_position;
 }
 
 size_t Parser::saveState() {
