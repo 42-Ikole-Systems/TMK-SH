@@ -15,6 +15,13 @@ public:
 	 * @return line read, nullopt if EOF is reached.
 	 */
 	virtual optional<string> nextLine() = 0;
+
+	/**
+	 * @brief Gets char from source
+	 *
+	 * @return char 0 on EOF
+	 */
+	virtual char nextChar() = 0;
 };
 
 } // namespace shell

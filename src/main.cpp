@@ -3,7 +3,10 @@
 #include "stdin_reader.hpp"
 #include "parser.hpp"
 #include "util.hpp"
+#include "lexer/lexer.hpp"
+#include "lexer/line_char_provider.hpp"
 #include <utility>
+#include "print.hpp"
 
 namespace shell {
 
@@ -19,12 +22,24 @@ static void initialize() {
 static int run(int argc, char *argv[], char *env[]) {
 	initialize();
 
-	auto reader = make_unique<StdinReader>(prompt);
-	Lexer lexer = Lexer(std::move(reader));
-	Parser parser = Parser(std::move(lexer));
+	using_history();
+	StdinReader reader = StdinReader(prompt);
+	// Lexer lexer = Lexer(reader);
+	// Parser parser = Parser();
 	while (true) {
-		Parser::AST ast = parser.getNextCommand();
+		auto line = reader.nextLine();
+		if (!line.has_value()) {
+			break;
+		}
+		add_history(line.value().c_str());
+
+		auto chars = LineCharProvider(line.value());
+		auto lexer = Lexer(chars);
+		auto parser = Parser(lexer);
+		Ast ast = parser.getNextCommand();
+		ast.print();
 	}
+	tprintf("\n");
 	return 0;
 }
 

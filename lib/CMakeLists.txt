@@ -4,6 +4,9 @@ add_library(
     lexer.cpp
     parser.cpp
     stdin_reader.cpp
+    token.cpp
+    line_char_provider.cpp
+    ast.cpp
 )
 
 # Forward the declared variable to the parent scope

@@ -4,7 +4,7 @@
 
 namespace shell {
 
-void tprintf(const char *format) // base function
+static void tprintf(const char *format) // base function
 {
 	std::cout << format;
 }
