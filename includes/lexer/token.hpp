@@ -28,10 +28,10 @@ public:
 	// https://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_10_01
 	enum class Type {
 		/* token / word */
-		Token, // Word, Name, or Assignment depending on context
+		// Token, // Word, Name, or Assignment depending on context
 		Word,
-		AssignmentWord, // Assignment (?)
-		Name,
+		// AssignmentWord, // Assignment (?)
+		// Name,
 
 		IoNumber, // e.g. 5>
 		Newline,
