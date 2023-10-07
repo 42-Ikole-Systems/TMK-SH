@@ -3,40 +3,40 @@
 
 namespace shell {
 
-OperatorToken::OperatorToken() {
+Token::Token(Token::Type type, Variant &&variant) : type(type), variant(std::move(variant)) {
 }
 
-void Token::print() const {
-	switch (type) {
-		case TokenType::Word:
-			word_token.print();
-			break;
-		case TokenType::Semicolon:
-		case TokenType::And:
-			operator_token.print(type);
-			break;
-		default:
-			throw std::runtime_error("token not supported");
-	}
-}
-
-void WordToken::print() const {
-	LOG_DEBUG("Word(%)\n", value);
-}
-
-static char getChar(TokenType operator_type) {
+static char getOperatorChar(Token::Type operator_type) {
 	switch (operator_type) {
-		case TokenType::Semicolon:
+		case Token::Type::Semicolon:
 			return ';';
-		case TokenType::And:
+		case Token::Type::And:
 			return '&';
 		default:
 			throw std::runtime_error("invalid operator token ch");
 	}
 }
 
-void OperatorToken::print(TokenType type) const {
-	LOG_DEBUG("Operator(%)\n", getChar(type));
+void Token::print() const {
+	switch (type) {
+		case Token::Type::Word:
+			get<WordToken>().print();
+			break;
+		case Token::Type::Semicolon:
+		case Token::Type::And:
+			LOG_DEBUG("Operator(%)\n", getOperatorChar(type));
+			break;
+		default:
+			throw std::runtime_error("token not supported");
+	}
+}
+
+Token::Type Token::getType() const {
+	return type;
+}
+
+void WordToken::print() const {
+	LOG_DEBUG("Word(%)\n", value);
 }
 
 } // namespace shell

@@ -98,7 +98,7 @@ optional<Ast::SeparatorOp> Parser::parseSeparatorOp() {
 	if (!token.has_value()) {
 		return nullopt;
 	}
-	if ((token->type != TokenType::Semicolon && token->type != TokenType::And)) {
+	if ((token->getType() != Token::Type::Semicolon && token->getType() != Token::Type::And)) {
 		return nullopt;
 	}
 	consumeToken();
@@ -112,10 +112,10 @@ optional<Ast::Command> Parser::parseCommand() {
 		auto token = peekToken();
 		if (!token.has_value()) {
 			break;
-		} else if (token->type != TokenType::Word) {
+		} else if (token->getType() != Token::Type::Word) {
 			break;
 		}
-		words.emplace_back(token->word_token.value);
+		words.emplace_back(token->get<WordToken>().value);
 		consumeToken();
 	}
 	if (words.empty()) {

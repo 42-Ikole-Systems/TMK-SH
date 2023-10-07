@@ -85,7 +85,7 @@ Lexer::State Lexer::wordState() {
 		return State::Word;
 	}
 
-	delimit(Token {.type = TokenType::Word, .word_token = WordToken {.value = std::move(state_data.word)}});
+	delimit(Token {Token::Type::Word, WordToken {std::move(state_data.word)}});
 	state_data.word.clear();
 	return state;
 }
@@ -93,15 +93,15 @@ Lexer::State Lexer::wordState() {
 Lexer::State Lexer::operatorState() {
 	char ch = chars.consume();
 	D_ASSERT(isMetaCharacter(ch));
-	TokenType type;
+	Token::Type type;
 	if (ch == ';') {
-		type = TokenType::Semicolon;
+		type = Token::Type::Semicolon;
 	} else if (ch == '&') {
-		type = TokenType::And;
+		type = Token::Type::And;
 	} else {
 		throw std::runtime_error("not implemented");
 	}
-	delimit(Token {.type = type, .operator_token = OperatorToken()});
+	delimit(Token {type, OperatorToken()});
 	return State::Empty;
 }
 
