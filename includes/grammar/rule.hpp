@@ -1,9 +1,10 @@
 #pragma once
 
-#include "parser.hpp"
 #include <optional>
 #include "util.hpp"
 #include "interfaces/provider.hpp"
+#include "lexer/token_provider.hpp"
+#include "ast.hpp"
 
 namespace shell {
 

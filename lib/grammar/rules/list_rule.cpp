@@ -18,7 +18,7 @@ vector<Rule::Option> ListRule::options() {
 }
 
 optional<Ast::Node> ListRule::singleCommand(vector<Ast::Node> &nodes) {
-	return nullopt;
+	return std::move(nodes[0]);
 }
 
 optional<Ast::Node> ListRule::separatedList(vector<Ast::Node> &nodes) {

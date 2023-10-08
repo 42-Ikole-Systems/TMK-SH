@@ -2,8 +2,18 @@
 #include "print.hpp"
 #include <stdexcept>
 #include <utility>
+#include "grammar/rules/list_rule.hpp"
+#include "assert.hpp"
 
 namespace shell {
+
+optional<Token> BufferedTokenProvider::peek() {
+	return parser.peekToken();
+}
+
+optional<Token> BufferedTokenProvider::consume() {
+	return parser.consumeToken();
+}
 
 Parser::Parser(TokenProvider &tokens) : tokens(tokens), token_position(0) {
 }
@@ -58,70 +68,85 @@ a ; b ; c ; d => SeparatorOp (
         )
     )
 )
-Basically: command becomes left side of next separatorOp, and that separatorOp becomes the right side of the previous
-separatorOp. Or the command becomes the right side of the previous separatorOp. If there is no next or previous
-separatorOp, it is simply a command. If the separatorOp == &, the command becomes `Detach` NodeType, which has Command
-as a child
 */
-Ast Parser::getNextCommand() {
-	optional<Ast::Node> listNode = parseList();
-	if (!listNode.has_value()) {
+
+optional<Ast::Node> Parser::parse(Rule::NonTerminal &option) {
+	vector<Ast::Node> nodes;
+	auto &rules = option.sequence;
+	auto state = saveState();
+	for (auto &rule : rules) {
+		auto result = parse(rule);
+		if (!result.has_value()) {
+			// Parsing this rule failed, revert back the state
+			setState(state);
+			return nullopt;
+		}
+		nodes.push_back(std::move(result.value()));
+	}
+	// Sequence was parsed successfully, assemble the Node from the components
+	auto result = option.node_assembler(nodes);
+	// If all the components of a rule pass, the node assembly should also pass
+	D_ASSERT(result.has_value());
+	return result;
+}
+
+BufferedTokenProvider Parser::tokenProvider() {
+	return BufferedTokenProvider(*this);
+}
+
+optional<Ast::Node> Parser::parse(Rule::Terminal &option) {
+	auto state = saveState();
+	auto token_provider = tokenProvider();
+	auto result = option.token_consumer(token_provider);
+	if (!result.has_value()) {
+		setState(state);
+		return nullopt;
+	}
+	return result;
+}
+
+optional<Ast::Node> Parser::parse(Rule rule) {
+	using OptionType = Rule::Option::Type;
+	auto options = rule.options();
+	for (auto &option : options) {
+		auto type = option.getType();
+		// Save the state so we can revert it if the rule doesn't match
+		auto state = saveState();
+		switch (type) {
+			case OptionType::NonTerminal: {
+				auto &non_terminal = option.get<Rule::NonTerminal>();
+				auto result = parse(non_terminal);
+				if (result.has_value()) {
+					return result;
+				}
+				break;
+			}
+			case OptionType::Terminal: {
+				auto &terminal = option.get<Rule::Terminal>();
+				auto result = parse(terminal);
+				if (result.has_value()) {
+					return result;
+				}
+				break;
+			}
+			default: {
+				throw std::runtime_error("Unrecognized option for OptionType in Parser::parse(Rule rule)");
+			}
+		}
+		// The option didn't return a valid result, reset the state
+		setState(state);
+	}
+	return nullopt;
+}
+
+Ast Parser::parse() {
+	auto initial_rule = ListRule::make();
+	auto root_node = parse(std::move(initial_rule));
+
+	if (!root_node.has_value()) {
 		return Ast(nullptr);
 	}
-	return Ast(make_unique<Ast::Node>(std::move(listNode.value())));
-}
-
-optional<Ast::Node> Parser::parseList() {
-	auto command = parseCommand();
-	if (!command.has_value()) {
-		return nullopt;
-	}
-	auto state = saveState();
-	optional<Ast::SeparatorOp> separator = parseSeparatorOp();
-	if (!separator.has_value()) {
-		return Ast::Node(std::move(command.value()));
-	}
-
-	optional<Ast::Node> list = parseList();
-	if (!list.has_value()) {
-		setState(state); // undo parsing of separator
-		return Ast::Node(std::move(command.value()));
-	}
-
-	separator->left = make_unique<Ast::Node>(Ast::Node(std::move(command.value())));
-	separator->right = make_unique<Ast::Node>(std::move(list.value()));
-	return separator;
-}
-
-optional<Ast::SeparatorOp> Parser::parseSeparatorOp() {
-	auto token = peekToken();
-	if (!token.has_value()) {
-		return nullopt;
-	}
-	if ((token->getType() != Token::Type::Semicolon && token->getType() != Token::Type::And)) {
-		return nullopt;
-	}
-	consumeToken();
-	return Ast::SeparatorOp();
-}
-
-// just parses a list of words for now
-optional<Ast::Command> Parser::parseCommand() {
-	vector<string> words;
-	while (true) {
-		auto token = peekToken();
-		if (!token.has_value()) {
-			break;
-		} else if (token->getType() != Token::Type::Word) {
-			break;
-		}
-		words.emplace_back(token->get<WordToken>().value);
-		consumeToken();
-	}
-	if (words.empty()) {
-		return nullopt;
-	}
-	return Ast::Command(std::move(words));
+	return Ast(make_unique<Ast::Node>(std::move(root_node.value())));
 }
 
 } // namespace shell
