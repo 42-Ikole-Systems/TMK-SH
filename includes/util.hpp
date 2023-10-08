@@ -8,12 +8,15 @@
 #include <unordered_set>
 #include <optional>
 #include <memory>
+#include <utility>
 
 namespace shell {
+using std::make_pair;
 using std::make_unique;
 using std::map;
 using std::nullopt;
 using std::optional;
+using std::pair;
 using std::set;
 using std::shared_ptr;
 using std::string;

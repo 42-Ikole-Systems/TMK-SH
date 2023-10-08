@@ -11,10 +11,9 @@
 namespace shell {
 
 class Lexer : public TokenProvider {
-public:
+private:
 	enum State { Empty, Done, Word, Operator };
 
-private:
 	struct StateData {
 		string word; // is this enough state?
 	};
@@ -48,5 +47,6 @@ Utility functions for lexing
 
 bool isSpace(char ch);
 bool isMetaCharacter(char ch);
+bool isOperatorCharacter(char ch);
 
 } // namespace shell

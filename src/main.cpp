@@ -36,6 +36,7 @@ static int run(int argc, const char **argv, char *const *envp) {
 		line.value().push_back('\n');
 		auto chars = LineCharProvider(line.value());
 		auto lexer = Lexer(chars);
+		optional<Token> token;
 		auto parser = Parser(lexer);
 		Ast ast = parser.getNextCommand();
 		ast.print();
