@@ -33,7 +33,7 @@ static int run(int argc, const char **argv, char *const *envp) {
 			break;
 		}
 		add_history(line.value().c_str());
-
+		line.value().push_back('\n');
 		auto chars = LineCharProvider(line.value());
 		auto lexer = Lexer(chars);
 		auto parser = Parser(lexer);
