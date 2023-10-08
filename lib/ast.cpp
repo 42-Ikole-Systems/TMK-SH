@@ -30,57 +30,58 @@ Ast::Node::Type Ast::Node::getType() const {
 }
 
 void Ast::print() const {
+	BLogger logger(LogLevel::Debug);
 	if (root == nullptr) {
-		tprintf("<null>\n");
+		logger << "<null>\n";
 		return;
 	}
-	root->print(0);
+	root->print(0, logger);
 }
 
-static void printLevel(int level) {
+static void printLevel(int level, BLogger& logger) {
 	for (int i = 0; i < level; i++) {
-		tprintf("    ");
+		logger << "    ";
 	}
 }
 
-void Ast::Node::print(int level) const {
-	printLevel(level);
+void Ast::Node::print(int level, BLogger& logger) const {
+	printLevel(level, logger);
 	switch (type) {
 		case Type::Command:
-			get<Command>().print(level);
+			get<Command>().print(level, logger);
 			break;
 		case Type::SeparatorOp:
-			get<SeparatorOp>().print(level);
+			get<SeparatorOp>().print(level, logger);
 			break;
 	}
 }
 
-void Ast::Command::print(int level) const {
-	tprintf("Command:\n");
-	printLevel(level + 1);
-	tprintf("Args: [ ");
+void Ast::Command::print(int level, BLogger& logger) const {
+	logger << "Command:\n";
+	printLevel(level + 1, logger);
+	logger << "Args: [ ";
 	for (int i = 0; i < (int)args.size(); i++) {
 		if (i != 0) {
-			tprintf(", ");
+			logger << ", ";
 		}
-		tprintf("%", args[i]);
+		logger << args[i];
 	}
-	tprintf(" ]\n");
+	logger << " ]\n";
 }
 
-void Ast::SeparatorOp::print(int level) const {
-	tprintf("SeparatorOp:\n");
+void Ast::SeparatorOp::print(int level, BLogger& logger) const {
+	logger << "SeparatorOp:\n";
 	if (left == nullptr) {
-		printLevel(level + 1);
-		tprintf("<null>\n");
+		printLevel(level + 1, logger);
+		logger << "<null>\n";
 	} else {
-		left->print(level + 1);
+		left->print(level + 1, logger);
 	}
 	if (right == nullptr) {
-		printLevel(level + 1);
-		tprintf("<null>\n");
+		printLevel(level + 1, logger);
+		logger << "<null>\n";
 	} else {
-		right->print(level + 1);
+		right->print(level + 1, logger);
 	}
 }
 

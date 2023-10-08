@@ -2,6 +2,7 @@
 
 #include "util.hpp"
 #include <variant>
+#include "logger.hpp"
 
 namespace shell {
 
@@ -14,7 +15,7 @@ public:
 		Command(vector<string> &&args);
 		~Command();
 
-		void print(int level) const;
+		void print(int level, BLogger& logger) const;
 		vector<string> args; // args[0] == program name
 	};
 
@@ -23,7 +24,7 @@ public:
 		SeparatorOp(SeparatorOp &&other);
 		~SeparatorOp();
 
-		void print(int level) const;
+		void print(int level, BLogger& logger) const;
 		unique_ptr<Node> left;
 		unique_ptr<Node> right;
 	};
@@ -53,7 +54,7 @@ public:
 			return std::get<T>(variant);
 		}
 
-		void print(int level) const;
+		void print(int level, BLogger& logger) const;
 	};
 
 public:
