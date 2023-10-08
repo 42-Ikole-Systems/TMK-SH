@@ -34,35 +34,16 @@ static const map<Token::Type, string> token_type_strings = {{Token::Type::Word, 
 
 string Token::toString() const {
 	const string &type_string = token_type_strings.at(type);
-	switch (type) {
-		case Token::Type::Word:
-			return type_string + "(" + get<WordToken>().toString() + ")";
-		/* operators */
-		case Token::Type::Semicolon:
-		case Token::Type::And:
-		case Token::Type::Pipe:
-		case Token::Type::PipeAnd:
-		case Token::Type::ParenthesisOpen:
-		case Token::Type::ParenthesisClose:
-		case Token::Type::AndIf:
-		case Token::Type::OrIf:
-		case Token::Type::DoubleSemicolon:
-		case Token::Type::Less:
-		case Token::Type::Great:
-		case Token::Type::DoubleLess:
-		case Token::Type::DoubleGreat:
-		case Token::Type::LessAnd:
-		case Token::Type::GreatAnd:
-		case Token::Type::LessGreat:
-		case Token::Type::DoubleLessDash:
-		case Token::Type::Clobber:
-			return type_string + "(" + getOperatorString(type) + ")";
-		case Token::Type::Newline:
-			return type_string;
-		case Token::Type::IoNumber:
-			return type_string + "(" + get<IoNumber>().toString();
-		default:
-			throw std::runtime_error("token not supported");
+	if (isWord(type)) {
+		return type_string + "(" + get<WordToken>().toString() + ")";
+	} else if (isOperator(type)) {
+		return type_string + "(" + getOperatorString(type) + ")";
+	} else if (isIoNumber(type)) {
+		return type_string + "(" + get<IoNumber>().toString();
+	} else if (isNewline(type)) {
+		return type_string;
+	} else {
+		throw std::runtime_error("token type not supported");
 	}
 }
 
@@ -122,6 +103,71 @@ const string &Token::getOperatorString(Token::Type type) {
 		}
 	}
 	throw std::runtime_error("operator token type not recognized");
+}
+
+bool Token::isWord(Token::Type type) {
+	return type == Token::Type::Word;
+}
+
+bool Token::isIoNumber(Token::Type type) {
+	return type == Token::Type::IoNumber;
+}
+
+bool Token::isNewline(Token::Type type) {
+	return type == Token::Type::Newline;
+}
+
+bool Token::isOperator(Token::Type type) {
+	switch (type) {
+		case Token::Type::Semicolon:
+		case Token::Type::And:
+		case Token::Type::Pipe:
+		case Token::Type::PipeAnd:
+		case Token::Type::ParenthesisOpen:
+		case Token::Type::ParenthesisClose:
+		case Token::Type::AndIf:
+		case Token::Type::OrIf:
+		case Token::Type::DoubleSemicolon:
+		case Token::Type::Less:
+		case Token::Type::Great:
+		case Token::Type::DoubleLess:
+		case Token::Type::DoubleGreat:
+		case Token::Type::LessAnd:
+		case Token::Type::GreatAnd:
+		case Token::Type::LessGreat:
+		case Token::Type::DoubleLessDash:
+		case Token::Type::Clobber:
+			return true;
+		default:
+			return false;
+	}
+}
+
+bool Token::equals(const Token &other) const {
+	if (type != other.type) {
+		return false;
+	}
+	if (isWord(type)) {
+		auto &a = get<WordToken>();
+		auto &b = other.get<WordToken>();
+		if (a.value != b.value) {
+			return false;
+		}
+		return true;
+	} else if (isOperator(type)) {
+		return type == other.type;
+	} else if (isIoNumber(type)) {
+		auto &a = get<IoNumber>();
+		auto &b = other.get<IoNumber>();
+		if (a.value != b.value) {
+			return false;
+		}
+		return true;
+	} else if (isNewline(type)) {
+		return type == other.type;
+	} else {
+		throw std::runtime_error("token type not supported");
+	}
 }
 
 } // namespace shell
