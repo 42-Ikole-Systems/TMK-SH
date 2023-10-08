@@ -12,8 +12,8 @@ private:
 
 public:
 	LineCharProvider(const string &line);
-	char peek(size_t n = 0) override;
-	char consume(size_t n = 0) override;
+	char peek() override;
+	char consume() override;
 };
 
 } // namespace shell

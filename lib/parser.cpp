@@ -5,33 +5,33 @@
 
 namespace shell {
 
-Parser::Parser(Provider<optional<Token>> &tokens) : tokens(tokens), token_position(0) {
+Parser::Parser(TokenProvider &tokens) : tokens(tokens), token_position(0) {
 }
 
-optional<Token> Parser::peekToken(size_t n) {
-	if (!retrieveTokens(n)) {
+// Warning: nullptr if no more tokens left
+optional<Token> Parser::peekToken() {
+	if (!nextToken()) {
 		return nullopt;
 	}
-	return fetched.at(token_position + n);
+	return fetched.at(token_position);
 }
 
-optional<Token> Parser::consumeToken(size_t n) {
-	if (!retrieveTokens(n)) {
+optional<Token> Parser::consumeToken() {
+	if (!nextToken()) {
 		return nullopt;
 	}
-	token_position += n;
 	return fetched.at(token_position++);
 }
 
-bool Parser::retrieveTokens(size_t n) {
-	while (unconsumedTokens() < (n + 1)) {
-		auto next = tokens.consume();
-		if (!next.has_value()) {
-			token_position = fetched.size();
-			return false;
-		}
-		fetched.emplace_back(next.value());
+bool Parser::nextToken() {
+	if (unconsumedTokens() != 0) {
+		return true;
 	}
+	auto next = tokens.consume();
+	if (!next.has_value()) {
+		return false;
+	}
+	fetched.emplace_back(std::move(next.value()));
 	return true;
 }
 
@@ -98,8 +98,7 @@ optional<Ast::SeparatorOp> Parser::parseSeparatorOp() {
 	if (!token.has_value()) {
 		return nullopt;
 	}
-	if (token->type != Token::Type::Operator || !(token->operator_token.type == OperatorToken::Type::Semicolon ||
-	                                              token->operator_token.type == OperatorToken::Type::Ampersand)) {
+	if ((token->getType() != Token::Type::Semicolon && token->getType() != Token::Type::And)) {
 		return nullopt;
 	}
 	consumeToken();
@@ -113,10 +112,10 @@ optional<Ast::Command> Parser::parseCommand() {
 		auto token = peekToken();
 		if (!token.has_value()) {
 			break;
-		} else if (token->type != Token::Type::Word) {
+		} else if (token->getType() != Token::Type::Word) {
 			break;
 		}
-		words.emplace_back(token->word_token.value);
+		words.emplace_back(token->get<WordToken>().value);
 		consumeToken();
 	}
 	if (words.empty()) {

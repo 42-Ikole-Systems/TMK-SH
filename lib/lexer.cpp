@@ -2,8 +2,8 @@
 #include <stdexcept>
 #include "util.hpp"
 #include <stdio.h>
-#include <cassert>
 #include "logger.hpp"
+#include "assert.hpp"
 
 namespace shell {
 
@@ -12,24 +12,22 @@ Lexer::Lexer(Provider<char> &chars, State initial) : chars(chars), state(initial
 Lexer::Lexer(Provider<char> &chars) : Lexer(chars, State::Empty) {
 }
 
-optional<Token> Lexer::peek(size_t n) {
-	generateTokens(n + 1);
-	if (tokens.size() < n + 1) {
-		return nullopt;
+optional<Token> Lexer::peek() {
+	if (!token.has_value()) {
+		nextToken();
 	}
-	return tokens[n];
+	return token;
 }
 
-// consume n tokens and return the last
-optional<Token> Lexer::consume(size_t n) {
-	generateTokens(n + 1);
-	if (tokens.size() < n + 1) {
-		return nullopt;
+optional<Token> Lexer::consume() {
+	if (!token.has_value()) {
+		nextToken();
 	}
-	tokens.erase(tokens.begin(), tokens.begin() + n);
-	Token token = tokens.front();
-	tokens.pop_front();
-	return token;
+	// move constructs other if present
+	optional<Token> other = nullopt;
+	token.swap(other);
+	other.value().print();
+	return other;
 }
 
 /**
@@ -37,15 +35,15 @@ optional<Token> Lexer::consume(size_t n) {
  *
  * @param n number of tokens to generate
  */
-void Lexer::generateTokens(size_t n) {
-	while (state != State::Done && tokens.size() < n) {
+void Lexer::nextToken() {
+	while (state != State::Done && !token.has_value()) {
 		auto handler = getStateHandler();
 		state = handler(*this);
 	}
 }
 
 void Lexer::delimit(Token &&token) {
-	tokens.emplace_back(token);
+	this->token = std::move(token);
 }
 
 std::function<Lexer::State(Lexer &)> Lexer::getStateHandler() {
@@ -61,6 +59,10 @@ Lexer::State Lexer::emptyState() {
 	char ch = chars.peek();
 	if (ch == EOF) {
 		return State::Done;
+	} else if (ch == '\n') {
+		delimit(Token {Token::Type::Newline, Newline()});
+		chars.consume();
+		return State::Empty;
 	} else if (isSpace(ch)) {
 		chars.consume();
 		return State::Empty;
@@ -75,7 +77,6 @@ Lexer::State Lexer::wordState() {
 	State state = State::Word;
 	char ch = chars.peek();
 	if (isSpace(ch) || ch == EOF) {
-		chars.consume();
 		state = State::Empty;
 	} else if (isMetaCharacter(ch)) {
 		state = State::Operator;
@@ -85,16 +86,23 @@ Lexer::State Lexer::wordState() {
 		return State::Word;
 	}
 
-	delimit(Token {.type = Token::Type::Word, .word_token = WordToken {.value = std::move(state_data.word)}});
+	delimit(Token {Token::Type::Word, WordToken {std::move(state_data.word)}});
 	state_data.word.clear();
 	return state;
 }
 
 Lexer::State Lexer::operatorState() {
-	// todo: multiple operator types
 	char ch = chars.consume();
-	assert(isMetaCharacter(ch));
-	delimit(Token {.type = Token::Type::Operator, .operator_token = OperatorToken(ch)});
+	D_ASSERT(isMetaCharacter(ch));
+	Token::Type type;
+	if (ch == ';') {
+		type = Token::Type::Semicolon;
+	} else if (ch == '&') {
+		type = Token::Type::And;
+	} else {
+		throw std::runtime_error("not implemented");
+	}
+	delimit(Token {type, OperatorToken()});
 	return State::Empty;
 }
 
