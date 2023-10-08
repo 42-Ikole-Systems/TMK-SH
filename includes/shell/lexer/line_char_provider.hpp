@@ -1,7 +1,7 @@
 #pragma once
 
-#include "util.hpp"
-#include "interfaces/provider.hpp"
+#include "shell/util.hpp"
+#include "shell/interfaces/provider.hpp"
 
 namespace shell {
 

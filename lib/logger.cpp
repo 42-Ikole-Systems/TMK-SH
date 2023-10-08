@@ -1,22 +1,19 @@
 
-#include "logger.hpp"
+#include "shell/logger.hpp"
 
-namespace shell
-{
+namespace shell {
 
 Logger::Logger()
-	: g_logLevel(
-		#ifdef DEBUG
-			LogLevel::Debug
-		#else
-			LogLevel::Error
-		#endif
-	)
-{
+    : g_logLevel(
+#ifdef DEBUG
+          LogLevel::Debug
+#else
+          LogLevel::Error
+#endif
+      ) {
 }
 
-const string Logger::getLogLevelPrefix(LogLevel logLevel)
-{
+const string Logger::getLogLevelPrefix(LogLevel logLevel) {
 	switch (logLevel) {
 		case LogLevel::Info:
 			return string("[Info]: ");
@@ -34,21 +31,18 @@ SLogger &SLogger::getInstance() {
 	return logger;
 }
 
-BLogger::BLogger(LogLevel logLevel_) : logLevel(logLevel_)
-{
+BLogger::BLogger(LogLevel logLevel_) : logLevel(logLevel_) {
 	addToBuffer(getLogLevelPrefix(logLevel));
 }
 
-BLogger::~BLogger()
-{
+BLogger::~BLogger() {
 	flush();
 }
 
-void BLogger::flush()
-{
+void BLogger::flush() {
 	std::cout << buffer.str();
 	buffer.clear();
 	addToBuffer(getLogLevelPrefix(logLevel));
 }
 
-} /*!< namespace Shell */
+} // namespace shell

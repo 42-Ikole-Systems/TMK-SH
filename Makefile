@@ -29,5 +29,5 @@ clean:
 format:
 	find src/ -iname *.cpp | xargs clang-format --sort-includes=0 -style=file -i
 	find lib/ -iname *.cpp | xargs clang-format --sort-includes=0 -style=file -i
-	find includes/ -iname *.hpp | xargs clang-format --sort-includes=0 -style=file -i
+	find includes/shell -iname *.hpp | xargs clang-format --sort-includes=0 -style=file -i
 	cmake-format -i CMakeLists.txt

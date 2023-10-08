@@ -1,20 +1,19 @@
 #pragma once
 
-#include "reader.hpp"
-#include "util.hpp"
-#include "token.hpp"
-#include "token_provider.hpp"
-#include "interfaces/provider.hpp"
+#include "shell/reader.hpp"
+#include "shell/util.hpp"
+#include "shell/lexer/token.hpp"
+#include "shell/lexer/token_provider.hpp"
+#include "shell/interfaces/provider.hpp"
 #include <functional>
 #include <deque>
 
 namespace shell {
 
 class Lexer : public TokenProvider {
-public:
-	enum State { Empty, Done, Word, Operator };
-
 private:
+	enum class State : uint8_t { Empty, Done, Word, Operator };
+
 	struct StateData {
 		string word; // is this enough state?
 	};
@@ -48,5 +47,6 @@ Utility functions for lexing
 
 bool isSpace(char ch);
 bool isMetaCharacter(char ch);
+bool isOperatorCharacter(char ch);
 
 } // namespace shell

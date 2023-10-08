@@ -1,9 +1,9 @@
-#include "lexer/lexer.hpp"
+#include "shell/lexer/lexer.hpp"
 #include <stdexcept>
-#include "util.hpp"
+#include "shell/util.hpp"
 #include <stdio.h>
-#include "logger.hpp"
-#include "assert.hpp"
+#include "shell/logger.hpp"
+#include "shell/assert.hpp"
 
 namespace shell {
 
@@ -26,15 +26,12 @@ optional<Token> Lexer::consume() {
 	// move constructs other if present
 	optional<Token> other = nullopt;
 	token.swap(other);
-	other.value().print();
+	if (other.has_value()) {
+		other.value().print();
+	}
 	return other;
 }
 
-/**
- * @brief Generates tokens until tokens.size() >= n or EOF is reached
- *
- * @param n number of tokens to generate
- */
 void Lexer::nextToken() {
 	while (state != State::Done && !token.has_value()) {
 		auto handler = getStateHandler();
@@ -43,23 +40,24 @@ void Lexer::nextToken() {
 }
 
 void Lexer::delimit(Token &&token) {
+	D_ASSERT(!this->token.has_value());
 	this->token = std::move(token);
 }
 
 std::function<Lexer::State(Lexer &)> Lexer::getStateHandler() {
 	static const std::function<State(Lexer &)> handlers[] = {
-	    [Empty] = &Lexer::emptyState,
-	    [Word] = &Lexer::wordState,
-	    [Operator] = &Lexer::operatorState,
+	    [(int)Lexer::State::Empty] = &Lexer::emptyState,
+	    [(int)Lexer::State::Word] = &Lexer::wordState,
+	    [(int)Lexer::State::Operator] = &Lexer::operatorState,
 	};
-	return handlers[state];
+	return handlers[(int)state];
 }
 
 Lexer::State Lexer::emptyState() {
 	char ch = chars.peek();
 	if (ch == EOF) {
 		return State::Done;
-	} else if (ch == '\n') {
+	} else if (ch == '\n') { // todo: carriage return support (store state)
 		delimit(Token {Token::Type::Newline, Newline()});
 		chars.consume();
 		return State::Empty;
@@ -86,30 +84,39 @@ Lexer::State Lexer::wordState() {
 		return State::Word;
 	}
 
-	delimit(Token {Token::Type::Word, WordToken {std::move(state_data.word)}});
+	if (!state_data.word.empty()) {
+		delimit(Token {Token::Type::Word, WordToken {std::move(state_data.word)}});
+	}
 	state_data.word.clear();
 	return state;
 }
 
 Lexer::State Lexer::operatorState() {
-	char ch = chars.consume();
-	D_ASSERT(isMetaCharacter(ch));
-	Token::Type type;
-	if (ch == ';') {
-		type = Token::Type::Semicolon;
-	} else if (ch == '&') {
-		type = Token::Type::And;
-	} else {
-		throw std::runtime_error("not implemented");
+	char ch = chars.peek();
+	int matches = Token::prefixOperatorMatches(state_data.word + ch);
+	if (matches >= 1) {
+		// The characters we have now are part of 1 or multiple operators
+		// don't delimit yet, because this does not tell us that it matches an entire operator
+		state_data.word.push_back(ch);
+		chars.consume();
+		return State::Operator;
 	}
-	delimit(Token {type, OperatorToken()});
+
+	// Previously it did match a prefix of a valid operator
+	// but with the additional character it doesn't;
+	// - find out what the previous operator was
+
+	auto result = Token::exactOperatorType(state_data.word);
+	D_ASSERT(result.has_value());
+	delimit(Token {result.value(), OperatorToken()});
+	state_data.word.clear();
 	return State::Empty;
 }
 
 // https://www.gnu.org/software/bash/manual/bash.html#index-metacharacter
-constexpr const char *WHITESPACE = " \n\t";
-// constexpr const char* METACHARACTERS = " \n\t|&;()<>";
-constexpr const char *METACHARACTERS = ";&";
+#define WHITESPACE          " \t\n"
+#define OPERATOR_CHARACTERS "|&;()<>-"           // characters that _can_ appear in operators
+#define METACHARACTERS      WHITESPACE "|&;()<>" // characters that _always_ delimit words
 
 static bool contains(const char *s, char ch) {
 	return strchr(s, ch) != nullptr;
@@ -121,6 +128,10 @@ bool isSpace(char ch) {
 
 bool isMetaCharacter(char ch) {
 	return contains(METACHARACTERS, ch);
+}
+
+bool isOperatorCharacter(char ch) {
+	return contains(OPERATOR_CHARACTERS, ch);
 }
 
 }; // namespace shell

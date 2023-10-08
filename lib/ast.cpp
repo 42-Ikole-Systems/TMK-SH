@@ -1,5 +1,5 @@
-#include "ast.hpp"
-#include "print.hpp"
+#include "shell/ast.hpp"
+#include "shell/print.hpp"
 
 namespace shell {
 
@@ -11,6 +11,15 @@ Ast::Node::Node(Node &&other) : type(other.type), variant(std::move(other.varian
 Ast::Node::Node(Command &&command) : type(Type::Command), variant(std::move(command)) {
 }
 Ast::Node::Node(SeparatorOp &&separator_op) : type(Type::SeparatorOp), variant(std::move(separator_op)) {
+}
+Ast::Node::Node(Literal &&literal) : type(Type::Literal), variant(std::move(literal)) {
+}
+
+Ast::Literal::Literal(Literal &&other) : token(std::move(other.token)) {
+}
+Ast::Literal::Literal(Token &&token) : token(token) {
+}
+Ast::Literal::~Literal() {
 }
 
 Ast::Command::Command(Command &&other) : args(std::move(other.args)) {
@@ -38,13 +47,13 @@ void Ast::print() const {
 	root->print(0, logger);
 }
 
-static void printLevel(int level, BLogger& logger) {
+static void printLevel(int level, BLogger &logger) {
 	for (int i = 0; i < level; i++) {
 		logger << "    ";
 	}
 }
 
-void Ast::Node::print(int level, BLogger& logger) const {
+void Ast::Node::print(int level, BLogger &logger) const {
 	printLevel(level, logger);
 	switch (type) {
 		case Type::Command:
@@ -53,13 +62,23 @@ void Ast::Node::print(int level, BLogger& logger) const {
 		case Type::SeparatorOp:
 			get<SeparatorOp>().print(level, logger);
 			break;
+		case Type::Literal:
+			get<Literal>().print(level, logger);
+			break;
 	}
 }
 
-void Ast::Command::print(int level, BLogger& logger) const {
-	logger << "Command:\n";
+void Ast::Literal::print(int level, BLogger &logger) const {
+	tprintf("Literal:\n");
 	printLevel(level + 1, logger);
-	logger << "Args: [ ";
+	tprintf("Token: ");
+	logger << token.toString();
+}
+
+void Ast::Command::print(int level, BLogger &logger) const {
+	tprintf("Command:\n");
+	printLevel(level + 1, logger);
+	tprintf("Args: [ ");
 	for (int i = 0; i < (int)args.size(); i++) {
 		if (i != 0) {
 			logger << ", ";
@@ -69,7 +88,7 @@ void Ast::Command::print(int level, BLogger& logger) const {
 	logger << " ]\n";
 }
 
-void Ast::SeparatorOp::print(int level, BLogger& logger) const {
+void Ast::SeparatorOp::print(int level, BLogger &logger) const {
 	logger << "SeparatorOp:\n";
 	if (left == nullptr) {
 		printLevel(level + 1, logger);

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "reader.hpp"
-#include "util.hpp"
+#include "shell/reader.hpp"
+#include "shell/util.hpp"
 
 namespace shell {
 

@@ -1,13 +1,13 @@
 #include <stdbool.h>
 #include <readline/readline.h>
-#include "stdin_reader.hpp"
-#include "parser.hpp"
-#include "util.hpp"
-#include "lexer/lexer.hpp"
-#include "lexer/line_char_provider.hpp"
+#include "shell/stdin_reader.hpp"
+#include "shell/parser.hpp"
+#include "shell/util.hpp"
+#include "shell/lexer/lexer.hpp"
+#include "shell/lexer/line_char_provider.hpp"
 #include <utility>
-#include "print.hpp"
-#include "executor/executor.hpp"
+#include "shell/print.hpp"
+#include "shell/executor/executor.hpp"
 
 namespace shell {
 
@@ -36,8 +36,9 @@ static int run(int argc, const char **argv, char *const *envp) {
 		line.value().push_back('\n');
 		auto chars = LineCharProvider(line.value());
 		auto lexer = Lexer(chars);
+		optional<Token> token;
 		auto parser = Parser(lexer);
-		Ast ast = parser.getNextCommand();
+		Ast ast = parser.parse();
 		ast.print();
 		auto executor = Executor(envp);
 		executor.execute(ast);

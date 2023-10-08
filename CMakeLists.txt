@@ -19,8 +19,11 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
       "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused -Wno-unused-parameter")
 endif()
 
-add_subdirectory(src)
 add_subdirectory(lib)
+add_subdirectory(src)
+
+# Build the test executable
+add_subdirectory(test)
 
 # Location of executable source file. Target must be named "app."
 add_executable(app ${ALL_OBJECT_FILES})

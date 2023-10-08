@@ -1,6 +1,6 @@
-#include "executor/executor.hpp"
-#include "ast.hpp"
-#include "assert.hpp"
+#include "shell/executor/executor.hpp"
+#include "shell/ast.hpp"
+#include "shell/assert.hpp"
 
 namespace shell {
 
