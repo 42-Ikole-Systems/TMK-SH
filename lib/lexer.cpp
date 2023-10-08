@@ -1,9 +1,9 @@
-#include "lexer/lexer.hpp"
+#include "shell/lexer/lexer.hpp"
 #include <stdexcept>
-#include "util.hpp"
+#include "shell/util.hpp"
 #include <stdio.h>
-#include "logger.hpp"
-#include "assert.hpp"
+#include "shell/logger.hpp"
+#include "shell/assert.hpp"
 
 namespace shell {
 

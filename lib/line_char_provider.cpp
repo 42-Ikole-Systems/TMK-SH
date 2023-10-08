@@ -1,5 +1,5 @@
-#include "lexer/line_char_provider.hpp"
-#include "util.hpp"
+#include "shell/lexer/line_char_provider.hpp"
+#include "shell/util.hpp"
 
 namespace shell {
 

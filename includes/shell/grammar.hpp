@@ -1,6 +1,6 @@
 #pragma once
 
-#include "parser.hpp"
+#include "shell/parser.hpp"
 #include <optional>
 
 namespace shell {

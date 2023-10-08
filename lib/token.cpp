@@ -1,5 +1,5 @@
-#include "lexer/token.hpp"
-#include "logger.hpp"
+#include "shell/lexer/token.hpp"
+#include "shell/logger.hpp"
 
 namespace shell {
 
