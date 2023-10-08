@@ -1,4 +1,4 @@
-#include "rules/and_or.hpp"
+#include "shell/rules/and_or.hpp"
 
 namespace shell {
 

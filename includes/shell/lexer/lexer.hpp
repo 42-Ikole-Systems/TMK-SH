@@ -1,10 +1,10 @@
 #pragma once
 
-#include "reader.hpp"
-#include "util.hpp"
-#include "token.hpp"
-#include "token_provider.hpp"
-#include "interfaces/provider.hpp"
+#include "shell/reader.hpp"
+#include "shell/util.hpp"
+#include "shell/lexer/token.hpp"
+#include "shell/lexer/token_provider.hpp"
+#include "shell/interfaces/provider.hpp"
 #include <functional>
 #include <deque>
 

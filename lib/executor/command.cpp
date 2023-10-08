@@ -1,7 +1,7 @@
-#include "executor/executor.hpp"
-#include "ast.hpp"
-#include "assert.hpp"
-#include "shell.hpp"
+#include "shell/executor/executor.hpp"
+#include "shell/ast.hpp"
+#include "shell/assert.hpp"
+#include "shell/shell.hpp"
 #include <unistd.h>
 #include <stdlib.h>
 

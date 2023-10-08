@@ -1,8 +1,8 @@
 #pragma once
 
-#include "grammar.hpp"
+#include "shell/grammar.hpp"
 #include <optional>
-#include "ast.hpp"
+#include "shell/ast.hpp"
 
 namespace shell {
 

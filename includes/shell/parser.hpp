@@ -1,9 +1,9 @@
 #pragma once
 
-#include "lexer/token_provider.hpp"
-#include "lexer/token.hpp"
-#include "util.hpp"
-#include "ast.hpp"
+#include "shell/lexer/token_provider.hpp"
+#include "shell/lexer/token.hpp"
+#include "shell/util.hpp"
+#include "shell/ast.hpp"
 
 namespace shell {
 

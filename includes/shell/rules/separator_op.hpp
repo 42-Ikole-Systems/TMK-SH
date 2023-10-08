@@ -1,12 +1,12 @@
 #pragma once
 
-#include "grammar.hpp"
+#include "shell/grammar.hpp"
 #include <optional>
-#include "ast.hpp"
+#include "shell/ast.hpp"
 
 namespace shell {
 
-class AndOr {
+class SeparatorOp {
 public:
 	static GrammarRule make();
 	static vector<GrammarRule::Option> options();

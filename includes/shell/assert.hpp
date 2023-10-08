@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdlib.h>
-#include "logger.hpp"
+#include "shell/logger.hpp"
 
 #define D_ASSERT(condition) shell::AssertInternal(bool(condition), #condition, __FILE__, __LINE__)
 #define SYSCALL_ERROR(s)    shell::SyscallError(s, __FILE__, __LINE__)

@@ -1,6 +1,6 @@
-#include "rules/list_rule.hpp"
-#include "rules/separator_op.hpp"
-#include "rules/and_or.hpp"
+#include "shell/rules/list_rule.hpp"
+#include "shell/rules/separator_op.hpp"
+#include "shell/rules/and_or.hpp"
 
 namespace shell {
 

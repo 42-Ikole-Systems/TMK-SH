@@ -1,7 +1,7 @@
 #pragma once
 
-#include "settings.hpp"
-#include "print.hpp"
+#include "shell/settings.hpp"
+#include "shell/print.hpp"
 
 #define LOG_INFO(format, ...)  shell::Logger::getInstance().write(shell::Logger::LogLevel::Info, format, ##__VA_ARGS__)
 #define LOG_ERROR(format, ...) shell::Logger::getInstance().write(shell::Logger::LogLevel::Error, format, ##__VA_ARGS__)

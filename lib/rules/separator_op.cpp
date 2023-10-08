@@ -1,4 +1,4 @@
-#include "rules/separator_op.hpp"
+#include "shell/rules/separator_op.hpp"
 
 namespace shell {
 
