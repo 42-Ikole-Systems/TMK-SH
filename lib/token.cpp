@@ -22,7 +22,9 @@ static const map<Token::Type, string> token_type_strings = {{Token::Type::Word, 
                                                             {Token::Type::AndIf, "AndIf"},
                                                             {Token::Type::OrIf, "OrIf"},
                                                             {Token::Type::DoubleSemicolon, "DoubleSemicolon"},
+                                                            {Token::Type::Less, "Less"},
                                                             {Token::Type::DoubleLess, "DoubleLess"},
+                                                            {Token::Type::Great, "Great"},
                                                             {Token::Type::DoubleGreat, "DoubleGreat"},
                                                             {Token::Type::LessAnd, "LessAnd"},
                                                             {Token::Type::GreatAnd, "GreatAnd"},
@@ -45,6 +47,8 @@ string Token::toString() const {
 		case Token::Type::AndIf:
 		case Token::Type::OrIf:
 		case Token::Type::DoubleSemicolon:
+		case Token::Type::Less:
+		case Token::Type::Great:
 		case Token::Type::DoubleLess:
 		case Token::Type::DoubleGreat:
 		case Token::Type::LessAnd:
@@ -82,7 +86,9 @@ const vector<pair<string, Token::Type>> Token::operator_types = {{";", Type::Sem
                                                                  {"&&", Type::AndIf},
                                                                  {"||", Type::OrIf},
                                                                  {";;", Type::DoubleSemicolon},
+                                                                 {"<", Type::Less},
                                                                  {"<<", Type::DoubleLess},
+                                                                 {">", Type::Great},
                                                                  {">>", Type::DoubleGreat},
                                                                  {"<&", Type::LessAnd},
                                                                  {">&", Type::GreatAnd},

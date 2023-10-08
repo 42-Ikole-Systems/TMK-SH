@@ -32,11 +32,6 @@ optional<Token> Lexer::consume() {
 	return other;
 }
 
-/**
- * @brief Generates tokens until tokens.size() >= n or EOF is reached
- *
- * @param n number of tokens to generate
- */
 void Lexer::nextToken() {
 	while (state != State::Done && !token.has_value()) {
 		auto handler = getStateHandler();
@@ -81,7 +76,7 @@ Lexer::State Lexer::wordState() {
 	char ch = chars.peek();
 	if (isSpace(ch) || ch == EOF) {
 		state = State::Empty;
-	} else if (isOperatorCharacter(ch)) {
+	} else if (isMetaCharacter(ch)) {
 		state = State::Operator;
 	} else {
 		state_data.word.push_back(ch);
@@ -89,7 +84,9 @@ Lexer::State Lexer::wordState() {
 		return State::Word;
 	}
 
-	delimit(Token {Token::Type::Word, WordToken {std::move(state_data.word)}});
+	if (!state_data.word.empty()) {
+		delimit(Token {Token::Type::Word, WordToken {std::move(state_data.word)}});
+	}
 	state_data.word.clear();
 	return state;
 }
@@ -98,13 +95,19 @@ Lexer::State Lexer::operatorState() {
 	char ch = chars.peek();
 	int matches = Token::prefixOperatorMatches(state_data.word + ch);
 	if (matches >= 1) {
-		// don't delimit yet, could be multiple operators
-		// we _could_ technically delimit with exactly 1 match, but this simplifies the code
+		// The characters we have now are part of 1 or multiple operators
+		// don't delimit yet, because this does not tell us that it matches an entire operator
 		state_data.word.push_back(ch);
 		chars.consume();
 		return State::Operator;
 	}
+
+	// Previously it did match a prefix of a valid operator
+	// but with the additional character it doesn't;
+	// - find out what the previous operator was
+
 	auto result = Token::exactOperatorType(state_data.word);
+	D_ASSERT(result.has_value());
 	delimit(Token {result.value(), OperatorToken()});
 	state_data.word.clear();
 	return State::Empty;

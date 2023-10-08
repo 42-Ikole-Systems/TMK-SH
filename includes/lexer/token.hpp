@@ -44,7 +44,9 @@ public:
 		AndIf,            // &&
 		OrIf,             // ||
 		DoubleSemicolon,  // ;;
+		Less,             // <
 		DoubleLess,       // <<
+		Great,            // >
 		DoubleGreat,      // >>
 		LessAnd,          // <&
 		GreatAnd,         // >&
