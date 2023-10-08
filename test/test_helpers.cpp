@@ -1,7 +1,18 @@
 #include "test_helpers.hpp"
+#include <functional>
 
 void assertExpectedTokens(const string &line, vector<Token> &expected_tokens) {
 	auto input = line + '\n';
+
+	// Prepare the array of expected tokens
+	vector<std::reference_wrapper<Token>> expected;
+	expected.reserve(expected_tokens.size());
+	auto newline = Token(Token::Type::Newline, Newline());
+	for (auto &token : expected_tokens) {
+		expected.push_back(token);
+	}
+	expected.push_back(newline);
+
 	auto chars = LineCharProvider(input);
 	auto lexer = Lexer(chars);
 	vector<Token> actual;
@@ -13,9 +24,9 @@ void assertExpectedTokens(const string &line, vector<Token> &expected_tokens) {
 		actual.emplace_back(std::move(token.value()));
 	}
 
-	REQUIRE(expected_tokens.size() == actual.size());
-	for (size_t i = 0; i < expected_tokens.size(); i++) {
-		auto &a = expected_tokens[i];
+	REQUIRE(expected.size() == actual.size());
+	for (size_t i = 0; i < expected.size(); i++) {
+		auto &a = expected[i].get();
 		auto &b = actual[i];
 
 		REQUIRE(a.equals(b));
