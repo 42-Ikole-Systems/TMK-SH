@@ -2,6 +2,7 @@ add_library(
     lib
     OBJECT
     lexer.cpp
+    logger.cpp
     parser.cpp
     stdin_reader.cpp
     token.cpp

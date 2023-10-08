@@ -2,17 +2,17 @@
 
 #include "settings.hpp"
 #include "print.hpp"
+#include "util.hpp"
 
 #include <sstream>
 
-#define LOG_INFO(format, ...)  shell::Logger::getInstance().write(shell::LogLevel::Info, format, ##__VA_ARGS__)
-#define LOG_ERROR(format, ...) shell::Logger::getInstance().write(shell::LogLevel::Error, format, ##__VA_ARGS__)
+#define LOG_INFO(format, ...)  shell::SLogger::getInstance().write(shell::LogLevel::Info, format, ##__VA_ARGS__)
+#define LOG_ERROR(format, ...) shell::SLogger::getInstance().write(shell::LogLevel::Error, format, ##__VA_ARGS__)
 #define LOG_WARNING(format, ...)                                                                                       \
-	shell::Logger::getInstance().write(shell::LogLevel::Warning, format, ##__VA_ARGS__)
+	shell::SLogger::getInstance().write(shell::LogLevel::Warning, format, ##__VA_ARGS__)
 
 #ifdef DEBUG
-// todo only print `[DEBUG]` at start of line (i.e. handle flushing)
-#define LOG_DEBUG(format, ...) shell::Logger::getInstance().write(shell::LogLevel::Debug, format, ##__VA_ARGS__)
+#define LOG_DEBUG(format, ...) shell::SLogger::getInstance().write(shell::LogLevel::Debug, format, ##__VA_ARGS__)
 #else
 #define LOG_DEBUG(format, ...)
 #endif
@@ -24,35 +24,36 @@ namespace shell {
 */
 enum class LogLevel { Info, Warning, Error, Debug };
 
-#ifdef DEBUG
-	constexpr auto g_logLevel = LogLevel::Debug;
-#else
-	constexpr auto g_logLevel = LogLevel::Error;
-#endif
-
-constexpr auto GetLogLevelPrefix(LogLevel logLevel)
+/*!
+ * @brief Logger baseclass can only be instantiated by derived class.
+*/
+class Logger
 {
-	switch (logLevel) {
-		case LogLevel::Info:
-			return "[Info]: ";
-		case LogLevel::Warning:
-			return "[Warning]: ";
-		case LogLevel::Error:
-			return "[Error]: ";
-		case LogLevel::Debug:
-			return "[Debug]: ";
-	};
-}
+protected:
+
+	const LogLevel g_logLevel; /*!< Loglevel set at compiletime. */
+	
+	/*!
+	 * @brief -.
+	*/
+	Logger();
+
+	/*!
+	 * @brief Gets loglevel prefix as string.
+	*/
+	static const string getLogLevelPrefix(LogLevel logLevel);
+};
 
 /*!
  * @brief Singleton Logging class.
+ * @note This implementation is not thread safe.
  */
-class Logger {
+class SLogger : public Logger {
 
 	/*!
 	 * @brief -.
 	*/
-	Logger() = default;
+	SLogger() = default;
 
 public:
 
@@ -63,8 +64,9 @@ public:
 	 * @param args
 	 */
 	template <class... Args>
-	void write(LogLevel logLevel, const char *format, Args &&...args) {
-		tprintf(GetLogLevelPrefix(logLevel));
+	void write(LogLevel logLevel, const char *format, Args &&...args)
+	{
+		tprintf("%", getLogLevelPrefix(logLevel));
 		tprintf(format, std::forward<Args>(args)...);
 	}
 
@@ -72,22 +74,19 @@ public:
 	 * @brief Get singleton instance.
 	 * @return
 	 */
-	static Logger &getInstance() {
-		static Logger logger;
-		return logger;
-	}
+	static SLogger &getInstance();
 };
 
 /*!
  * @brief Buffered logging class
 */
-class BLogger
+class BLogger : public Logger
 {
 	const LogLevel logLevel; /*!< -. */
 	std::stringstream buffer; /*!< -. */
 
 	template<class T>
-	inline void AddToBuffer(const T& val)
+	inline void addToBuffer(const T& val)
 	{
 		if (logLevel <= g_logLevel)
 		{
@@ -102,18 +101,12 @@ public:
 	 * 		  Nothing will be written when the global loglevel is lower than the loglevel you try to write with.
 	 * @param logLevel
 	*/
-	BLogger(LogLevel logLevel_) : logLevel(logLevel_)
-	{
-		AddToBuffer(GetLogLevelPrefix(logLevel));
-	}
+	BLogger(LogLevel logLevel_);
 
 	/*!
 	 * @brief .-
 	*/
-	~BLogger()
-	{
-		flush();
-	}
+	~BLogger();
 
 	/*!
 	 * @brief Adds value to buffer.
@@ -121,19 +114,14 @@ public:
 	template<class T>
 	BLogger& operator << (const T& val)
 	{
-		AddToBuffer(val);
+		addToBuffer(val);
 		return *this;
 	}
 
 	/*!
 	 * @brief flushes the buffer.
 	*/
-	void flush()
-	{
-		std::cout << buffer.str();
-		buffer.clear();
-		AddToBuffer(GetLogLevelPrefix(logLevel));
-	}
+	void flush();
 
 };
 
