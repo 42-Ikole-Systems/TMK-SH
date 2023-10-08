@@ -11,7 +11,10 @@
 
 using namespace shell;
 
+extern char** environ;
+
 TEST_CASE("basic shell", "[shell]") {
+	char** envp = environ;
 	string line = "/bin/ls -la";
 
 	line.push_back('\n');
@@ -20,4 +23,6 @@ TEST_CASE("basic shell", "[shell]") {
 	auto parser = Parser(lexer);
 	Ast ast = parser.getNextCommand();
 	ast.print();
+	auto executor = Executor(envp);
+	executor.execute(ast);
 }
