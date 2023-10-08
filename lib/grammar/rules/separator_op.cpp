@@ -1,4 +1,5 @@
 #include "grammar/rules/separator_op.hpp"
+#include "grammar/grammar_util.hpp"
 
 namespace shell {
 
@@ -9,39 +10,8 @@ Rule SeparatorOp::make() {
 }
 
 vector<Rule::Option> SeparatorOp::options() {
-	return {Rule::Terminal {semicolon}, Rule::Terminal {ampersand}};
-}
-
-optional<Ast::Node> SeparatorOp::semicolon(Provider<Token> &tokens) {
-	auto token = tokens.peek();
-	if (token.type != Token::Type::Operator) {
-		return nullopt;
-	}
-	auto &operator_token = token.operator_token;
-	if (operator_token.type != OperatorToken::Type::Semicolon) {
-		return nullopt;
-	}
-	auto node = Ast::SeparatorOp();
-	node.left = nullptr;
-	node.right = nullptr;
-	tokens.consume();
-	return node;
-}
-
-optional<Ast::Node> SeparatorOp::ampersand(Provider<Token> &tokens) {
-	auto token = tokens.peek();
-	if (token.type != Token::Type::Operator) {
-		return nullopt;
-	}
-	auto &operator_token = token.operator_token;
-	if (operator_token.type != OperatorToken::Type::Ampersand) {
-		return nullopt;
-	}
-	auto node = Ast::SeparatorOp();
-	node.left = nullptr;
-	node.right = nullptr;
-	tokens.consume();
-	return node;
+	return {Rule::Terminal {GrammarUtil::ConsumeIf<Token::Type::Semicolon>},
+	        Rule::Terminal {GrammarUtil::ConsumeIf<Token::Type::And>}};
 }
 
 } // namespace shell

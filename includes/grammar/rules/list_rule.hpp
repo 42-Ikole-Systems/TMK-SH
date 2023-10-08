@@ -12,8 +12,8 @@ public:
 	static vector<Rule::Option> options();
 
 private:
-	static optional<Ast::Node> separatedList(const vector<Ast::Node> &nodes);
-	static optional<Ast::Node> singleCommand(const vector<Ast::Node> &nodes);
+	static optional<Ast::Node> separatedList(vector<Ast::Node> &nodes);
+	static optional<Ast::Node> singleCommand(vector<Ast::Node> &nodes);
 };
 
 } // namespace shell

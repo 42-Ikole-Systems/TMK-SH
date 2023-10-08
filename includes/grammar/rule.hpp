@@ -9,8 +9,8 @@ namespace shell {
 
 struct Rule {
 public:
-	using grammar_func_t = std::function<optional<Ast::Node>(const vector<Ast::Node> &nodes)>;
-	using token_consumer_t = std::function<optional<Ast::Node>(Provider<Token> &provider)>;
+	using grammar_func_t = std::function<optional<Ast::Node>(vector<Ast::Node> &nodes)>;
+	using token_consumer_t = std::function<optional<Ast::Node>(TokenProvider &provider)>;
 
 	struct NonTerminal {
 		NonTerminal(grammar_func_t node_assembler, vector<Rule> sequence)

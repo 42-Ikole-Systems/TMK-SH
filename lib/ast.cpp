@@ -12,6 +12,15 @@ Ast::Node::Node(Command &&command) : type(Type::Command), variant(std::move(comm
 }
 Ast::Node::Node(SeparatorOp &&separator_op) : type(Type::SeparatorOp), variant(std::move(separator_op)) {
 }
+Ast::Node::Node(Literal &&literal) : type(Type::Literal), variant(std::move(literal)) {
+}
+
+Ast::Literal::Literal(Literal &&other) : token(std::move(other.token)) {
+}
+Ast::Literal::Literal(Token &&token) : token(token) {
+}
+Ast::Literal::~Literal() {
+}
 
 Ast::Command::Command(Command &&other) : args(std::move(other.args)) {
 }
@@ -52,7 +61,17 @@ void Ast::Node::print(int level) const {
 		case Type::SeparatorOp:
 			get<SeparatorOp>().print(level);
 			break;
+		case Type::Literal:
+			get<Literal>().print(level);
+			break;
 	}
+}
+
+void Ast::Literal::print(int level) const {
+	tprintf("Literal:\n");
+	printLevel(level + 1);
+	tprintf("Token: ");
+	token.print();
 }
 
 void Ast::Command::print(int level) const {

@@ -2,12 +2,22 @@
 
 #include "util.hpp"
 #include <variant>
+#include "lexer/token.hpp"
 
 namespace shell {
 
 class Ast {
 public:
 	class Node;
+
+	struct Literal {
+		Literal(Literal &&other);
+		Literal(Token &&token);
+		~Literal();
+
+		void print(int level) const;
+		Token token;
+	};
 
 	struct Command {
 		Command(Command &&other);
@@ -30,16 +40,17 @@ public:
 
 	class Node {
 	public:
-		enum class Type { SeparatorOp, Command };
+		enum class Type { SeparatorOp, Command, Literal };
 
 	private:
 		Type type;
-		std::variant<Command, SeparatorOp> variant;
+		std::variant<Command, SeparatorOp, Literal> variant;
 
 	public:
 		Node(Node &&other);
 		Node(Command &&command);
 		Node(SeparatorOp &&separator_op);
+		Node(Literal &&separator_op);
 
 		Type getType() const;
 

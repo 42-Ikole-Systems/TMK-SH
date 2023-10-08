@@ -13,17 +13,18 @@ vector<Rule::Option> AndOr::options() {
 	return {Rule::Terminal {handler}};
 }
 
-optional<Ast::Node> AndOr::handler(Provider<Token> &tokens) {
+optional<Ast::Node> AndOr::handler(TokenProvider &tokens) {
 	vector<string> words;
 	while (true) {
 		auto token = tokens.peek();
-		// if (!token.has_value()) {
-		//	break;
-		//}
-		if (token.type != Token::Type::Word) {
+		if (!token.has_value()) {
 			break;
 		}
-		words.emplace_back(token.word_token.value);
+		if (token->getType() != Token::Type::Word) {
+			break;
+		}
+		auto &word_token = token->get<WordToken>();
+		words.emplace_back(word_token.value);
 		tokens.consume();
 	}
 	if (words.empty()) {

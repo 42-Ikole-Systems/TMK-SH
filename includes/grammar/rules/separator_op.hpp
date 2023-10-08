@@ -13,8 +13,8 @@ public:
 	static vector<Rule::Option> options();
 
 private:
-	static optional<Ast::Node> semicolon(Provider<Token> &tokens);
-	static optional<Ast::Node> ampersand(Provider<Token> &tokens);
+	static optional<Ast::Node> semicolon(TokenProvider &tokens);
+	static optional<Ast::Node> ampersand(TokenProvider &tokens);
 };
 
 } // namespace shell

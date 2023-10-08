@@ -4,7 +4,7 @@
 
 namespace shell {
 
-struct RuleProducer {
+struct GrammarUtil {
 public:
 	using grammar_func_t = Rule::grammar_func_t;
 
@@ -13,6 +13,16 @@ public:
 	static Rule::Option MakeOption(grammar_func_t node_assembler) {
 		// Use fold expression to populate the sequence vector.
 		return Rule::NonTerminal(node_assembler, {Targs::make()...});
+	}
+
+	template <Token::Type TOKEN_TYPE>
+	static optional<Ast::Node> ConsumeIf(TokenProvider &tokens) {
+		auto token = tokens.peek();
+		if (token->getType() != TOKEN_TYPE) {
+			return nullopt;
+		}
+		tokens.consume();
+		return Ast::Literal(std::move(token.value()));
 	}
 };
 
