@@ -16,10 +16,15 @@ enum class ResultCode : uint8_t {
 
 class Executor {
 private:
-	char *const *envp;
+
+	/*!
+	 * @brief Resolves program path.
+	 * @param command
+	*/
+	optional<string> resolvePath(const string &command) const;
 
 public:
-	Executor(char *const *envp);
+	Executor();
 
 	ResultCode execute(Ast &ast);
 	ResultCode execute(Ast::Node &node);

@@ -8,6 +8,7 @@ add_library(
     line_char_provider.cpp
     ast.cpp
     assert.cpp
+    environment.cpp
 )
 
 add_subdirectory(grammar)

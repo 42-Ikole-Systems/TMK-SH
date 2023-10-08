@@ -8,7 +8,7 @@
 
 namespace shell {
 
-Executor::Executor(char *const *envp) : envp(envp) {
+Executor::Executor() {
 }
 
 ResultCode Executor::execute(Ast::Node &node) {

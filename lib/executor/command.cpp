@@ -2,8 +2,12 @@
 #include "shell/ast.hpp"
 #include "shell/assert.hpp"
 #include "shell/shell.hpp"
+#include "shell/environment.hpp"
+
 #include <unistd.h>
 #include <stdlib.h>
+#include <ranges>
+#include <filesystem>
 
 namespace shell {
 
@@ -26,14 +30,32 @@ static unique_ptr<char *const []> convertArguments(const vector<string> &vec) {
 	return unique_ptr<char *const[]>((char *const *)result.release());
 }
 
+optional<string> Executor::resolvePath(const string &program) const
+{
+	if (program.find('/') != string::npos) {
+		return program;
+	}
+
+	const auto& path = Environment::get("PATH");
+	for (const auto location : std::views::split(path, ':')) {
+		const auto path = location + '/' + program;
+		if (std::filesystem::exists(path)) {
+			return path; 
+		}
+	}
+	return nullopt;
+}
+
 ResultCode Executor::execute(Ast::Command &command) {
 	D_ASSERT(!command.args.empty());
 
-	const string &program = command.args[0];
-
 	// todo: add builtin support
-	// todo: path resolution
-	D_ASSERT(program.find('/') != string::npos);
+	const auto &program = command.args[0];
+	const auto programPath = resolvePath(program);
+	if (!programPath.has_value()) {
+		LOG_ERROR("%: command not found", program);
+		return ResultCode::CommandNotFound;
+	}
 
 	pid_t pid = fork();
 	if (pid < 0) {
@@ -42,7 +64,7 @@ ResultCode Executor::execute(Ast::Command &command) {
 	} else if (pid == 0) {
 		// Child
 		auto args = convertArguments(command.args);
-		execve(program.c_str(), args.get(), envp);
+		execve(programPath.value().c_str(), args.get(), Environment::getEnvironmentVariables().raw());
 		SYSCALL_ERROR("execve");
 		if (errno == ENOEXEC) {
 			Exit(ResultCode::CommandNotExecutable);

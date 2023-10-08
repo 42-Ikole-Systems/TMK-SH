@@ -1,13 +1,14 @@
-#include <stdbool.h>
 #include <readline/readline.h>
 #include "shell/stdin_reader.hpp"
 #include "shell/parser.hpp"
 #include "shell/util.hpp"
 #include "shell/lexer/lexer.hpp"
 #include "shell/lexer/line_char_provider.hpp"
-#include <utility>
 #include "shell/print.hpp"
 #include "shell/executor/executor.hpp"
+#include "shell/environment.hpp"
+
+#include <utility>
 
 namespace shell {
 
@@ -22,6 +23,7 @@ static void initialize() {
 
 static int run(int argc, const char **argv, char *const *envp) {
 	initialize();
+	Environment::setEnvironmentVariables(envp);
 
 	using_history();
 	StdinReader reader = StdinReader(prompt);
@@ -40,7 +42,7 @@ static int run(int argc, const char **argv, char *const *envp) {
 		auto parser = Parser(lexer);
 		Ast ast = parser.parse();
 		ast.print();
-		auto executor = Executor(envp);
+		auto executor = Executor();
 		executor.execute(ast);
 	}
 	tprintf("\n");
