@@ -1,6 +1,6 @@
 #pragma once
 
-#include "grammar/rule.hpp"
+#include "shell/grammar/rule.hpp"
 
 namespace shell {
 

@@ -14,6 +14,7 @@ add_subdirectory(grammar)
 add_subdirectory(executor)
 
 # Forward the declared variable to the parent scope
-set(ALL_OBJECT_FILES
-    ${ALL_OBJECT_FILES} $<TARGET_OBJECTS:lib>
-    PARENT_SCOPE)
+set(ALL_OBJECT_FILES ${ALL_OBJECT_FILES} $<TARGET_OBJECTS:lib>)
+set(ALL_OBJECT_FILES ${ALL_OBJECT_FILES} $<TARGET_OBJECTS:lib> PARENT_SCOPE)
+
+add_library(shell ${ALL_OBJECT_FILES})

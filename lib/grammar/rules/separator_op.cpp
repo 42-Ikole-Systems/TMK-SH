@@ -1,5 +1,5 @@
-#include "grammar/rules/separator_op.hpp"
-#include "grammar/grammar_util.hpp"
+#include "shell/grammar/rules/separator_op.hpp"
+#include "shell/grammar/grammar_util.hpp"
 
 namespace shell {
 

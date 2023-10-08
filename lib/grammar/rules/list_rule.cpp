@@ -1,8 +1,8 @@
-#include "grammar/rules/list_rule.hpp"
-#include "grammar/rules/separator_op.hpp"
-#include "grammar/rules/and_or.hpp"
-#include "grammar/grammar_util.hpp"
-#include "assert.hpp"
+#include "shell/grammar/rules/list_rule.hpp"
+#include "shell/grammar/rules/separator_op.hpp"
+#include "shell/grammar/rules/and_or.hpp"
+#include "shell/grammar/grammar_util.hpp"
+#include "shell/assert.hpp"
 
 namespace shell {
 

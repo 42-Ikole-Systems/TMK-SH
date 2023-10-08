@@ -1,8 +1,8 @@
 #pragma once
 
-#include "util.hpp"
+#include "shell/util.hpp"
 #include <variant>
-#include "lexer/token.hpp"
+#include "shell/lexer/token.hpp"
 
 namespace shell {
 

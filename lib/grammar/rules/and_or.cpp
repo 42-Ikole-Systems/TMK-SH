@@ -1,5 +1,5 @@
-#include "grammar/rules/and_or.hpp"
-#include "interfaces/provider.hpp"
+#include "shell/grammar/rules/and_or.hpp"
+#include "shell/interfaces/provider.hpp"
 
 namespace shell {
 

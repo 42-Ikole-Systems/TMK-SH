@@ -1,10 +1,10 @@
 #pragma once
 
-#include "lexer/token_provider.hpp"
-#include "lexer/token.hpp"
-#include "util.hpp"
-#include "ast.hpp"
-#include "grammar/rule.hpp"
+#include "shell/lexer/token_provider.hpp"
+#include "shell/lexer/token.hpp"
+#include "shell/util.hpp"
+#include "shell/ast.hpp"
+#include "shell/grammar/rule.hpp"
 
 namespace shell {
 

@@ -1,9 +1,9 @@
-#include "parser.hpp"
-#include "print.hpp"
+#include "shell/parser.hpp"
+#include "shell/print.hpp"
 #include <stdexcept>
 #include <utility>
-#include "grammar/rules/list_rule.hpp"
-#include "assert.hpp"
+#include "shell/grammar/rules/list_rule.hpp"
+#include "shell/assert.hpp"
 
 namespace shell {
 

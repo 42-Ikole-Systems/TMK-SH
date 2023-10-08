@@ -1,25 +1,23 @@
 #pragma once
 
-#include "util.hpp"
+#include "shell/util.hpp"
 
 namespace shell {
 
 /* specific token values */
 struct WordToken {
 	string value;
-	void print() const;
+	string toString() const;
 };
 
 struct OperatorToken {};
 
 struct IoNumber {
 	string value; // numeric string
-	void print() const;
+	string toString() const;
 };
 
-struct Newline {
-	void print() const;
-};
+struct Newline {};
 
 struct Token {
 public:
@@ -43,17 +41,18 @@ public:
 		PipeAnd,          // |&
 		ParenthesisOpen,  // (
 		ParenthesisClose, // )
-
-		AndIf,           // &&
-		OrIf,            // ||
-		DoubleSemicolon, // ;;
-		DoubleLess,      // <<
-		DoubleGreat,     // >>
-		LessAnd,         // <&
-		GreatAnd,        // >&
-		LessGreat,       // <>
-		DoubleLessDash,  // <<-
-		Clobber,         // >|
+		AndIf,            // &&
+		OrIf,             // ||
+		DoubleSemicolon,  // ;;
+		Less,             // <
+		DoubleLess,       // <<
+		Great,            // >
+		DoubleGreat,      // >>
+		LessAnd,          // <&
+		GreatAnd,         // >&
+		LessGreat,        // <>
+		DoubleLessDash,   // <<-
+		Clobber,          // >|
 
 		/* not sure if these are operators? referenced: https://www.gnu.org/software/bash/manual/bash.html#Definitions
 		as control operators*/
@@ -65,6 +64,8 @@ private:
 	Type type;
 	Variant variant;
 
+	static const vector<pair<string, Type>> operator_types;
+
 public:
 	Token() = default;                   // remove
 	Token(const Token &other) = default; // remove and optimize code to not copy but move instead as much as possible
@@ -75,6 +76,7 @@ public:
 
 	Type getType() const;
 	void print() const;
+	string toString() const;
 
 	template <typename T>
 	T &get() {
@@ -85,6 +87,12 @@ public:
 	const T &get() const {
 		return std::get<T>(variant);
 	}
+
+	static int prefixOperatorMatches(const string &s);
+	static optional<Type> exactOperatorType(const string &s);
+
+private:
+	static const string &getOperatorString(Token::Type type);
 };
 
 } // namespace shell
