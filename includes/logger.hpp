@@ -86,6 +86,15 @@ class BLogger
 	const LogLevel logLevel; /*!< -. */
 	std::stringstream buffer; /*!< -. */
 
+	template<class T>
+	inline void AddToBuffer(const T& val)
+	{
+		if (logLevel <= g_logLevel)
+		{
+			buffer << val;
+		}
+	}
+
 public:
 
 	/*!
@@ -95,10 +104,7 @@ public:
 	*/
 	BLogger(LogLevel logLevel_) : logLevel(logLevel_)
 	{
-		if (logLevel <= g_logLevel)
-		{
-			buffer << GetLogLevelPrefix(logLevel);
-		}
+		AddToBuffer(GetLogLevelPrefix(logLevel));
 	}
 
 	/*!
@@ -113,12 +119,9 @@ public:
 	 * @brief Adds value to buffer.
 	*/
 	template<class T>
-	BLogger& operator << (const T& value)
+	BLogger& operator << (const T& val)
 	{
-		if (logLevel <= g_logLevel)
-		{
-			buffer << value;
-		}
+		AddToBuffer(val);
 		return *this;
 	}
 
@@ -129,6 +132,7 @@ public:
 	{
 		std::cout << buffer.str();
 		buffer.clear();
+		AddToBuffer(GetLogLevelPrefix(logLevel));
 	}
 
 };
