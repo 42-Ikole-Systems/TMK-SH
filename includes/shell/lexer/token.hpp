@@ -78,6 +78,8 @@ public:
 	void print() const;
 	string toString() const;
 
+	bool equals(const Token &other) const;
+
 	template <typename T>
 	T &get() {
 		return std::get<T>(variant);
@@ -93,6 +95,10 @@ public:
 
 private:
 	static const string &getOperatorString(Token::Type type);
+	static bool isOperator(Token::Type type);
+	static bool isWord(Token::Type type);
+	static bool isIoNumber(Token::Type type);
+	static bool isNewline(Token::Type type);
 };
 
 } // namespace shell

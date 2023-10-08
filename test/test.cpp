@@ -13,6 +13,35 @@ using namespace shell;
 
 extern char** environ;
 
+TEST_CASE("lexer test", "[shell]") {
+	string line = "/bin/ls -la";
+
+	line.push_back('\n');
+	auto chars = LineCharProvider(line);
+	auto lexer = Lexer(chars);
+	vector<Token> actual;
+	while (true) {
+		auto token = lexer.consume();
+		if (!token.has_value()) {
+			break;
+		}
+		actual.emplace_back(std::move(token.value()));
+	}
+
+	vector<Token> expected = {
+		Token(Token::Type::Word, WordToken{"/bin/ls"}),
+		Token(Token::Type::Word, WordToken{"-la"}),
+		Token(Token::Type::Newline, Newline())
+	};
+	REQUIRE(expected.size() == actual.size());
+	for (size_t i = 0; i < expected.size(); i++) {
+		auto &a = expected[i];
+		auto &b = actual[i];
+
+		REQUIRE(a.equals(b));
+	}
+}
+
 TEST_CASE("basic shell", "[shell]") {
 	char** envp = environ;
 	string line = "/bin/ls -la";
