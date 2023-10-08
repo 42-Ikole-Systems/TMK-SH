@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shell/reader.hpp"
+#include "shell/interfaces/reader.hpp"
 #include "shell/util.hpp"
 
 namespace shell {

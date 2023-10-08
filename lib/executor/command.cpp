@@ -33,7 +33,10 @@ ResultCode Executor::execute(Ast::Command &command) {
 
 	// todo: add builtin support
 	// todo: path resolution
-	D_ASSERT(program.find('/') != string::npos);
+	if (program.find('/') == string::npos) {
+		LOG_WARNING("execution without '/' in name is not implemented\n");
+		return ResultCode::GeneralError;
+	}
 
 	pid_t pid = fork();
 	if (pid < 0) {

@@ -8,6 +8,7 @@
 #include <utility>
 #include "shell/print.hpp"
 #include "shell/executor/executor.hpp"
+#include "shell/lexer/reader_char_provider.hpp"
 
 namespace shell {
 
@@ -25,23 +26,38 @@ static int run(int argc, const char **argv, char *const *envp) {
 
 	using_history();
 	StdinReader reader = StdinReader(prompt);
-	// Lexer lexer = Lexer(reader);
-	// Parser parser = Parser();
 	while (true) {
-		auto line = reader.nextLine();
-		if (!line.has_value()) {
+		auto provider = ReaderCharProvider(reader);
+		auto lexer = Lexer(provider);
+		optional<Token> token;
+
+		vector<Token> tokens;
+		token = lexer.consume();
+		while (token.has_value() && token->getType() != Token::Type::Newline) {
+			tokens.push_back(token.value());
+			token = lexer.consume();
+		}
+		if (!token.has_value()) {
 			break;
 		}
-		add_history(line.value().c_str());
-		line.value().push_back('\n');
-		auto chars = LineCharProvider(line.value());
-		auto lexer = Lexer(chars);
-		optional<Token> token;
-		auto parser = Parser(lexer);
-		Ast ast = parser.parse();
-		ast.print();
-		auto executor = Executor(envp);
-		executor.execute(ast);
+		for (auto &token : tokens) {
+			token.print();
+		}
+
+		// auto parser = Parser(lexer);
+		// Ast ast = parser.parse();
+		// ast.print();
+
+		if (provider.isEof()) {
+			break;
+		}
+		string line = provider.takeLine();
+		if (!line.empty()) {
+			add_history(line.c_str());
+		}
+
+		// auto executor = Executor(envp);
+		// executor.execute(ast);
 	}
 	tprintf("\n");
 	return 0;

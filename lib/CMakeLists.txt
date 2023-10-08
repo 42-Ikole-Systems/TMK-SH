@@ -1,15 +1,14 @@
 add_library(
     lib
     OBJECT
-    lexer.cpp
     parser.cpp
     stdin_reader.cpp
-    token.cpp
-    line_char_provider.cpp
     ast.cpp
     assert.cpp
+    exception.cpp
 )
 
+add_subdirectory(lexer)
 add_subdirectory(grammar)
 add_subdirectory(executor)
 
