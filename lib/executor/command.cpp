@@ -39,9 +39,9 @@ optional<string> Executor::resolvePath(const string &program) const
 
 	const auto& path = Environment::get("PATH");
 	for (const auto location : LazySplit(path, ":")) {
-		const auto path = std::filesystem::path(location) / program;
-		if (std::filesystem::exists(path)) {
-			return path.string();
+		const auto programPath = std::filesystem::path(location) / program;
+		if (std::filesystem::exists(programPath)) {
+			return programPath.string();
 		}
 	}
 	return nullopt;
@@ -54,7 +54,7 @@ ResultCode Executor::execute(Ast::Command &command) {
 	const auto &program = command.args[0];
 	const auto programPath = resolvePath(program);
 	if (!programPath.has_value()) {
-		LOG_ERROR("%: command not found", program);
+		LOG_ERROR("%: command not found\n", program);
 		return ResultCode::CommandNotFound;
 	}
 

@@ -13,10 +13,14 @@ namespace shell
 	pair<size_t, std::string_view> LazySplit::next(size_t pos)
 	{
 		if (pos >= source.length()) {
-			return {string::npos, nullptr};
+			return {string::npos, {}};
 		}
-		const auto delim_pos = source.find(delimiter, pos); 
-		return {delim_pos + delimiter.length(), std::string_view(source.data() + pos, delim_pos)};
+		const auto delim_pos = source.find(delimiter, pos);
+		// Last occurrence.
+		if (delim_pos == string::npos) {
+			return {string::npos, std::string_view(source.data() + pos, source.length() - pos)};
+		}
+		return {delim_pos + delimiter.length(), std::string_view(source.data() + pos, delim_pos - pos)};
 	}
 
 	LazySplit::iterator LazySplit::begin() {
@@ -25,7 +29,7 @@ namespace shell
 	}
 
 	LazySplit::iterator LazySplit::end() {
-		return iterator(std::string_view(source.data(), source.length()), *this, string::npos);
+		return iterator({}, *this, string::npos);
 	}
 
 	ForwardLazySpliterator::ForwardLazySpliterator(std::string_view view_, LazySplit& splitter_, size_t pos_)
@@ -41,7 +45,7 @@ namespace shell
 	}
 
 	ForwardLazySpliterator& ForwardLazySpliterator::operator ++ () {
-		auto [delim_pos, new_view] = splitter.next(pos);
+		const auto& [delim_pos, new_view] = splitter.next(pos);
 		pos = delim_pos;
 		view = new_view;
 		return *this;
@@ -54,7 +58,7 @@ namespace shell
 	}
 
 	bool ForwardLazySpliterator::operator != (const ForwardLazySpliterator& x) {
-		return (this->pos != x.pos);
+		return (this->pos != x.pos && this->view != x.view);
 	}
 
 }
