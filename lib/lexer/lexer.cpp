@@ -53,6 +53,9 @@ std::function<Lexer::State(Lexer &)> Lexer::getStateHandler() {
 	    [(int)Lexer::State::Backslash] = &Lexer::backslashState,
 	    [(int)Lexer::State::SingleQuoteStart] = &Lexer::singleQuoteStartState,
 	    [(int)Lexer::State::SingleQuote] = &Lexer::singleQuoteState,
+	    [(int)Lexer::State::DoubleQuoteStart] = &Lexer::doubleQuoteStateStart,
+	    [(int)Lexer::State::DoubleQuote] = &Lexer::doubleQuoteState,
+	    [(int)Lexer::State::DoubleQuoteBackslash] = &Lexer::doubleQuoteBackslashState,
 	};
 	D_ASSERT((size_t)state < (sizeof(handlers) / sizeof(handlers[0])));
 	D_ASSERT(handlers[(int)state] != nullptr);
@@ -93,6 +96,8 @@ Lexer::State Lexer::wordState() {
 		return State::Backslash;
 	} else if (isSingleQuote(ch)) {
 		return State::SingleQuoteStart;
+	} else if (isDoubleQuote(ch)) {
+		return State::DoubleQuoteStart;
 	} else {
 		state_data.word.push_back(ch);
 		chars.consume();
@@ -152,16 +157,22 @@ Lexer::State Lexer::commentState() {
 }
 
 Lexer::State Lexer::backslashState() {
-	D_ASSERT(isBackslash(chars.consume()));
-	char ch = chars.peek();
+	char ch = chars.consume();
+	D_ASSERT(isBackslash(ch));
+	ch = chars.peek();
 	if (isNewline(ch)) {
-		// unconsume backslash, so that it can be removed from the input stream together with the newline
+		// Special case: `\\n`: remove backslash and newline from the input stream and continue where we left off.
 		chars.unconsume();
+		// Todo: if the NEXT character IS another newline, then the backslash _IS_ added to the history. Maybe just a
+		// bash/zsh behavior?
 		chars.remove();
 		chars.remove();
 		return state_data.previous;
 	}
 
+	// This is required to be here in the case of something like `>\\n>`, which results in the next token being used as
+	// an operator. Since we have not encountered a newline, that scenario is no longer possible and the literal value
+	// is used as part of a word, so we delimit the operator at this point.
 	if (state_data.previous == State::Operator) {
 		delimitOperator();
 	}
@@ -186,6 +197,50 @@ Lexer::State Lexer::singleQuoteState() {
 		return State::Word;
 	}
 	return State::SingleQuote;
+}
+
+Lexer::State Lexer::doubleQuoteStateStart() {
+	char ch = chars.consume();
+	D_ASSERT(isDoubleQuote(ch));
+	state_data.word.push_back(ch);
+	return State::DoubleQuote;
+}
+
+Lexer::State Lexer::doubleQuoteState() {
+	char ch = chars.consume();
+	if (isDoubleQuote(ch)) {
+		state_data.word.push_back(ch);
+		// back to word !
+		return State::Word;
+	}
+	if (isBackslash(ch)) {
+		return State::DoubleQuoteBackslash;
+	} else if (isBackTick(ch)) {
+		throw NotImplementedException();
+	} else if (isDollarSign(ch)) {
+		throw NotImplementedException();
+	}
+	state_data.word.push_back(ch);
+	return State::DoubleQuote;
+}
+
+// precondition: backslash is already consumde
+// separate state since nothing is actually removed from the input stream here (and it only works for certain
+// characters)
+Lexer::State Lexer::doubleQuoteBackslashState() {
+	char ch = chars.consume();
+	if (isNewline(ch)) {
+		return State::DoubleQuote;
+	}
+	static const string special = "$`\"\\";
+	auto result = special.find(ch);
+	if (result != string::npos) {
+		state_data.word.push_back(special[result]);
+		return State::DoubleQuote;
+	}
+	state_data.word.push_back('\\');
+	state_data.word.push_back(ch);
+	return State::DoubleQuote;
 }
 
 // https://www.gnu.org/software/bash/manual/bash.html#index-metacharacter
@@ -232,6 +287,14 @@ bool isSingleQuote(char ch) {
 
 bool isDoubleQuote(char ch) {
 	return ch == '\"';
+}
+
+bool isDollarSign(char ch) {
+	return ch == '$';
+}
+
+bool isBackTick(char ch) {
+	return ch == '`';
 }
 
 }; // namespace shell

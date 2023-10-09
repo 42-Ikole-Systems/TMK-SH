@@ -21,6 +21,9 @@ private:
 		Backslash,
 		SingleQuoteStart,
 		SingleQuote,
+		DoubleQuoteStart,
+		DoubleQuote,
+		DoubleQuoteBackslash
 	};
 
 	struct StateData {
@@ -55,13 +58,16 @@ private:
 	State backslashState();
 	State singleQuoteStartState();
 	State singleQuoteState();
+	State doubleQuoteStateStart();
+	State doubleQuoteState();
+	State doubleQuoteBackslashState();
 };
 
 /*
 Utility functions for lexing
  */
 
-// todo: inline
+// todo: inline (?)
 bool isSpace(char ch);
 bool isMetaCharacter(char ch);
 bool isOperatorCharacter(char ch);
@@ -71,5 +77,7 @@ bool isNewline(char ch);
 bool isBackslash(char ch);
 bool isSingleQuote(char ch);
 bool isDoubleQuote(char ch);
+bool isDollarSign(char ch);
+bool isBackTick(char ch);
 
 } // namespace shell
