@@ -1,7 +1,6 @@
 
 #include "shell/environment.hpp"
 
-#include <iostream>
 #include <cstring>
 
 namespace shell
@@ -62,7 +61,7 @@ Environment& Environment::getInstance()
 
 void Environment::setEnvironmentVariables(char *const *envp)
 {
-	auto environment = getInstance();
+	auto& environment = getInstance();
 	for (; *envp != nullptr; envp++)
 	{
 		const string variable = *envp;
@@ -78,25 +77,25 @@ void Environment::setEnvironmentVariables(char *const *envp)
 
 EnvironmentVariables Environment::getEnvironmentVariables()
 {
-	const auto environment = getInstance();
+	const auto& environment = getInstance();
 	return EnvironmentVariables(environment.variables);
 }
 
 void Environment::addEnvironmentVariable(const string& name, const string& value)
 {
-	auto environment = getInstance();
+	auto& environment = getInstance();
 	environment.variables[name] = value;
 }
 
 void Environment::removeEnvironmentVariable(const string& name)
 {
-	auto environment = getInstance();
+	auto& environment = getInstance();
 	environment.variables.erase(name);
 }
 
 const string& Environment::get(const string& name)
 {
-	auto environment = getInstance();
+	const auto& environment = getInstance();
 	return environment.variables.at(name);
 }
 
