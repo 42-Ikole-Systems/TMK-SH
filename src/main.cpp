@@ -1,7 +1,7 @@
 #include <readline/readline.h>
 #include "shell/stdin_reader.hpp"
 #include "shell/parser.hpp"
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 #include "shell/lexer/lexer.hpp"
 #include "shell/lexer/line_char_provider.hpp"
 #include "shell/print.hpp"

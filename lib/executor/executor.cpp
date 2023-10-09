@@ -1,7 +1,7 @@
 #include "shell/executor/executor.hpp"
 
 #include "shell/logger.hpp"
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 #include <stdexcept>
 #include <cassert>
 #include <stdio.h>

@@ -3,6 +3,7 @@
 #include "shell/assert.hpp"
 #include "shell/shell.hpp"
 #include "shell/environment.hpp"
+#include "shell/utility/split.hpp"
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -37,10 +38,10 @@ optional<string> Executor::resolvePath(const string &program) const
 	}
 
 	const auto& path = Environment::get("PATH");
-	for (const auto location : std::views::split(path, ':')) {
-		const auto path = location + '/' + program;
+	for (const auto location : LazySplit(path, ":")) {
+		const auto path = std::filesystem::path(location) / program;
 		if (std::filesystem::exists(path)) {
-			return path; 
+			return path.string();
 		}
 	}
 	return nullopt;

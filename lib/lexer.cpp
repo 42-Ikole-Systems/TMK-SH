@@ -1,6 +1,6 @@
 #include "shell/lexer/lexer.hpp"
 #include <stdexcept>
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 #include <stdio.h>
 #include "shell/logger.hpp"
 #include "shell/assert.hpp"

@@ -10,6 +10,7 @@
 #include <memory>
 #include <variant>
 #include <utility>
+#include <filesystem>
 
 namespace shell {
 using std::make_pair;

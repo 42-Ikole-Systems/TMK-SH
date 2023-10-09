@@ -2,12 +2,13 @@
 #include "catch.hpp"
 #include "shell/stdin_reader.hpp"
 #include "shell/parser.hpp"
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 #include "shell/lexer/lexer.hpp"
 #include "shell/lexer/line_char_provider.hpp"
 #include <utility>
 #include "shell/print.hpp"
 #include "shell/executor/executor.hpp"
+#include "shell/environment.hpp"
 
 using namespace shell;
 
@@ -15,6 +16,7 @@ extern char** environ;
 
 TEST_CASE("basic shell", "[shell]") {
 	char** envp = environ;
+	Environment::setEnvironmentVariables(envp);
 	string line = "/bin/ls -la";
 
 	line.push_back('\n');
@@ -23,6 +25,6 @@ TEST_CASE("basic shell", "[shell]") {
 	auto parser = Parser(lexer);
 	Ast ast = parser.parse();
 	ast.print();
-	auto executor = Executor(envp);
+	auto executor = Executor();
 	executor.execute(ast);
 }
