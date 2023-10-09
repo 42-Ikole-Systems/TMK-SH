@@ -3,43 +3,35 @@
 
 #include <cstring>
 
-namespace shell
-{
+namespace shell {
 
-EnvironmentVariables::EnvironmentVariables(const map<string, string>& variables) : envp(nullptr)
-{
+EnvironmentVariables::EnvironmentVariables(const map<string, string> &variables) : envp(nullptr) {
 	const auto listSize = variables.size() + 1;
 	try {
-		envp = new char*[listSize];
+		envp = new char *[listSize];
 
 		size_t i = 0;
-		for (const auto& [name, value] : variables) {
+		for (const auto &[name, value] : variables) {
 			envp[i] = nullptr;
-			char* variable = new char[name.size() + value.length() + 2]; // +2 for '=' and '/0'
+			char *variable = new char[name.size() + value.length() + 2]; // +2 for '=' and '/0'
 			std::memmove(variable, name.data(), name.length());
 			std::memmove(variable + name.length(), "=", 1);
 			std::memmove(variable + name.length() + 1, value.data(), value.length() + 1); // +1 to include '/0'
 			i++;
 		}
-	}
-	catch (const std::exception& e)
-	{
+	} catch (const std::exception &e) {
 		destroy();
 		throw e;
 	}
 }
 
-EnvironmentVariables::~EnvironmentVariables()
-{
+EnvironmentVariables::~EnvironmentVariables() {
 	destroy();
 }
 
-void EnvironmentVariables::destroy()
-{
-	if (envp)
-	{
-		while (*envp != nullptr)
-		{
+void EnvironmentVariables::destroy() {
+	if (envp) {
+		while (*envp != nullptr) {
 			delete[] (*envp);
 			envp++;
 		}
@@ -48,22 +40,18 @@ void EnvironmentVariables::destroy()
 	}
 }
 
-char* const* EnvironmentVariables::raw() const
-{
+char *const *EnvironmentVariables::raw() const {
 	return envp;
 }
 
-Environment& Environment::getInstance()
-{
+Environment &Environment::getInstance() {
 	static Environment environment;
 	return environment;
 }
 
-void Environment::setEnvironmentVariables(char *const *envp)
-{
-	auto& environment = getInstance();
-	for (; *envp != nullptr; envp++)
-	{
+void Environment::setEnvironmentVariables(char *const *envp) {
+	auto &environment = getInstance();
+	for (; *envp != nullptr; envp++) {
 		const string variable = *envp;
 
 		const auto splitPoint = variable.find('=');
@@ -75,27 +63,23 @@ void Environment::setEnvironmentVariables(char *const *envp)
 	}
 }
 
-EnvironmentVariables Environment::getEnvironmentVariables()
-{
-	const auto& environment = getInstance();
+EnvironmentVariables Environment::getEnvironmentVariables() {
+	const auto &environment = getInstance();
 	return EnvironmentVariables(environment.variables);
 }
 
-void Environment::addEnvironmentVariable(const string& name, const string& value)
-{
-	auto& environment = getInstance();
+void Environment::addEnvironmentVariable(const string &name, const string &value) {
+	auto &environment = getInstance();
 	environment.variables[name] = value;
 }
 
-void Environment::removeEnvironmentVariable(const string& name)
-{
-	auto& environment = getInstance();
+void Environment::removeEnvironmentVariable(const string &name) {
+	auto &environment = getInstance();
 	environment.variables.erase(name);
 }
 
-const string& Environment::get(const string& name)
-{
-	const auto& environment = getInstance();
+const string &Environment::get(const string &name) {
+	const auto &environment = getInstance();
 	return environment.variables.at(name);
 }
 

@@ -16,13 +16,6 @@ enum class ResultCode : uint8_t {
 
 class Executor {
 private:
-
-	/*!
-	 * @brief Resolves program path.
-	 * @param command
-	*/
-	optional<string> resolvePath(const string &command) const;
-
 public:
 	Executor();
 

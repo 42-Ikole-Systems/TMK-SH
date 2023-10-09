@@ -22,7 +22,7 @@ Command search and execution
 
 */
 
-static unique_ptr<char *const []> convertArguments(const vector<string> &vec) {
+static unique_ptr<char *const[]> convertArguments(const vector<string> &vec) {
 	std::unique_ptr<const char *[]> result(new const char *[vec.size() + 1]);
 	for (size_t i = 0; i < vec.size(); i++) {
 		result[i] = vec[i].c_str();
@@ -31,13 +31,16 @@ static unique_ptr<char *const []> convertArguments(const vector<string> &vec) {
 	return unique_ptr<char *const[]>((char *const *)result.release());
 }
 
-optional<string> Executor::resolvePath(const string &program) const
-{
+/*!
+ * @brief Resolves program path.
+ * @param command
+ */
+static optional<string> resolvePath(const string &program) {
 	if (program.find('/') != string::npos) {
 		return program;
 	}
 
-	const auto& path = Environment::get("PATH");
+	const auto &path = Environment::get("PATH");
 	for (const auto location : LazySplit(path, ":")) {
 		const auto programPath = std::filesystem::path(location) / program;
 		if (std::filesystem::exists(programPath)) {
