@@ -2,6 +2,22 @@
 
 using namespace shell;
 
+TEST_CASE("lexer parameterized test", "[lexer]") {
+	auto input = GENERATE(
+		make_pair("/bin/ls", vector { Token(Token::Type::Word, WordToken{"/bin/ls"})}),
+		make_pair("<<-", vector { Token(Token::Type::DoubleLessDash, OperatorToken{})}),
+		make_pair("<-", vector { Token(Token::Type::Less, OperatorToken{}), Token({Token::Type::Word, WordToken{"-"}})}),
+		make_pair("<\\\n<", vector { Token(Token::Type::DoubleLess, OperatorToken{})}),
+		make_pair("ex\\\nample", vector { Token(Token::Type::Word, WordToken{"example"})}),
+		make_pair("ex\\\\", vector { Token(Token::Type::Word, WordToken{"ex\\\\"})}),
+		make_pair("\\<<", vector { Token(Token::Type::Word, WordToken{"\\<"}), Token(Token::Type::Less, OperatorToken{}) }),
+		make_pair("'\\<<'\"abcde\\\n\"", vector { Token(Token::Type::Word, WordToken{"'\\<<'\"abcde\""}) })
+	);
+
+	assertExpectedTokens(input.first, input.second);
+}
+
+
 TEST_CASE("ls -la", "[lexer]") {
 	string line = "/bin/ls -la";
 	vector<Token> expected = {

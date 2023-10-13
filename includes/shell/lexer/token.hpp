@@ -101,4 +101,7 @@ private:
 	static bool isNewline(Token::Type type);
 };
 
+bool operator==(const Token& lhs, const Token& rhs);
+std::ostream& operator<<(std::ostream& lhs, const Token& rhs);
+
 } // namespace shell

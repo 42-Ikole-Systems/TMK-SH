@@ -143,6 +143,10 @@ bool Token::isOperator(Token::Type type) {
 	}
 }
 
+bool operator==(const Token& lhs, const Token& rhs) {
+	return lhs.equals(rhs);
+}
+
 bool Token::equals(const Token &other) const {
 	if (type != other.type) {
 		return false;
@@ -168,6 +172,11 @@ bool Token::equals(const Token &other) const {
 	} else {
 		throw std::runtime_error("token type not supported");
 	}
+}
+
+std::ostream& operator<<(std::ostream& lhs, const Token& rhs) {
+	lhs << rhs.toString();
+	return lhs;
 }
 
 } // namespace shell
