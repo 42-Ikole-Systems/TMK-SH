@@ -26,9 +26,9 @@ optional<Token> Lexer::consume() {
 	// move constructs other if present
 	optional<Token> other = nullopt;
 	token.swap(other);
-	// if (other.has_value()) {
-	// 	other.value().print();
-	// }
+	if (other.has_value()) {
+		LOG_DEBUG("%\n", other.value());
+	}
 	return other;
 }
 
@@ -56,6 +56,8 @@ std::function<Lexer::State(Lexer &)> Lexer::getStateHandler() {
 	    [(int)Lexer::State::DoubleQuoteStart] = &Lexer::doubleQuoteStateStart,
 	    [(int)Lexer::State::DoubleQuote] = &Lexer::doubleQuoteState,
 	    [(int)Lexer::State::DoubleQuoteBackslash] = &Lexer::doubleQuoteBackslashState,
+	    [(int)Lexer::State::ExpansionStart] = &Lexer::expansionStartState,
+	    [(int)Lexer::State::ParameterExpansion] = &Lexer::parameterExpansionState,
 	};
 	D_ASSERT((size_t)state < (sizeof(handlers) / sizeof(handlers[0])));
 	D_ASSERT(handlers[(int)state] != nullptr);
@@ -98,6 +100,12 @@ Lexer::State Lexer::wordState() {
 		return State::SingleQuoteStart;
 	} else if (isDoubleQuote(ch)) {
 		return State::DoubleQuoteStart;
+	} else if (ch == '$') {
+		return State::ExpansionStart;
+	} else if (ch == '`') {
+		throw NotImplementedException();
+		// state_data.word.push_back(chars.consume());
+		// return State::CommandSubstitution;
 	} else {
 		state_data.word.push_back(ch);
 		chars.consume();
@@ -160,6 +168,10 @@ Lexer::State Lexer::backslashState() {
 	char ch = chars.consume();
 	D_ASSERT(isBackslash(ch));
 	ch = chars.peek();
+	if (ch == EOF) {
+		// todo: determine behavior
+		throw std::runtime_error("encountered EOF in backslash lexing");
+	}
 	if (isNewline(ch)) {
 		// Special case: `\\n`: remove backslash and newline from the input stream and continue where we left off.
 		chars.unconsume();
@@ -192,6 +204,10 @@ Lexer::State Lexer::singleQuoteStartState() {
 
 Lexer::State Lexer::singleQuoteState() {
 	char ch = chars.consume();
+	if (ch == EOF) {
+		// todo: determine behavior
+		throw std::runtime_error("encountered EOF in single quote parsing");
+	}
 	state_data.word.push_back(ch);
 	if (isSingleQuote(ch)) {
 		return State::Word;
@@ -208,39 +224,76 @@ Lexer::State Lexer::doubleQuoteStateStart() {
 
 Lexer::State Lexer::doubleQuoteState() {
 	char ch = chars.consume();
-	if (isDoubleQuote(ch)) {
-		state_data.word.push_back(ch);
-		// back to word !
-		return State::Word;
+	if (ch == EOF) {
+		// todo: determine behavior
+		throw std::runtime_error("encountered EOF in double quote lexing");
 	}
 	if (isBackslash(ch)) {
+		// May not push back backslash in case of new line
 		return State::DoubleQuoteBackslash;
+	}
+	state_data.word.push_back(ch);
+	if (isDoubleQuote(ch)) {
+		return State::Word;
 	} else if (isBackTick(ch)) {
 		throw NotImplementedException();
 	} else if (isDollarSign(ch)) {
 		throw NotImplementedException();
 	}
-	state_data.word.push_back(ch);
 	return State::DoubleQuote;
 }
 
-// precondition: backslash is already consumde
+// precondition: backslash is already consumed
 // separate state since nothing is actually removed from the input stream here (and it only works for certain
 // characters)
 Lexer::State Lexer::doubleQuoteBackslashState() {
 	char ch = chars.consume();
-	if (isNewline(ch)) {
-		return State::DoubleQuote;
+	if (ch == EOF) {
+		// todo: determine behavior
+		throw std::runtime_error("encountered EOF in double quote backslash lexing");
 	}
-	static const string special = "$`\"\\";
-	auto result = special.find(ch);
-	if (result != string::npos) {
-		state_data.word.push_back(special[result]);
+	if (isNewline(ch)) {
 		return State::DoubleQuote;
 	}
 	state_data.word.push_back('\\');
 	state_data.word.push_back(ch);
 	return State::DoubleQuote;
+}
+
+Lexer::State Lexer::expansionStartState() {
+	char ch = chars.consume();
+	D_ASSERT(ch == '$');
+	state_data.word.push_back(ch);
+	ch = chars.peek();
+	state_data.word.push_back(ch);
+	switch (ch) {
+		case '{':
+			state_data.word.push_back(chars.consume());
+			return State::ParameterExpansion;
+		case '(':
+			throw NotImplementedException();
+			// return CommandSubstitutionStart;
+			// state_data.word.push_back(chars.consume());
+			// if (chars.peek() == '(') {
+			// 	state_data.word.push_back(chars.consume());
+			// 	return State::ArithmeticExpansion;
+			// } else {
+			// 	return State::CommandSubstitution;
+			// }
+		default:
+			// Reasoning: parameter expansion without special behavior
+			return State::Word;
+	}
+}
+
+Lexer::State Lexer::parameterExpansionState() {
+	char ch = chars.peek();
+	// Quote: Double and Single (same behavior)
+	// Backslash (same behavior)
+	// CommandSubstitution (same behavior)
+	// Nested ParameterExpansion (same behavior)
+	// ArithmeticExpansion (same behavior)
+	throw NotImplementedException();
 }
 
 // https://www.gnu.org/software/bash/manual/bash.html#index-metacharacter

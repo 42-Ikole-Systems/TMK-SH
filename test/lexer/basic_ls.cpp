@@ -2,7 +2,7 @@
 
 using namespace shell;
 
-TEST_CASE("lexer parameterized test", "[lexer]") {
+TEST_CASE("lexer parameterized test", "[lexer][parameterized]") {
 	auto input = GENERATE(
 		make_pair("/bin/ls", vector { Token(Token::Type::Word, WordToken{"/bin/ls"})}),
 		make_pair("<<-", vector { Token(Token::Type::DoubleLessDash, OperatorToken{})}),
@@ -11,7 +11,8 @@ TEST_CASE("lexer parameterized test", "[lexer]") {
 		make_pair("ex\\\nample", vector { Token(Token::Type::Word, WordToken{"example"})}),
 		make_pair("ex\\\\", vector { Token(Token::Type::Word, WordToken{"ex\\\\"})}),
 		make_pair("\\<<", vector { Token(Token::Type::Word, WordToken{"\\<"}), Token(Token::Type::Less, OperatorToken{}) }),
-		make_pair("'\\<<'\"abcde\\\n\"", vector { Token(Token::Type::Word, WordToken{"'\\<<'\"abcde\""}) })
+		make_pair("'\\<<'\"abcde\\\n\"", vector { Token(Token::Type::Word, WordToken{"'\\<<'\"abcde\""}) }),
+		make_pair("< <\\\n<", vector { Token(Token::Type::Less, OperatorToken{}), Token(Token::Type::DoubleLess, OperatorToken{}) })
 	);
 
 	assertExpectedTokens(input.first, input.second);

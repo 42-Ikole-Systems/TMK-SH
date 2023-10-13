@@ -23,7 +23,10 @@ private:
 		SingleQuote,
 		DoubleQuoteStart,
 		DoubleQuote,
-		DoubleQuoteBackslash
+		DoubleQuoteBackslash,
+		ExpansionStart,
+		ParameterExpansion,
+		CommandSubstitution
 	};
 
 	struct StateData {
@@ -61,6 +64,8 @@ private:
 	State doubleQuoteStateStart();
 	State doubleQuoteState();
 	State doubleQuoteBackslashState();
+	State expansionStartState();
+	State parameterExpansionState();
 };
 
 /*

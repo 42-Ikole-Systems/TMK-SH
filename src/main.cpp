@@ -29,25 +29,9 @@ static int run(int argc, const char **argv, char *const *envp) {
 	while (true) {
 		auto provider = ReaderCharProvider(reader);
 		auto lexer = Lexer(provider);
-		optional<Token> token;
-
-		vector<Token> tokens;
-		token = lexer.consume();
-		while (token.has_value() && token->getType() != Token::Type::Newline) {
-			tokens.push_back(token.value());
-			token = lexer.consume();
-		}
-		if (!token.has_value()) {
-			break;
-		}
-		for (auto &token : tokens) {
-			token.print();
-		}
-
-		// auto parser = Parser(lexer);
-		// Ast ast = parser.parse();
-		// ast.print();
-
+		auto parser = Parser(lexer);
+		Ast ast = parser.parse();
+		ast.print();
 		if (provider.isEof()) {
 			break;
 		}
@@ -55,9 +39,8 @@ static int run(int argc, const char **argv, char *const *envp) {
 		if (!line.empty()) {
 			add_history(line.c_str());
 		}
-
-		// auto executor = Executor(envp);
-		// executor.execute(ast);
+		auto executor = Executor(envp);
+		executor.execute(ast);
 	}
 	tprintf("\n");
 	return 0;
