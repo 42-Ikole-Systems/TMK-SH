@@ -143,7 +143,7 @@ bool Token::isOperator(Token::Type type) {
 	}
 }
 
-bool operator==(const Token& lhs, const Token& rhs) {
+bool operator==(const Token &lhs, const Token &rhs) {
 	return lhs.equals(rhs);
 }
 
@@ -174,7 +174,7 @@ bool Token::equals(const Token &other) const {
 	}
 }
 
-std::ostream& operator<<(std::ostream& lhs, const Token& rhs) {
+std::ostream &operator<<(std::ostream &lhs, const Token &rhs) {
 	lhs << rhs.toString();
 	return lhs;
 }

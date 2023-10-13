@@ -20,14 +20,14 @@ char LineCharProvider::consume() {
 	return line[index++];
 }
 
-void  LineCharProvider::remove() {
+void LineCharProvider::remove() {
 	if (index >= line.length()) {
 		return;
 	}
 	index++;
 }
 
-void  LineCharProvider::unconsume() {
+void LineCharProvider::unconsume() {
 	if (index == 0) {
 		return;
 	}
