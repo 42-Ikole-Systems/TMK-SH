@@ -12,6 +12,9 @@ add_library(
 	io_file.cpp
 	io_redirect.cpp
 	simple_command.cpp
+	assignment_word.cpp
+	here_end.cpp
+	io_here.cpp
 )
 
 # Forward the declared variable to the parent scope

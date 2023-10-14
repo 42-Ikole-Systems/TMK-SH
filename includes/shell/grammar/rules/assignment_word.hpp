@@ -6,13 +6,14 @@
 
 namespace shell {
 
-class CommandWord {
+class AssignmentWord {
 public:
 	static Rule make();
 	static vector<Rule::Option> options();
 
-private:
+public:
 	static optional<Ast::Node> handler(TokenProvider &tokens);
+	static bool isValidName(const string &value);
 };
 
 } // namespace shell

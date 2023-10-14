@@ -6,7 +6,7 @@
 
 namespace shell {
 
-class CommandWord {
+class HereEnd {
 public:
 	static Rule make();
 	static vector<Rule::Option> options();

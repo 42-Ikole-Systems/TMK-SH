@@ -1,4 +1,5 @@
 #include "shell/grammar/rules/command_name.hpp"
+#include "shell/grammar/rules/assignment_word.hpp"
 #include "shell/assert.hpp"
 
 namespace shell {
@@ -12,25 +13,6 @@ Rule CommandName::make() {
 vector<Rule::Option> CommandName::options() {
 	// TODO: implement
 	return {Rule::Terminal {handler}};
-}
-
-static bool isValidName(const string &input) {
-	if (input.empty()) {
-		return false;
-	}
-	auto first_char = input[0];
-	if (isdigit(first_char)) {
-		return false;
-	}
-	for (auto &ch : input) {
-		auto is_underscore = ch == '_';
-		auto is_digit = isdigit(ch);
-		auto is_alpha = isalpha(ch);
-		if (!is_underscore && is_digit && is_alpha) {
-			return false;
-		}
-	}
-	return true;
 }
 
 optional<Ast::Node> CommandName::handler(TokenProvider &tokens) {
@@ -48,7 +30,8 @@ optional<Ast::Node> CommandName::handler(TokenProvider &tokens) {
 		if (!reserved_word.has_value()) {
 			return Ast::Literal(std::move(token.value()));
 		}
-		return Ast::Literal(Token(reserved_word.value(), ReservedWordToken()));
+		// WORD is requested here
+		return nullopt;
 	}
 	// Rule 7b
 	D_ASSERT(!value.empty());
@@ -58,8 +41,9 @@ optional<Ast::Node> CommandName::handler(TokenProvider &tokens) {
 	auto equals_pos = value.find('=');
 	D_ASSERT(equals_pos != std::string::npos);
 	auto maybe_name = value.substr(0, equals_pos);
-	if (isValidName(maybe_name)) {
-		return Ast::Literal(Token(Token::Type::AssignmentWord, WordToken {value}));
+	if (AssignmentWord::isValidName(maybe_name)) {
+		// WORD is requested here
+		return nullopt;
 	}
 	return Ast::Literal(std::move(token.value()));
 }
