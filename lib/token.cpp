@@ -104,6 +104,15 @@ optional<Token::Type> Token::exactOperatorType(const string &s) {
 	return nullopt;
 }
 
+optional<Token::Type> Token::exactReservedWordType(const string &s) {
+	for (auto &p : reserved_word_types) {
+		if (p.first == s) {
+			return p.second;
+		}
+	}
+	return nullopt;
+}
+
 const string &Token::getOperatorString(Token::Type type) {
 	for (auto &p : operator_types) {
 		if (p.second == type) {
@@ -123,6 +132,14 @@ const string &Token::getReservedWordString(Token::Type type) {
 }
 
 bool Token::isWord(Token::Type type) {
+	switch (type) {
+		case Token::Type::Word:
+		case Token::Type::AssignmentWord:
+		case Token::Type::Name:
+			return true;
+		default:
+			return false;
+	}
 	return type == Token::Type::Word;
 }
 

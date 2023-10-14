@@ -12,6 +12,8 @@ struct WordToken {
 
 struct OperatorToken {};
 
+struct ReservedWordToken {};
+
 struct IoNumber {
 	string value; // numeric string
 	string toString() const;
@@ -21,18 +23,18 @@ struct Newline {};
 
 struct Token {
 public:
-	using Variant = std::variant<WordToken, OperatorToken, IoNumber, Newline>;
+	using Variant = std::variant<WordToken, OperatorToken, ReservedWordToken, IoNumber, Newline>;
 
 	// https://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_10_01
 	enum class Type {
 		/* token / word */
 		// Token, // Word, Name, or Assignment depending on context
 		Word,
-		// AssignmentWord, // Assignment (?)
-		// Name,
+		AssignmentWord,
+		Name,
+		Newline,
 
 		IoNumber, // e.g. 5>
-		Newline,
 
 		/* operators */
 		Semicolon,        // ;
@@ -111,6 +113,7 @@ public:
 
 	static int prefixOperatorMatches(const string &s);
 	static optional<Type> exactOperatorType(const string &s);
+	static optional<Type> exactReservedWordType(const string &s);
 
 private:
 	static const string &getOperatorString(Token::Type type);

@@ -14,6 +14,8 @@ Ast::Node::Node(SeparatorOp &&separator_op) : type(Type::SeparatorOp), variant(s
 }
 Ast::Node::Node(Literal &&literal) : type(Type::Literal), variant(std::move(literal)) {
 }
+Ast::Node::Node(Redirection &&redirection) : type(Type::Redirection), variant(std::move(redirection)) {
+}
 
 Ast::Literal::Literal(Literal &&other) : token(std::move(other.token)) {
 }
@@ -32,6 +34,11 @@ Ast::Command::~Command() {
 Ast::SeparatorOp::SeparatorOp(SeparatorOp &&other) : left(std::move(other.left)), right(std::move(other.right)) {
 }
 Ast::SeparatorOp::~SeparatorOp() {
+}
+
+Ast::Redirection::Redirection(Redirection &&other) : left(std::move(other.left)), right(std::move(other.right)) {
+}
+Ast::Redirection::~Redirection() {
 }
 
 Ast::Node::Type Ast::Node::getType() const {
@@ -89,6 +96,22 @@ void Ast::Command::print(int level) const {
 
 void Ast::SeparatorOp::print(int level) const {
 	tprintf("SeparatorOp:\n");
+	if (left == nullptr) {
+		printLevel(level + 1);
+		tprintf("<null>\n");
+	} else {
+		left->print(level + 1);
+	}
+	if (right == nullptr) {
+		printLevel(level + 1);
+		tprintf("<null>\n");
+	} else {
+		right->print(level + 1);
+	}
+}
+
+void Ast::Redirection::print(int level) const {
+	tprintf("Redirection:\n");
 	if (left == nullptr) {
 		printLevel(level + 1);
 		tprintf("<null>\n");

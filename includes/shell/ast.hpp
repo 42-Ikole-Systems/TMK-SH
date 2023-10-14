@@ -38,19 +38,33 @@ public:
 		unique_ptr<Node> right;
 	};
 
+	struct Redirection {
+	public:
+		Redirection() = default;
+		Redirection(Redirection &&other);
+		~Redirection();
+
+	public:
+		void print(int level) const;
+		unique_ptr<Node> left;
+		unique_ptr<Node> right;
+		Token::Type redirection_type;
+	};
+
 	class Node {
 	public:
-		enum class Type { SeparatorOp, Command, Literal };
+		enum class Type { SeparatorOp, Command, Literal, Redirection };
 
 	private:
 		Type type;
-		std::variant<Command, SeparatorOp, Literal> variant;
+		std::variant<Command, SeparatorOp, Literal, Redirection> variant;
 
 	public:
 		Node(Node &&other);
 		Node(Command &&command);
 		Node(SeparatorOp &&separator_op);
 		Node(Literal &&separator_op);
+		Node(Redirection &&separator_op);
 
 		Type getType() const;
 
