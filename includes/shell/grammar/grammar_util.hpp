@@ -19,9 +19,9 @@ public:
 	struct ConsumeIf {
 	public:
 		static Rule make() {
-			return Rule {
-			    OP,
-			};
+			return Rule {[]() -> vector<Rule::Option> {
+				return {Rule::Terminal {ConsumeIf<TOKEN_TYPE>::OP}};
+			}};
 		}
 
 	public:

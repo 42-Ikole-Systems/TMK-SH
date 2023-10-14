@@ -71,6 +71,9 @@ void Ast::Node::print(int level) const {
 		case Type::Literal:
 			get<Literal>().print(level);
 			break;
+		case Type::Redirection:
+			get<Redirection>().print(level);
+			break;
 	}
 }
 

@@ -37,8 +37,8 @@ static bool isRedirection(Token::Type type) {
 optional<Ast::Node> IOFile::handler(vector<Ast::Node> &args) {
 	D_ASSERT(args.size() == 3);
 	auto redir = Ast::Redirection();
-	redir.left = make_unique<Ast::Node>(args[0]);
-	redir.right = make_unique<Ast::Node>(args[1]);
+	redir.left = make_unique<Ast::Node>(std::move(args[0]));
+	redir.right = make_unique<Ast::Node>(std::move(args[1]));
 
 	auto &literal = args[1].get<Ast::Literal>();
 	auto &token = literal.token;
