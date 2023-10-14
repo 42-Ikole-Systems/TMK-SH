@@ -17,7 +17,7 @@ Rule CommandPrefix::make() {
 vector<Rule::Option> CommandPrefix::options() {
 	// TODO: implement
 	auto placeholder = [](vector<Ast::Node> &args) -> optional<Ast::Node> {
-		return nullopt;
+		return std::move(args[0]);
 	};
 	// FIXME: how do we implement lists of command prefixes?
 	return {Rule::NonTerminal(placeholder, {IORedirect::make()}),

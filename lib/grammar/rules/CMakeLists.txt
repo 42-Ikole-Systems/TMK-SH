@@ -13,6 +13,7 @@ add_library(
 	io_redirect.cpp
 	simple_command.cpp
 	assignment_word.cpp
+	word.cpp
 	here_end.cpp
 	io_here.cpp
 )

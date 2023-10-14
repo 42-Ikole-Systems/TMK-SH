@@ -1,11 +1,16 @@
 #pragma once
 
 #include <iostream>
+#include "shell/util.hpp"
 
 namespace shell {
 
 static void tprintf(const char *format) // base function
 {
+	std::cout << format;
+}
+
+static void tprintf(const string &format) {
 	std::cout << format;
 }
 

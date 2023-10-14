@@ -10,6 +10,9 @@ class SimpleCommand {
 public:
 	static Rule make();
 	static vector<Rule::Option> options();
+
+private:
+	static optional<Ast::Node> singleCommand(vector<Ast::Node> &args);
 };
 
 } // namespace shell
