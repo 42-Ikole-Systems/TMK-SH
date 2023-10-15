@@ -33,11 +33,14 @@ vector<Rule::Option> SimpleCommand::options() {
 }
 
 optional<Ast::Node> SimpleCommand::singleCommand(vector<Ast::Node> &args) {
-	vector<string> arguments;
-	D_ASSERT(args.size() == 2);
-
-	auto &command_name = args[0].get<Ast::Literal>().token.get<WordToken>().value;
-	return Ast::Command(command_name, std::move(args[1].get<Ast::List>()));
+	if (args.size() == 1) {
+		auto &command_name = args[0].get<Ast::Literal>().token.get<WordToken>().value;
+		return Ast::Command(command_name, Ast::List());
+	} else {
+		D_ASSERT(args.size() == 2);
+		auto &command_name = args[0].get<Ast::Literal>().token.get<WordToken>().value;
+		return Ast::Command(command_name, std::move(args[1].get<Ast::List>()));
+	}
 }
 
 } // namespace shell

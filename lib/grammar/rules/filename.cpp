@@ -9,13 +9,12 @@ Rule Filename::make() {
 }
 
 vector<Rule::Option> Filename::options() {
-	// TODO: implement
 	return {Rule::Terminal {handler}};
 }
 
 optional<Ast::Node> Filename::handler(TokenProvider &tokens) {
 	auto token = tokens.peek();
-	if (token->getType() != Token::Type::Word) {
+	if (token->getType() != Token::Type::Token) {
 		return nullopt;
 	}
 	// Rule 2

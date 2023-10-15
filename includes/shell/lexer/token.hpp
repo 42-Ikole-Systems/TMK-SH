@@ -27,15 +27,11 @@ public:
 
 	// https://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_10_01
 	enum class Type {
+		/* Tokens produced by the lexer */
 		/* token / word */
-		// Token, // Word, Name, or Assignment depending on context
-		Word,
-		AssignmentWord,
-		Name,
+		Token,    // Word, Name, or AssignmentWord depending on context
+		IoNumber, // e.g. 5> makes IoNumber("5"), OperatorToken(Great)
 		Newline,
-
-		IoNumber, // e.g. 5>
-
 		/* operators */
 		Semicolon,        // ;
 		And,              // &
@@ -60,6 +56,11 @@ public:
 		as control operators*/
 		// SemicolonAnd, // ;&
 		// DoubleSemicolonAnd, // ;;&
+
+		/* Tokens produced by the parser */
+		Word,
+		AssignmentWord, // Assignment
+		Name,
 
 		/* reserved words */
 		If,     // if
@@ -120,9 +121,12 @@ public:
 private:
 	static bool isReservedWord(Token::Type type);
 	static bool isOperator(Token::Type type);
-	static bool isWord(Token::Type type);
+	static bool isToken(Token::Type type);
 	static bool isIoNumber(Token::Type type);
 	static bool isNewline(Token::Type type);
 };
+
+bool operator==(const Token &lhs, const Token &rhs);
+std::ostream &operator<<(std::ostream &lhs, const Token &rhs);
 
 } // namespace shell

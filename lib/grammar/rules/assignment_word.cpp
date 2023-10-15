@@ -35,7 +35,7 @@ bool AssignmentWord::isValidName(const string &input) {
 
 optional<Ast::Node> AssignmentWord::handler(TokenProvider &tokens) {
 	auto token = tokens.peek();
-	if (token->getType() != Token::Type::Word) {
+	if (token->getType() != Token::Type::Token) {
 		return nullopt;
 	}
 	// Rule 7a

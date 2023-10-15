@@ -17,7 +17,7 @@ vector<Rule::Option> CommandName::options() {
 
 optional<Ast::Node> CommandName::handler(TokenProvider &tokens) {
 	auto token = tokens.peek();
-	if (token->getType() != Token::Type::Word) {
+	if (token->getType() != Token::Type::Token) {
 		return nullopt;
 	}
 	// Rule 7a
@@ -28,7 +28,7 @@ optional<Ast::Node> CommandName::handler(TokenProvider &tokens) {
 		// Rule 1
 		auto reserved_word = Token::exactReservedWordType(value);
 		if (!reserved_word.has_value()) {
-			return Ast::Literal(std::move(token.value()));
+			return Ast::Literal(Token(Token::Type::Word, WordToken {word_token.value}));
 		}
 		// WORD is requested here
 		return nullopt;
@@ -36,7 +36,7 @@ optional<Ast::Node> CommandName::handler(TokenProvider &tokens) {
 	// Rule 7b
 	D_ASSERT(!value.empty());
 	if (value[0] == '=') {
-		return Ast::Literal(std::move(token.value()));
+		return Ast::Literal(Token(Token::Type::Word, WordToken {word_token.value}));
 	}
 	auto equals_pos = value.find('=');
 	D_ASSERT(equals_pos != std::string::npos);
@@ -45,7 +45,7 @@ optional<Ast::Node> CommandName::handler(TokenProvider &tokens) {
 		// WORD is requested here
 		return nullopt;
 	}
-	return Ast::Literal(std::move(token.value()));
+	return Ast::Literal(Token(Token::Type::Word, WordToken {word_token.value}));
 }
 
 } // namespace shell

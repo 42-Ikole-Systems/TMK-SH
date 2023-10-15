@@ -16,9 +16,10 @@ vector<Rule::Option> Word::options() {
 
 optional<Ast::Node> Word::handler(TokenProvider &tokens) {
 	auto token = tokens.peek();
-	if (token->getType() != Token::Type::Word) {
+	if (token->getType() != Token::Type::Token) {
 		return nullopt;
 	}
+	tokens.consume();
 	return Ast::Literal(std::move(token.value()));
 }
 

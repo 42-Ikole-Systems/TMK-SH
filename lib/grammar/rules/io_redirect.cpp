@@ -17,6 +17,7 @@ vector<Rule::Option> IORedirect::options() {
 		return nullopt;
 	};
 	auto handler = [](vector<Ast::Node> &args) -> optional<Ast::Node> {
+		LOG_DEBUG("IORedirect: handler\n");
 		if (args.size() == 2) {
 			auto &io_number_token = args[0].get<Ast::Literal>().token.get<IoNumber>();
 			auto io_number = std::stoul(io_number_token.value);

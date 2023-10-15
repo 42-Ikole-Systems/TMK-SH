@@ -12,6 +12,7 @@
 #include <utility>
 #include <deque>
 #include <list>
+#include "shell/exception.hpp"
 
 namespace shell {
 using std::deque;

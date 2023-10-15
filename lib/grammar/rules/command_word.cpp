@@ -17,7 +17,7 @@ vector<Rule::Option> CommandWord::options() {
 
 optional<Ast::Node> CommandWord::handler(TokenProvider &tokens) {
 	auto token = tokens.peek();
-	if (token->getType() != Token::Type::Word) {
+	if (token->getType() != Token::Type::Token) {
 		return nullopt;
 	}
 	// Rule 7a
@@ -31,7 +31,7 @@ optional<Ast::Node> CommandWord::handler(TokenProvider &tokens) {
 	// Rule 7b
 	D_ASSERT(!value.empty());
 	if (value[0] == '=') {
-		return Ast::Literal(std::move(token.value()));
+		return Ast::Literal(Token(Token::Type::Word, WordToken {value}));
 	}
 	auto equals_pos = value.find('=');
 	D_ASSERT(equals_pos != std::string::npos);
@@ -40,7 +40,7 @@ optional<Ast::Node> CommandWord::handler(TokenProvider &tokens) {
 		// WORD is requested here
 		return nullopt;
 	}
-	return Ast::Literal(std::move(token.value()));
+	return Ast::Literal(Token(Token::Type::Word, WordToken {value}));
 }
 
 } // namespace shell

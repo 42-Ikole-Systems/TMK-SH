@@ -31,13 +31,14 @@ static unique_ptr<char *const []> convertArguments(const Ast::List &list) {
 }
 
 ResultCode Executor::execute(Ast::Command &command) {
-	D_ASSERT(!command.arguments.entries.empty());
-
 	const string &program = command.program_name;
 
 	// todo: add builtin support
 	// todo: path resolution
-	D_ASSERT(program.find('/') != string::npos);
+	if (program.find('/') == string::npos) {
+		LOG_WARNING("execution without '/' in name is not implemented\n");
+		return ResultCode::GeneralError;
+	}
 
 	pid_t pid = fork();
 	if (pid < 0) {

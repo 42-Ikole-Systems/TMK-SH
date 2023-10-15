@@ -21,6 +21,7 @@ vector<Rule::Option> CommandPrefix::options() {
 		auto &list_arg = args[1].get<Ast::List>();
 
 		list_arg.append(std::move(args[0]));
+		LOG_DEBUG("CommandPrefix: Append to list\n");
 		return std::move(list_arg);
 	};
 	return {Rule::NonTerminal(appender, {IORedirect::make(), CommandPrefix::make()}),
