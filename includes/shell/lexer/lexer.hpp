@@ -69,9 +69,7 @@ private:
 	State operatorState();
 	State commentState();
 	State backslashState();
-	State singleQuoteStartState();
 	State singleQuoteState();
-	State doubleQuoteStateStart();
 	State doubleQuoteState();
 	State innerBackslashState();
 	State expansionStartState();
