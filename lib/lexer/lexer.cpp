@@ -4,8 +4,17 @@
 #include "shell/logger.hpp"
 #include "shell/assert.hpp"
 #include "shell/exception.hpp"
+#include "shell/error/error.hpp"
+
+#define UNEXPECTED_EOF "unexpected end of file"
+#define UNEXPECTED_EOF_WHILE_ERROR "unexpected EOF while looking for matching"
+
 
 namespace shell {
+
+[[noreturn]] static void syntaxError(char expected) {
+	throw SyntaxErrorException(string(UNEXPECTED_EOF_WHILE_ERROR) + " `" + expected + "'");
+}
 
 Lexer::Lexer(Provider<char> &chars, State initial) : chars(chars), state(initial) {
 }
@@ -217,8 +226,6 @@ Lexer::State Lexer::backslashState() {
 	D_ASSERT(isBackslash(ch));
 	ch = chars.peek();
 	if (ch == EOF) {
-		// todo: determine behavior
-		// throw std::runtime_error("encountered EOF in backslash lexing");
 		return state_data.popState();
 	}
 	if (isNewline(ch)) {
@@ -255,9 +262,7 @@ Lexer::State Lexer::singleQuoteState() {
 	while (true) {
 		char ch = chars.consume();
 		if (ch == EOF) {
-			// todo: determine behavior
-			// throw std::runtime_error("encountered EOF in single quote parsing");
-			return state_data.popState();
+			syntaxError('\'');
 		}
 		state_data.word.push_back(ch);
 		if (isSingleQuote(ch)) {
@@ -278,9 +283,7 @@ Lexer::State Lexer::doubleQuoteState() {
 	while (state == State::DoubleQuote) {
 		char ch = chars.consume();
 		if (ch == EOF) {
-			// todo: determine behavior
-			// throw std::runtime_error("encountered EOF in double quote lexing");
-			return state_data.popState();
+			syntaxError('"');
 		}
 		state_data.word.push_back(ch);
 		if (isDoubleQuote(ch)) {
@@ -307,8 +310,6 @@ Lexer::State Lexer::innerBackslashState() {
 	D_ASSERT(!state_data.states.empty());
 	char ch = chars.consume();
 	if (ch == EOF) {
-		// todo: determine behavior
-		// throw std::runtime_error("encountered EOF in double quote backslash lexing");
 		return state_data.popState();
 	}
 	state_data.word.push_back(ch);
@@ -340,7 +341,7 @@ Lexer::State Lexer::expansionStartState() {
 // same as double quote, except it can also transition to single quote
 Lexer::State Lexer::nextNestedState(State current, char ch) {
 	if (ch == EOF) {
-		throw std::runtime_error("unexpected EOF in nested state");
+		throw SyntaxErrorException(UNEXPECTED_EOF);
 	} else if (isBackslash(ch)) {
 		return State::InnerBackslash;
 	} else if (isDoubleQuote(ch)) {
@@ -360,7 +361,7 @@ Lexer::State Lexer::generalExpansionHandler(State state, char terminator) {
 	while (current == state) {
 		char ch = chars.consume();
 		if (ch == EOF) {
-			return state_data.popState();
+			syntaxError(terminator);
 		}
 		state_data.word.push_back(ch);
 		if (ch == terminator) {
@@ -387,7 +388,7 @@ Lexer::State Lexer::arithmeticExpansionState() {
 	while (state == State::ArithmeticExpansion) {
 		char ch = chars.consume();
 		if (ch == EOF) {
-			return state_data.popState();
+			syntaxError(')');
 		}
 		state_data.word.push_back(ch);
 		if (ch == ')') {
