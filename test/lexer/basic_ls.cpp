@@ -36,7 +36,14 @@ TEST_CASE("lexer parameterized test", "[lexer][parameterized]") {
 				Token( Token::Type::Word, WordToken{"$(( 5 + 9 ))"}),
 				Token( Token::Type::Word, WordToken{"$(( echo \"${HOME}\" ) | cat  )"})
 			}
-		)
+		),
+
+		make_pair("5> 12934712834< 1a2> a;", vector {
+			Token( Token::Type::IoNumber, IoNumber{"5"} ), Token( Token::Type::Great, OperatorToken{} ),
+			Token( Token::Type::IoNumber, IoNumber{"12934712834"} ), Token( Token::Type::Less, OperatorToken{} ),
+			Token( Token::Type::Word, WordToken{"1a2"} ), Token( Token::Type::Great, OperatorToken{} ),
+			Token( Token::Type::Word, WordToken{"a"} ), Token( Token::Type::Semicolon, OperatorToken{} )
+		})
 	);
 
 	assertExpectedTokens(input.first, input.second);

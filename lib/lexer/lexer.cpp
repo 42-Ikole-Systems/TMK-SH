@@ -95,6 +95,18 @@ Lexer::State Lexer::emptyState() {
 	}
 }
 
+static bool isIoNumber(const string& word, char delimiter) {
+	if (delimiter != '>' && delimiter != '<') {
+		return false;
+	}
+	for (char ch : word) {
+		if (!isdigit(ch)) {
+			return false;
+		}
+	}
+	return true;
+}
+
 /*
 Operator -> delimit + switch state
 Backslash -> push state + switch state
@@ -141,7 +153,11 @@ Lexer::State Lexer::wordState() {
 	}
 	// Handle delimit outside of loop: EOF, IFS, operator, comment
 	if (!state_data.word.empty()) {
-		delimit(Token{Token::Type::Word, WordToken{std::move(state_data.word)}});
+		if (isIoNumber(state_data.word, chars.peek())) {
+			delimit(Token(Token::Type::IoNumber, IoNumber{std::move(state_data.word)}));
+		} else {
+			delimit(Token{Token::Type::Word, WordToken{std::move(state_data.word)}});
+		}
 		state_data.word.clear();
 	}
 	return state;
