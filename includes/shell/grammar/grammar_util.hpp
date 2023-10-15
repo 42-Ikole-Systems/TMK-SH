@@ -26,11 +26,10 @@ public:
 
 	public:
 		static optional<Ast::Node> OP(TokenProvider &tokens) {
-			auto token = tokens.peek();
-			if (token->getType() != TOKEN_TYPE) {
+			auto token = tokens.consumeIf([](Token &token) { return token.getType() == TOKEN_TYPE; });
+			if (!token.has_value()) {
 				return nullopt;
 			}
-			tokens.consume();
 			return Ast::Literal(std::move(token.value()));
 		}
 	};

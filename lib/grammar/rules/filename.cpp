@@ -1,4 +1,5 @@
 #include "shell/grammar/rules/filename.hpp"
+#include "shell/grammar/grammar_util.hpp"
 
 namespace shell {
 
@@ -13,15 +14,15 @@ vector<Rule::Option> Filename::options() {
 }
 
 optional<Ast::Node> Filename::handler(TokenProvider &tokens) {
-	auto token = tokens.peek();
-	if (token->getType() != Token::Type::Token) {
+	auto token = tokens.consumeIf([](Token &token) { return token.getType() == Token::Type::Token; });
+	if (!token.has_value()) {
 		return nullopt;
 	}
 	// Rule 2
 	// shall be subjected to tilde expansion, parameter expansion, command substitution, arithmetic expansion, and quote
 	// removal
 	// TODO: implement the expansions
-	return Ast::Literal(std::move(tokens.consume().value()));
+	return Ast::Literal(Token(Token::Type::Word, WordToken {token->get<WordToken>().value}));
 }
 
 } // namespace shell

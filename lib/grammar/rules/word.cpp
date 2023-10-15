@@ -15,12 +15,11 @@ vector<Rule::Option> Word::options() {
 }
 
 optional<Ast::Node> Word::handler(TokenProvider &tokens) {
-	auto token = tokens.peek();
-	if (token->getType() != Token::Type::Token) {
+	auto token = tokens.consumeIf([](Token &token) { return token.getType() == Token::Type::Token; });
+	if (!token.has_value()) {
 		return nullopt;
 	}
-	tokens.consume();
-	return Ast::Literal(std::move(token.value()));
+	return Ast::Literal(Token(Token::Type::Word, WordToken {token->get<WordToken>().value}));
 }
 
 } // namespace shell

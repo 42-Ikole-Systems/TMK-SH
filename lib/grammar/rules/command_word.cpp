@@ -1,6 +1,7 @@
 #include "shell/grammar/rules/command_word.hpp"
 #include "shell/grammar/rules/assignment_word.hpp"
 #include "shell/assert.hpp"
+#include "shell/grammar/grammar_util.hpp"
 
 namespace shell {
 
@@ -16,13 +17,12 @@ vector<Rule::Option> CommandWord::options() {
 }
 
 optional<Ast::Node> CommandWord::handler(TokenProvider &tokens) {
-	auto token = tokens.peek();
-	if (token->getType() != Token::Type::Token) {
+	auto token = tokens.consumeIf([](Token &token) { return token.getType() == Token::Type::Token; });
+	if (!token.has_value()) {
 		return nullopt;
 	}
 	// Rule 7a
 	auto &word_token = token->get<WordToken>();
-	tokens.consume();
 	auto &value = word_token.value;
 	if (value.find('=') == std::string::npos) {
 		// Do not apply Rule 7a
