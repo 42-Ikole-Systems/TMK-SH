@@ -29,6 +29,7 @@ static int run(int argc, const char **argv, char *const *envp) {
 	auto provider = ReaderCharProvider(reader);
 	while (true) {
 		auto lexer = Lexer(provider);
+		reader.setLexer(&lexer);
 		auto parser = Parser(lexer);
 		Ast ast = parser.parse();
 		ast.print();

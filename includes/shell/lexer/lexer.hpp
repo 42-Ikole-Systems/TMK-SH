@@ -11,7 +11,7 @@
 namespace shell {
 
 class Lexer : public TokenProvider {
-private:
+public:
 	enum class State : uint8_t {
 		Empty,
 		Done,
@@ -28,6 +28,8 @@ private:
 		BackTick,
 		ArithmeticExpansion
 	};
+
+private:
 
 	struct StateData {
 		string word;    // is this enough state?
@@ -50,6 +52,8 @@ public:
 
 	optional<Token> peek() override;
 	optional<Token> consume() override;
+
+	State getCurrentState() const;
 
 private:
 	void delimit(Token &&token);

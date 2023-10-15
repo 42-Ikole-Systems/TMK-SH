@@ -32,6 +32,10 @@ optional<Token> Lexer::consume() {
 	return other;
 }
 
+Lexer::State Lexer::getCurrentState() const {
+	return state;
+}
+
 void Lexer::nextToken() {
 	while (state != State::Done && !token.has_value()) {
 		auto handler = getStateHandler();
