@@ -25,7 +25,7 @@ public:
 		ExpansionStart,
 		ParameterExpansion,
 		CommandSubstitution,
-		BackTick,
+		BackQuote,
 		ArithmeticExpansion
 	};
 
@@ -78,7 +78,7 @@ private:
 	State parameterExpansionState();
 	State commandSubstitutionState();
 	State arithmeticExpansionState();
-	State backTickState();
+	State backQuoteState();
 };
 
 /*
@@ -96,6 +96,6 @@ bool isBackslash(char ch);
 bool isSingleQuote(char ch);
 bool isDoubleQuote(char ch);
 bool isDollarSign(char ch);
-bool isBackTick(char ch);
+bool isBackQuote(char ch);
 
 } // namespace shell

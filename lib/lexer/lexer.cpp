@@ -65,7 +65,7 @@ std::function<Lexer::State(Lexer &)> Lexer::getStateHandler() {
 	    [(int)Lexer::State::DoubleQuote] = &Lexer::doubleQuoteState,
 	    [(int)Lexer::State::InnerBackslash] = &Lexer::innerBackslashState,
 	    [(int)Lexer::State::ExpansionStart] = &Lexer::expansionStartState,
-	    [(int)Lexer::State::BackTick] = &Lexer::backTickState,
+	    [(int)Lexer::State::BackQuote] = &Lexer::backQuoteState,
 	    [(int)Lexer::State::ParameterExpansion] = &Lexer::parameterExpansionState,
 	    [(int)Lexer::State::ArithmeticExpansion] = &Lexer::arithmeticExpansionState,
 	    [(int)Lexer::State::CommandSubstitution] = &Lexer::commandSubstitutionState,
@@ -110,7 +110,7 @@ static bool isIoNumber(const string& word, char delimiter) {
 /*
 Operator -> delimit + switch state
 Backslash -> push state + switch state
-(D|S)Quote/Expansion/Backtick -> pushChar + consume + pushState + switch state
+(D|S)Quote/Expansion/BackQuote -> pushChar + consume + pushState + switch state
 Space || EOF -> delimit + switch to Empty
 Comment -> delimit + switch to Comment
 */
@@ -120,7 +120,7 @@ Lexer::State Lexer::wordState() {
 		char ch = chars.peek();
 
 		// [ push char, consume, push state ], switch state
-		if (isSingleQuote(ch) || isDoubleQuote(ch) || isDollarSign(ch) || isBackTick(ch)) {
+		if (isSingleQuote(ch) || isDoubleQuote(ch) || isDollarSign(ch) || isBackQuote(ch)) {
 			state_data.word.push_back(chars.consume());
 			state_data.pushState(State::Word);
 			if (isSingleQuote(ch)) {
@@ -129,8 +129,8 @@ Lexer::State Lexer::wordState() {
 				return State::DoubleQuote;
 			} else if (isDollarSign(ch)) {
 				return State::ExpansionStart;
-			} else if (isBackTick(ch)) {
-				return State::BackTick;
+			} else if (isBackQuote(ch)) {
+				return State::BackQuote;
 			}
 		}
 		// [ push state, switch state ]
@@ -283,8 +283,8 @@ Lexer::State Lexer::doubleQuoteState() {
 		}
 		if (isBackslash(ch)) {
 			state = State::InnerBackslash;
-		} else if (isBackTick(ch)) {
-			state = State::BackTick;
+		} else if (isBackQuote(ch)) {
+			state = State::BackQuote;
 		} else if (isDollarSign(ch)) {
 			state = State::ExpansionStart;
 		}
@@ -339,8 +339,8 @@ Lexer::State Lexer::nextNestedState(State current, char ch) {
 		return State::SingleQuote;
 	} else if (isDollarSign(ch)) {
 		return State::ExpansionStart;
-	} else if (isBackTick(ch)) {
-		return State::BackTick;
+	} else if (isBackQuote(ch)) {
+		return State::BackQuote;
 	}
 	return current;
 }
@@ -396,14 +396,14 @@ Lexer::State Lexer::arithmeticExpansionState() {
 	return state;
 }
 
-Lexer::State Lexer::backTickState() {
+Lexer::State Lexer::backQuoteState() {
 	while (true) {
 		char ch = chars.consume();
 		state_data.word.push_back(ch);
 		if (isBackslash(ch)) {
-			state_data.pushState(State::BackTick);
+			state_data.pushState(State::BackQuote);
 			return State::InnerBackslash;
-		} else if (isBackTick(ch)) {
+		} else if (isBackQuote(ch)) {
 			return state_data.popState();
 		}
 	}
@@ -477,7 +477,7 @@ bool isDollarSign(char ch) {
 	return ch == '$';
 }
 
-bool isBackTick(char ch) {
+bool isBackQuote(char ch) {
 	return ch == '`';
 }
 
