@@ -9,7 +9,6 @@
 namespace shell {
 
 Executor::Executor() {
-	generateBuiltinMap();
 }
 
 ResultCode Executor::execute(Ast::Node &node) {
@@ -38,10 +37,6 @@ ResultCode Executor::execute(Ast &ast) {
 		return ResultCode::Ok;
 	}
 	return execute(*ast.root);
-}
-
-[[noreturn]] void Executor::Exit(ResultCode code) {
-	exit(static_cast<int>(code));
 }
 
 }; // namespace shell

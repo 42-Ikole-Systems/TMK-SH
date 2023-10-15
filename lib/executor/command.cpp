@@ -4,6 +4,7 @@
 #include "shell/shell.hpp"
 #include "shell/environment.hpp"
 #include "shell/utility/split.hpp"
+#include "shell/executor/builtins.hpp"
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -71,9 +72,9 @@ ResultCode Executor::executeProcess(const string &program, const Ast::Command &c
 		execve(programPath.value().c_str(), args.get(), Environment::getEnvironmentVariables().raw());
 		SYSCALL_ERROR("execve");
 		if (errno == ENOEXEC) {
-			Exit(ResultCode::CommandNotExecutable);
+			Builtin::exit(ResultCode::CommandNotExecutable);
 		}
-		Exit(ResultCode::GeneralError);
+		Builtin::exit(ResultCode::GeneralError);
 	} else {
 		// Parent
 		// extract exit status from child
@@ -88,8 +89,9 @@ ResultCode Executor::execute(Ast::Command &command) {
 	D_ASSERT(!command.args.empty());
 	const auto &program = command.args[0];
 
-	if (isBuiltin(program)) {
-		return executeBuiltin(program, command);
+	auto builtin = Builtin::getBuiltin(program);
+	if (builtin.has_value()) {
+		return (*builtin)(command);
 	} else {
 		return executeProcess(program, command);
 	}

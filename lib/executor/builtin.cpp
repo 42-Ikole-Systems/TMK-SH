@@ -1,24 +1,32 @@
 
-#include "shell/executor/executor.hpp"
+#include "shell/executor/builtins.hpp"
 
 namespace shell
 {
 
-	bool Executor::isBuiltin(const string& program) {
-		return builtins.count(program) > 0;
+	Builtin& Builtin::getInstance() {
+		static Builtin builtin;
+		return builtin;
 	}
 
-	void Executor::generateBuiltinMap() {
+	Builtin::Builtin() {
 		builtins.emplace("exit", [=](const Ast::Command& command) {
-			Exit(command.args.size() > 1 ? static_cast<ResultCode>(std::stoi(command.args[1])) : ResultCode::Ok);
+			exit(command.args);
 			return ResultCode::Ok; // Does not actually get hit because it exits, its just here to keep the compiler happy :)
+		});
+
+		builtins.emplace("echo", [=](const Ast::Command& command) {
+			return echo(command.args);
 		});
 	}
 
-	ResultCode Executor::executeBuiltin(const string& program, const Ast::Command& command)
-	{
-		auto& builtin = builtins.at(program);
-		return builtin(command);
+	optional<Builtin::builtinFunction> Builtin::getBuiltin(const string &program) {
+		auto& that = getInstance();
+		auto builtin = that.builtins.find(program);
+		if (builtin != that.builtins.end()) {
+			return builtin->second;
+		}
+		return nullopt;
 	}
 
 }
