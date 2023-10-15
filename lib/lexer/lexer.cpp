@@ -156,7 +156,7 @@ Lexer::State Lexer::wordState() {
 		if (isIoNumber(state_data.word, chars.peek())) {
 			delimit(Token(Token::Type::IoNumber, IoNumber{std::move(state_data.word)}));
 		} else {
-			delimit(Token{Token::Type::Word, WordToken{std::move(state_data.word)}});
+			delimit(Token{Token::Type::Token, WordToken{std::move(state_data.word)}});
 		}
 		state_data.word.clear();
 	}

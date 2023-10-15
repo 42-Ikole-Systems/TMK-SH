@@ -10,7 +10,10 @@ void Token::print() const {
 	LOG_DEBUG("%\n", toString());
 }
 
-static const map<Token::Type, string> token_type_strings = {{Token::Type::Word, "Word"},
+static const map<Token::Type, string> token_type_strings = {{Token::Type::Token, "Token"},
+                                                            {Token::Type::Word, "Word"},
+                                                            {Token::Type::AssignmentWord, "AssignmentWord"},
+                                                            {Token::Type::Name, "Name"},
                                                             {Token::Type::IoNumber, "IoNumber"},
                                                             {Token::Type::Newline, "Newline"},
                                                             {Token::Type::Semicolon, "Semicolon"},
@@ -34,14 +37,14 @@ static const map<Token::Type, string> token_type_strings = {{Token::Type::Word, 
 
 string Token::toString() const {
 	const string &type_string = token_type_strings.at(type);
-	if (isWord(type)) {
-		return type_string + "( " + get<WordToken>().toString() + " )";
+	if (isToken(type)) {
+		return type_string + "(`" + get<WordToken>().toString() + "')";
 	} else if (isOperator(type)) {
-		return type_string + "(" + getOperatorString(type) + ")";
+		return type_string + "(`" + getOperatorString(type) + "')";
 	} else if (isReservedWord(type)) {
-		return type_string + "(" + getReservedWordString(type) + ")";
+		return type_string + "(`" + getReservedWordString(type) + "')";
 	} else if (isIoNumber(type)) {
-		return type_string + "( " + get<IoNumber>().toString() + " )";
+		return type_string + "(`" + get<IoNumber>().toString() + "')";
 	} else if (isNewline(type)) {
 		return type_string;
 	} else {
@@ -122,8 +125,8 @@ const string &Token::getReservedWordString(Token::Type type) {
 	throw std::runtime_error("operator token type not recognized");
 }
 
-bool Token::isWord(Token::Type type) {
-	return type == Token::Type::Word;
+bool Token::isToken(Token::Type type) {
+	return type == Token::Type::Token;
 }
 
 bool Token::isIoNumber(Token::Type type) {
@@ -192,7 +195,7 @@ bool Token::equals(const Token &other) const {
 	if (type != other.type) {
 		return false;
 	}
-	if (isWord(type)) {
+	if (isToken(type)) {
 		auto &a = get<WordToken>();
 		auto &b = other.get<WordToken>();
 		if (a.value != b.value) {
