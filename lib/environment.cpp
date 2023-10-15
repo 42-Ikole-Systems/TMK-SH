@@ -1,86 +1,35 @@
 
 #include "shell/environment.hpp"
 
+#include <stdlib.h>
+#include <sys/errno.h>
 #include <cstring>
+
+extern char* const* environ;
 
 namespace shell {
 
-EnvironmentVariables::EnvironmentVariables(const map<string, string> &variables) : envp(nullptr) {
-	const auto listSize = variables.size() + 1;
-	try {
-		envp = new char *[listSize];
+char* const* Environment::getEnvironmentVariables() {
+	return environ;
+}
 
-		size_t i = 0;
-		for (const auto &[name, value] : variables) {
-			envp[i] = nullptr;
-			char *variable = new char[name.size() + value.length() + 2]; // +2 for '=' and '/0'
-			std::memmove(variable, name.data(), name.length());
-			std::memmove(variable + name.length(), "=", 1);
-			std::memmove(variable + name.length() + 1, value.data(), value.length() + 1); // +1 to include '/0'
-			i++;
-		}
-	} catch (const std::exception &e) {
-		destroy();
-		throw e;
+void Environment::addEnvironmentVariable(const string& variable) {
+	char* raw = new char[variable.length() + 1]; // Dont delete because it becomes part of env.
+	std::memcpy(raw, variable.data(), variable.length() + 1);
+	if (putenv(raw) == -1) {
+		delete[] raw;
+		throw std::runtime_error(strerror(errno));
 	}
-}
-
-EnvironmentVariables::~EnvironmentVariables() {
-	destroy();
-}
-
-void EnvironmentVariables::destroy() {
-	if (envp) {
-		while (*envp != nullptr) {
-			delete[] (*envp);
-			envp++;
-		}
-		delete[] envp;
-		envp = nullptr;
-	}
-}
-
-char *const *EnvironmentVariables::raw() const {
-	return envp;
-}
-
-Environment &Environment::getInstance() {
-	static Environment environment;
-	return environment;
-}
-
-void Environment::setEnvironmentVariables(char *const *envp) {
-	auto &environment = getInstance();
-	for (; *envp != nullptr; envp++) {
-		const string variable = *envp;
-
-		const auto splitPoint = variable.find('=');
-		assert(splitPoint != string::npos);
-
-		const auto name = variable.substr(0, splitPoint);
-		const auto value = variable.substr(splitPoint + 1);
-		environment.variables[name] = value;
-	}
-}
-
-EnvironmentVariables Environment::getEnvironmentVariables() {
-	const auto &environment = getInstance();
-	return EnvironmentVariables(environment.variables);
-}
-
-void Environment::addEnvironmentVariable(const string &name, const string &value) {
-	auto &environment = getInstance();
-	environment.variables[name] = value;
 }
 
 void Environment::removeEnvironmentVariable(const string &name) {
-	auto &environment = getInstance();
-	environment.variables.erase(name);
+	if (unsetenv(name.c_str()) == -1) {
+		throw std::runtime_error(strerror(errno));
+	}
 }
 
-const string &Environment::get(const string &name) {
-	const auto &environment = getInstance();
-	return environment.variables.at(name);
+const char* Environment::get(const string &name) {
+	return getenv(name.c_str());
 }
 
 } // namespace shell

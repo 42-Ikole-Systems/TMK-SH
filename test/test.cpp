@@ -16,7 +16,6 @@ extern char** environ;
 
 TEST_CASE("basic shell", "[shell]") {
 	char** envp = environ;
-	Environment::setEnvironmentVariables(envp);
 	string line = "/bin/ls -la";
 
 	line.push_back('\n');

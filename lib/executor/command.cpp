@@ -68,7 +68,7 @@ ResultCode Executor::execute(Ast::Command &command) {
 	} else if (pid == 0) {
 		// Child
 		auto args = convertArguments(command.args);
-		execve(programPath.value().c_str(), args.get(), Environment::getEnvironmentVariables().raw());
+		execve(programPath.value().c_str(), args.get(), Environment::getEnvironmentVariables());
 		SYSCALL_ERROR("execve");
 		if (errno == ENOEXEC) {
 			Exit(ResultCode::CommandNotExecutable);
