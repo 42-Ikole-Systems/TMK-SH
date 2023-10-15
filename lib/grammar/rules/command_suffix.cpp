@@ -12,7 +12,6 @@ Rule CommandSuffix::make() {
 }
 
 vector<Rule::Option> CommandSuffix::options() {
-	// TODO: implement
 	auto handler = [](vector<Ast::Node> &args) -> optional<Ast::Node> {
 		D_ASSERT(args.size() == 1);
 		return Ast::List(std::move(args));
