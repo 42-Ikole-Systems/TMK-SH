@@ -210,6 +210,9 @@ Lexer::State Lexer::commentState() {
 
 // Precondition: backslash is NOT consumed. Previous state is either WORD or OPERATOR
 Lexer::State Lexer::backslashState() {
+	D_ASSERT(!state_data.states.empty());
+	D_ASSERT(state_data.previousState() == State::Word || state_data.previousState() == State::Operator);
+
 	char ch = chars.consume();
 	D_ASSERT(isBackslash(ch));
 	ch = chars.peek();
@@ -248,6 +251,7 @@ Preconditions:
 No transitions, everything is literal.
 */
 Lexer::State Lexer::singleQuoteState() {
+	D_ASSERT(!state_data.states.empty());
 	while (true) {
 		char ch = chars.consume();
 		if (ch == EOF) {
@@ -269,6 +273,7 @@ Preconditions:
 Nested transitions: \, `, $ (expansions)
 */
 Lexer::State Lexer::doubleQuoteState() {
+	D_ASSERT(!state_data.states.empty());
 	auto state = State::DoubleQuote;
 	while (state == State::DoubleQuote) {
 		char ch = chars.consume();
@@ -299,6 +304,7 @@ Lexer::State Lexer::doubleQuoteState() {
 //	- previous state is on the stack
 // Does NOT remove <newline> from the input stream
 Lexer::State Lexer::innerBackslashState() {
+	D_ASSERT(!state_data.states.empty());
 	char ch = chars.consume();
 	if (ch == EOF) {
 		// todo: determine behavior
@@ -309,7 +315,11 @@ Lexer::State Lexer::innerBackslashState() {
 	return state_data.popState();
 }
 
+// Preconditions:
+//	- $ is consumed
+//	- Previous state is on the stack
 Lexer::State Lexer::expansionStartState() {
+	D_ASSERT(!state_data.states.empty());
 	switch (chars.peek()) {
 		case '{':
 			state_data.word.push_back(chars.consume());
@@ -396,7 +406,11 @@ Lexer::State Lexer::arithmeticExpansionState() {
 	return state;
 }
 
+// Preconditions:
+//	- Backquote is consumed
+//	- Previous state is on the stack
 Lexer::State Lexer::backQuoteState() {
+	D_ASSERT(!state_data.states.empty());
 	while (true) {
 		char ch = chars.consume();
 		state_data.word.push_back(ch);
