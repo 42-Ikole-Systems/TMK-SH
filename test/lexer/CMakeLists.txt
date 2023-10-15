@@ -2,6 +2,7 @@ add_library(
     test_lexer
     OBJECT
     basic_ls.cpp
+    stdin_lexer.cpp
 )
 
 # Forward the declared variable to the parent scope

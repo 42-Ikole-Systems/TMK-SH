@@ -18,6 +18,7 @@ set(TEST_OBJECT_FILES
 add_executable(test ${TEST_OBJECT_FILES})
 
 target_link_libraries(test PRIVATE shell)
+target_link_libraries(test PRIVATE readline)
 
 ## Add a custom target to run tests
 #add_custom_target(run_tests COMMAND ./test DEPENDS test)

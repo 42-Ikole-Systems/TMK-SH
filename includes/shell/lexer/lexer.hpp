@@ -6,7 +6,7 @@
 #include "shell/lexer/token_provider.hpp"
 #include "shell/interfaces/provider.hpp"
 #include <functional>
-#include <deque>
+#include <stack>
 
 namespace shell {
 
@@ -19,19 +19,23 @@ private:
 		Operator,
 		Comment,
 		Backslash,
-		SingleQuoteStart,
 		SingleQuote,
-		DoubleQuoteStart,
 		DoubleQuote,
-		DoubleQuoteBackslash,
+		InnerBackslash,
 		ExpansionStart,
 		ParameterExpansion,
-		CommandSubstitution
+		CommandSubstitution,
+		BackTick,
+		ArithmeticExpansion
 	};
 
 	struct StateData {
 		string word;    // is this enough state?
-		State previous; // will probably need a stack for expansion lexing?
+		std::stack<State> states;
+
+		void pushState(State state);
+		State popState();
+		State previousState();
 	};
 
 private:
@@ -50,6 +54,8 @@ public:
 private:
 	void delimit(Token &&token);
 	void nextToken();
+	State nextNestedState(State current, char ch);
+	State generalExpansionHandler(State state, char terminator);
 
 	void delimitOperator();
 
@@ -63,9 +69,12 @@ private:
 	State singleQuoteState();
 	State doubleQuoteStateStart();
 	State doubleQuoteState();
-	State doubleQuoteBackslashState();
+	State innerBackslashState();
 	State expansionStartState();
 	State parameterExpansionState();
+	State commandSubstitutionState();
+	State arithmeticExpansionState();
+	State backTickState();
 };
 
 /*

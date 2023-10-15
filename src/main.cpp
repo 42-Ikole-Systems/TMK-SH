@@ -26,8 +26,8 @@ static int run(int argc, const char **argv, char *const *envp) {
 
 	using_history();
 	StdinReader reader = StdinReader(prompt);
+	auto provider = ReaderCharProvider(reader);
 	while (true) {
-		auto provider = ReaderCharProvider(reader);
 		auto lexer = Lexer(provider);
 		auto parser = Parser(lexer);
 		Ast ast = parser.parse();

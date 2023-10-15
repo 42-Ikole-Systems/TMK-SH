@@ -35,11 +35,11 @@ static const map<Token::Type, string> token_type_strings = {{Token::Type::Word, 
 string Token::toString() const {
 	const string &type_string = token_type_strings.at(type);
 	if (isWord(type)) {
-		return type_string + "(" + get<WordToken>().toString() + ")";
+		return type_string + "( " + get<WordToken>().toString() + " )";
 	} else if (isOperator(type)) {
-		return type_string + "(" + getOperatorString(type) + ")";
+		return type_string + "( " + getOperatorString(type) + " )";
 	} else if (isIoNumber(type)) {
-		return type_string + "(" + get<IoNumber>().toString();
+		return type_string + "( " + get<IoNumber>().toString() + " )";
 	} else if (isNewline(type)) {
 		return type_string;
 	} else {

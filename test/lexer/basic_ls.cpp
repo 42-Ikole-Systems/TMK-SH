@@ -5,14 +5,38 @@ using namespace shell;
 TEST_CASE("lexer parameterized test", "[lexer][parameterized]") {
 	auto input = GENERATE(
 		make_pair("/bin/ls", vector { Token(Token::Type::Word, WordToken{"/bin/ls"})}),
+		make_pair("echo \\`", vector { Token(Token::Type::Word, WordToken{"echo"}), Token(Token::Type::Word, WordToken{"\\`"})}),
 		make_pair("<<-", vector { Token(Token::Type::DoubleLessDash, OperatorToken{})}),
 		make_pair("<-", vector { Token(Token::Type::Less, OperatorToken{}), Token({Token::Type::Word, WordToken{"-"}})}),
 		make_pair("<\\\n<", vector { Token(Token::Type::DoubleLess, OperatorToken{})}),
 		make_pair("ex\\\nample", vector { Token(Token::Type::Word, WordToken{"example"})}),
 		make_pair("ex\\\\", vector { Token(Token::Type::Word, WordToken{"ex\\\\"})}),
 		make_pair("\\<<", vector { Token(Token::Type::Word, WordToken{"\\<"}), Token(Token::Type::Less, OperatorToken{}) }),
-		make_pair("'\\<<'\"abcde\\\n\"", vector { Token(Token::Type::Word, WordToken{"'\\<<'\"abcde\""}) }),
-		make_pair("< <\\\n<", vector { Token(Token::Type::Less, OperatorToken{}), Token(Token::Type::DoubleLess, OperatorToken{}) })
+		make_pair("'\\<<'\"abcde\\\n\"", vector { Token(Token::Type::Word, WordToken{"'\\<<'\"abcde\\\n\""}) }), // everything should be present in the resulting string
+		make_pair("< <\\\n<", vector { Token(Token::Type::Less, OperatorToken{}), Token(Token::Type::DoubleLess, OperatorToken{}) }),
+
+		make_pair("`echo 1234`", vector { Token( Token::Type::Word, WordToken{ "`echo 1234`"} )}),
+		make_pair(
+			"   `\\`echo 1234 \\` $() ${} $ $(())`    ",
+			vector { Token(Token::Type::Word, WordToken{"`\\`echo 1234 \\` $() ${} $ $(())`"})}
+		),
+
+		make_pair(
+			"\"$(   ')' \") $( \"abcde\" )\" \\)  )\"",
+			vector { Token(Token::Type::Word, WordToken{"\"$(   ')' \") $( \"abcde\" )\" \\)  )\""} )}
+		),
+
+		make_pair(
+			"$((5 + 9))",
+			vector { Token(Token::Type::Word, WordToken{"$((5 + 9))"})}
+		),
+
+		make_pair("$(( 5 + 9 )) $(( echo \"${HOME}\" ) | cat  )",
+			vector {
+				Token( Token::Type::Word, WordToken{"$(( 5 + 9 ))"}),
+				Token( Token::Type::Word, WordToken{"$(( echo \"${HOME}\" ) | cat  )"})
+			}
+		)
 	);
 
 	assertExpectedTokens(input.first, input.second);

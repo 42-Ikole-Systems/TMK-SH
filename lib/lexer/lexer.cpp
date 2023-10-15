@@ -44,6 +44,12 @@ void Lexer::delimit(Token &&token) {
 	this->token = std::move(token);
 }
 
+/*
+Handler requirements:
+	- Delimits at most one token in a single run
+	- Returns the next state in case of a state transition requirement
+Handlers are free to loop and process as many chars as necessary in order to delimit or encounter a state transition.
+*/
 std::function<Lexer::State(Lexer &)> Lexer::getStateHandler() {
 	static const std::function<State(Lexer &)> handlers[] = {
 	    [(int)Lexer::State::Empty] = &Lexer::emptyState,
@@ -51,13 +57,14 @@ std::function<Lexer::State(Lexer &)> Lexer::getStateHandler() {
 	    [(int)Lexer::State::Operator] = &Lexer::operatorState,
 	    [(int)Lexer::State::Comment] = &Lexer::commentState,
 	    [(int)Lexer::State::Backslash] = &Lexer::backslashState,
-	    [(int)Lexer::State::SingleQuoteStart] = &Lexer::singleQuoteStartState,
 	    [(int)Lexer::State::SingleQuote] = &Lexer::singleQuoteState,
-	    [(int)Lexer::State::DoubleQuoteStart] = &Lexer::doubleQuoteStateStart,
 	    [(int)Lexer::State::DoubleQuote] = &Lexer::doubleQuoteState,
-	    [(int)Lexer::State::DoubleQuoteBackslash] = &Lexer::doubleQuoteBackslashState,
+	    [(int)Lexer::State::InnerBackslash] = &Lexer::innerBackslashState,
 	    [(int)Lexer::State::ExpansionStart] = &Lexer::expansionStartState,
+	    [(int)Lexer::State::BackTick] = &Lexer::backTickState,
 	    [(int)Lexer::State::ParameterExpansion] = &Lexer::parameterExpansionState,
+	    [(int)Lexer::State::ArithmeticExpansion] = &Lexer::arithmeticExpansionState,
+	    [(int)Lexer::State::CommandSubstitution] = &Lexer::commandSubstitutionState,
 	};
 	D_ASSERT((size_t)state < (sizeof(handlers) / sizeof(handlers[0])));
 	D_ASSERT(handlers[(int)state] != nullptr);
@@ -66,56 +73,73 @@ std::function<Lexer::State(Lexer &)> Lexer::getStateHandler() {
 
 Lexer::State Lexer::emptyState() {
 	char ch = chars.peek();
-	if (ch == EOF) {
-		return State::Done;
-	} else if (ch == '\n') {
-		delimit(Token {Token::Type::Newline, Newline()});
-		chars.consume();
-		return State::Empty;
-	} else if (isSpace(ch)) {
-		chars.consume();
-		return State::Empty;
-	} else if (isOperatorStart(ch)) {
-		return State::Operator;
-	} else {
-		return State::Word;
+	while (true) {
+		char ch = chars.peek();
+		if (ch == EOF) {
+			return State::Done;
+		} else if (ch == '\n') {
+			delimit(Token {Token::Type::Newline, Newline()});
+			chars.consume();
+			return State::Empty;
+		} else if (isSpace(ch)) {
+			chars.consume();
+		} else if (isOperatorStart(ch)) {
+			return State::Operator;
+		} else {
+			return State::Word;
+		}
 	}
 }
 
+/*
+Operator -> delimit + switch state
+Backslash -> push state + switch state
+(D|S)Quote/Expansion/Backtick -> pushChar + consume + pushState + switch state
+Space || EOF -> delimit + switch to Empty
+Comment -> delimit + switch to Comment
+*/
 Lexer::State Lexer::wordState() {
 	State state = State::Word;
-	char ch = chars.peek();
-	if (isSpace(ch) || ch == EOF) {
-		state = State::Empty;
-	} else if (isCommentStart(ch)) {
-		state = State::Comment;
-	} else if (isOperatorStart(ch)) {
-		state = State::Operator;
-	} else if (isCommentStart(ch)) {
-		state = State::Comment;
-	} else if (isBackslash(ch)) {
-		state_data.previous = State::Word;
-		return State::Backslash;
-	} else if (isSingleQuote(ch)) {
-		return State::SingleQuoteStart;
-	} else if (isDoubleQuote(ch)) {
-		return State::DoubleQuoteStart;
-	} else if (ch == '$') {
-		return State::ExpansionStart;
-	} else if (ch == '`') {
-		throw NotImplementedException();
-		// state_data.word.push_back(chars.consume());
-		// return State::CommandSubstitution;
-	} else {
-		state_data.word.push_back(ch);
-		chars.consume();
-		return State::Word;
-	}
+	while (state == State::Word) {
+		char ch = chars.peek();
 
-	if (!state_data.word.empty()) {
-		delimit(Token {Token::Type::Word, WordToken {std::move(state_data.word)}});
+		// [ push char, consume, push state ], switch state
+		if (isSingleQuote(ch) || isDoubleQuote(ch) || isDollarSign(ch) || isBackTick(ch)) {
+			state_data.word.push_back(chars.consume());
+			state_data.pushState(State::Word);
+			if (isSingleQuote(ch)) {
+				return State::SingleQuote;
+			} else if (isDoubleQuote(ch)) {
+				return State::DoubleQuote;
+			} else if (isDollarSign(ch)) {
+				return State::ExpansionStart;
+			} else if (isBackTick(ch)) {
+				return State::BackTick;
+			}
+		}
+		// [ push state, switch state ]
+		if (isBackslash(ch)) {
+			state_data.pushState(State::Word);
+			return State::Backslash;
+		}
+
+		// [ delimit ], switch state
+		if (isSpace(ch) || ch == EOF) {
+			state = State::Empty;
+		} else if (isCommentStart(ch)) {
+			state = State::Comment;
+		} else if (isOperatorStart(ch)) {
+			state = State::Operator;
+		} else {
+			// Continue word state
+			state_data.word.push_back(chars.consume());
+		}
 	}
-	state_data.word.clear();
+	// Handle delimit outside of loop: EOF, IFS, operator, comment
+	if (!state_data.word.empty()) {
+		delimit(Token{Token::Type::Word, WordToken{std::move(state_data.word)}});
+		state_data.word.clear();
+	}
 	return state;
 }
 
@@ -123,7 +147,7 @@ Lexer::State Lexer::operatorState() {
 	char ch = chars.peek();
 
 	if (isBackslash(ch)) {
-		state_data.previous = State::Operator;
+		state_data.pushState(State::Operator);
 		return State::Backslash;
 	}
 
@@ -164,13 +188,15 @@ Lexer::State Lexer::commentState() {
 	return State::Comment;
 }
 
+// Precondition: backslash is NOT consumed. Previous state is either WORD or OPERATOR
 Lexer::State Lexer::backslashState() {
 	char ch = chars.consume();
 	D_ASSERT(isBackslash(ch));
 	ch = chars.peek();
 	if (ch == EOF) {
 		// todo: determine behavior
-		throw std::runtime_error("encountered EOF in backslash lexing");
+		// throw std::runtime_error("encountered EOF in backslash lexing");
+		return state_data.popState();
 	}
 	if (isNewline(ch)) {
 		// Special case: `\\n`: remove backslash and newline from the input stream and continue where we left off.
@@ -179,121 +205,206 @@ Lexer::State Lexer::backslashState() {
 		// bash/zsh behavior?
 		chars.remove();
 		chars.remove();
-		return state_data.previous;
+		return state_data.popState();
 	}
 
 	// This is required to be here in the case of something like `>\\n>`, which results in the next token being used as
 	// an operator. Since we have not encountered a newline, that scenario is no longer possible and the literal value
 	// is used as part of a word, so we delimit the operator at this point.
-	if (state_data.previous == State::Operator) {
+	if (state_data.previousState() == State::Operator) {
 		delimitOperator();
 	}
 
 	state_data.word.push_back('\\');
 	state_data.word.push_back(ch);
 	chars.consume();
-	return State::Word;
+	return state_data.popState();
 }
 
-Lexer::State Lexer::singleQuoteStartState() {
-	char ch = chars.consume();
-	D_ASSERT(isSingleQuote(ch));
-	state_data.word.push_back(ch);
-	return State::SingleQuote;
-}
-
+/*
+Preconditions:
+	- Starting single quote is consumed
+	- Previous state is on the stack
+No transitions, everything is literal.
+*/
 Lexer::State Lexer::singleQuoteState() {
-	char ch = chars.consume();
-	if (ch == EOF) {
-		// todo: determine behavior
-		throw std::runtime_error("encountered EOF in single quote parsing");
+	while (true) {
+		char ch = chars.consume();
+		if (ch == EOF) {
+			// todo: determine behavior
+			// throw std::runtime_error("encountered EOF in single quote parsing");
+			return state_data.popState();
+		}
+		state_data.word.push_back(ch);
+		if (isSingleQuote(ch)) {
+			return state_data.popState();
+		}
 	}
-	state_data.word.push_back(ch);
-	if (isSingleQuote(ch)) {
-		return State::Word;
-	}
-	return State::SingleQuote;
 }
 
-Lexer::State Lexer::doubleQuoteStateStart() {
-	char ch = chars.consume();
-	D_ASSERT(isDoubleQuote(ch));
-	state_data.word.push_back(ch);
-	return State::DoubleQuote;
-}
-
+/*
+Preconditions:
+	- Starting double quote is consumed
+	- Previous state is on the stack
+Nested transitions: \, `, $ (expansions)
+*/
 Lexer::State Lexer::doubleQuoteState() {
-	char ch = chars.consume();
-	if (ch == EOF) {
-		// todo: determine behavior
-		throw std::runtime_error("encountered EOF in double quote lexing");
+	auto state = State::DoubleQuote;
+	while (state == State::DoubleQuote) {
+		char ch = chars.consume();
+		if (ch == EOF) {
+			// todo: determine behavior
+			// throw std::runtime_error("encountered EOF in double quote lexing");
+			return state_data.popState();
+		}
+		state_data.word.push_back(ch);
+		if (isDoubleQuote(ch)) {
+			return state_data.popState();
+		}
+		if (isBackslash(ch)) {
+			state = State::InnerBackslash;
+		} else if (isBackTick(ch)) {
+			state = State::BackTick;
+		} else if (isDollarSign(ch)) {
+			state = State::ExpansionStart;
+		}
 	}
-	if (isBackslash(ch)) {
-		// May not push back backslash in case of new line
-		return State::DoubleQuoteBackslash;
-	}
-	state_data.word.push_back(ch);
-	if (isDoubleQuote(ch)) {
-		return State::Word;
-	} else if (isBackTick(ch)) {
-		throw NotImplementedException();
-	} else if (isDollarSign(ch)) {
-		throw NotImplementedException();
-	}
-	return State::DoubleQuote;
+	// Nested state transition
+	state_data.pushState(State::DoubleQuote);
+	return state;
 }
 
-// precondition: backslash is already consumed
-// separate state since nothing is actually removed from the input stream here (and it only works for certain
-// characters)
-Lexer::State Lexer::doubleQuoteBackslashState() {
+// preconditions:
+//	- backslash is already consumed and added to word
+//	- previous state is on the stack
+// Does NOT remove <newline> from the input stream
+Lexer::State Lexer::innerBackslashState() {
 	char ch = chars.consume();
 	if (ch == EOF) {
 		// todo: determine behavior
-		throw std::runtime_error("encountered EOF in double quote backslash lexing");
+		// throw std::runtime_error("encountered EOF in double quote backslash lexing");
+		return state_data.popState();
 	}
-	if (isNewline(ch)) {
-		return State::DoubleQuote;
-	}
-	state_data.word.push_back('\\');
 	state_data.word.push_back(ch);
-	return State::DoubleQuote;
+	return state_data.popState();
 }
 
 Lexer::State Lexer::expansionStartState() {
-	char ch = chars.consume();
-	D_ASSERT(ch == '$');
-	state_data.word.push_back(ch);
-	ch = chars.peek();
-	state_data.word.push_back(ch);
-	switch (ch) {
+	switch (chars.peek()) {
 		case '{':
 			state_data.word.push_back(chars.consume());
 			return State::ParameterExpansion;
 		case '(':
-			throw NotImplementedException();
-			// return CommandSubstitutionStart;
-			// state_data.word.push_back(chars.consume());
-			// if (chars.peek() == '(') {
-			// 	state_data.word.push_back(chars.consume());
-			// 	return State::ArithmeticExpansion;
-			// } else {
-			// 	return State::CommandSubstitution;
-			// }
+			state_data.word.push_back(chars.consume());
+			if (chars.peek() == '(') {
+				state_data.word.push_back(chars.consume());
+				return State::ArithmeticExpansion;
+			} else {
+				return State::CommandSubstitution;
+			}
 		default:
-			// Reasoning: parameter expansion without special behavior
-			return State::Word;
+			return state_data.popState();
 	}
 }
 
+// same as double quote, except it can also transition to single quote
+Lexer::State Lexer::nextNestedState(State current, char ch) {
+	if (ch == EOF) {
+		throw std::runtime_error("unexpected EOF in nested state");
+	} else if (isBackslash(ch)) {
+		return State::InnerBackslash;
+	} else if (isDoubleQuote(ch)) {
+		return State::DoubleQuote;
+	} else if (isSingleQuote(ch)) {
+		return State::SingleQuote;
+	} else if (isDollarSign(ch)) {
+		return State::ExpansionStart;
+	} else if (isBackTick(ch)) {
+		return State::BackTick;
+	}
+	return current;
+}
+
+Lexer::State Lexer::generalExpansionHandler(State state, char terminator) {
+	auto current = state;
+	while (current == state) {
+		char ch = chars.consume();
+		if (ch == EOF) {
+			return state_data.popState();
+		}
+		state_data.word.push_back(ch);
+		if (ch == terminator) {
+			return state_data.popState();
+		}
+		current = nextNestedState(current, ch);
+	}
+	state_data.pushState(state);
+	return current;
+}
+
+
 Lexer::State Lexer::parameterExpansionState() {
-	char ch = chars.peek();
-	// Quote: Double and Single (same behavior)
-	// Backslash (same behavior)
-	// CommandSubstitution (same behavior)
-	// Nested ParameterExpansion (same behavior)
-	// ArithmeticExpansion (same behavior)
-	throw NotImplementedException();
+	return generalExpansionHandler(state, '}');
+}
+
+Lexer::State Lexer::commandSubstitutionState() {
+	return generalExpansionHandler(state, ')');
+}
+
+// Requires some extra logic due to having multiple terminating characters
+Lexer::State Lexer::arithmeticExpansionState() {
+	auto state = State::ArithmeticExpansion;
+	while (state == State::ArithmeticExpansion) {
+		char ch = chars.consume();
+		if (ch == EOF) {
+			return state_data.popState();
+		}
+		state_data.word.push_back(ch);
+		if (ch == ')') {
+			if (chars.peek() == ')') {
+				state_data.word.push_back(chars.consume());
+				return state_data.popState();
+			} else {
+				// If it closes with ')' instead of '))', we are actually in a subshell of a command substitution
+				// Example: $((echo ...) | cat)
+				return State::CommandSubstitution;
+			}
+		}
+		state = nextNestedState(State::ArithmeticExpansion, ch);
+	}
+	state_data.pushState(State::ArithmeticExpansion);
+	return state;
+}
+
+Lexer::State Lexer::backTickState() {
+	while (true) {
+		char ch = chars.consume();
+		state_data.word.push_back(ch);
+		if (isBackslash(ch)) {
+			state_data.pushState(State::BackTick);
+			return State::InnerBackslash;
+		} else if (isBackTick(ch)) {
+			return state_data.popState();
+		}
+	}
+}
+
+/* State Data methods */
+
+void Lexer::StateData::pushState(State state) {
+	states.push(state);
+}
+
+Lexer::State Lexer::StateData::popState() {
+	D_ASSERT(!states.empty());
+	State state = states.top();
+	states.pop();
+	return state;
+}
+
+Lexer::State Lexer::StateData::previousState() {
+	D_ASSERT(!states.empty());
+	return states.top();
 }
 
 // https://www.gnu.org/software/bash/manual/bash.html#index-metacharacter
