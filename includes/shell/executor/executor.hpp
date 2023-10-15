@@ -16,6 +16,10 @@ enum class ResultCode : uint8_t {
 
 class Executor {
 private:
+	std::map<string, std::function<ResultCode(const Ast::Command &)>> builtins;
+
+	void generateBuiltinMap();
+
 public:
 	Executor();
 
@@ -25,6 +29,15 @@ public:
 	ResultCode execute(Ast::SeparatorOp &node);
 
 private:
+	ResultCode executeProcess(const string &program, const Ast::Command &command);
+	ResultCode executeBuiltin(const string &program, const Ast::Command &command);
+
+	bool isBuiltin(const string &program);
+
+	//////////////
+	// Builtins //
+	//////////////
+
 	[[noreturn]] void Exit(ResultCode code);
 };
 

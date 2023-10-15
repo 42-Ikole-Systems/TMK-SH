@@ -9,6 +9,7 @@
 namespace shell {
 
 Executor::Executor() {
+	generateBuiltinMap();
 }
 
 ResultCode Executor::execute(Ast::Node &node) {

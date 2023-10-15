@@ -37,7 +37,11 @@ static unique_ptr<char *const[]> convertArguments(const vector<string> &vec) {
  */
 static optional<string> resolvePath(const string &program) {
 	if (program.find('/') != string::npos) {
-		return program;
+		if (std::filesystem::exists(program)) {
+			return program;
+		} else {
+			return nullopt;
+		}
 	}
 
 	const auto &path = Environment::get("PATH");
@@ -50,11 +54,7 @@ static optional<string> resolvePath(const string &program) {
 	return nullopt;
 }
 
-ResultCode Executor::execute(Ast::Command &command) {
-	D_ASSERT(!command.args.empty());
-
-	// todo: add builtin support
-	const auto &program = command.args[0];
+ResultCode Executor::executeProcess(const string &program, const Ast::Command &command) {
 	const auto programPath = resolvePath(program);
 	if (!programPath.has_value()) {
 		LOG_ERROR("%: command not found\n", program);
@@ -82,6 +82,17 @@ ResultCode Executor::execute(Ast::Command &command) {
 		}
 	}
 	return ResultCode::Ok;
+}
+
+ResultCode Executor::execute(Ast::Command &command) {
+	D_ASSERT(!command.args.empty());
+	const auto &program = command.args[0];
+
+	if (isBuiltin(program)) {
+		return executeBuiltin(program, command);
+	} else {
+		return executeProcess(program, command);
+	}
 }
 
 } // namespace shell

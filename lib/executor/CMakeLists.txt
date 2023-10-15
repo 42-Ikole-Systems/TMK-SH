@@ -4,6 +4,7 @@ add_library(
     command.cpp
     executor.cpp
     separator_op.cpp
+    builtin.cpp
 )
 
 # Forward the declared variable to the parent scope
