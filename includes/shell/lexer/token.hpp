@@ -114,10 +114,10 @@ public:
 	static int prefixOperatorMatches(const string &s);
 	static optional<Type> exactOperatorType(const string &s);
 	static optional<Type> exactReservedWordType(const string &s);
-
-private:
 	static const string &getOperatorString(Token::Type type);
 	static const string &getReservedWordString(Token::Type type);
+
+private:
 	static bool isReservedWord(Token::Type type);
 	static bool isOperator(Token::Type type);
 	static bool isWord(Token::Type type);

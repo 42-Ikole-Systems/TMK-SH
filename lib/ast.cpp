@@ -39,7 +39,8 @@ Ast::SeparatorOp::SeparatorOp(SeparatorOp &&other) : left(std::move(other.left))
 Ast::SeparatorOp::~SeparatorOp() {
 }
 
-Ast::Redirection::Redirection(Redirection &&other) : left(std::move(other.left)), right(std::move(other.right)) {
+Ast::Redirection::Redirection(Redirection &&other)
+    : file_name(other.file_name), redirection_type(other.redirection_type), io_number(other.io_number) {
 }
 Ast::Redirection::~Redirection() {
 }
@@ -141,18 +142,12 @@ void Ast::SeparatorOp::print(int level) const {
 
 void Ast::Redirection::print(int level) const {
 	tprintf("Redirection:\n");
-	if (left == nullptr) {
-		printLevel(level + 1);
-		tprintf("<null>\n");
-	} else {
-		left->print(level + 1);
-	}
-	if (right == nullptr) {
-		printLevel(level + 1);
-		tprintf("<null>\n");
-	} else {
-		right->print(level + 1);
-	}
+	printLevel(level + 1);
+	tprintf("Filename: %\n", file_name);
+	printLevel(level + 1);
+	tprintf("Redirection Type: %\n", Token::getOperatorString(redirection_type));
+	printLevel(level + 1);
+	tprintf("Filedescriptor: %\n", io_number);
 }
 
 } // namespace shell

@@ -62,9 +62,11 @@ public:
 
 	public:
 		void print(int level) const;
-		unique_ptr<Node> left;
-		unique_ptr<Node> right;
+
+	public:
+		string file_name;
 		Token::Type redirection_type;
+		size_t io_number;
 	};
 
 	class Node {

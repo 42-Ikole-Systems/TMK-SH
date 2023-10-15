@@ -12,7 +12,6 @@ Rule IOFile::make() {
 }
 
 vector<Rule::Option> IOFile::options() {
-	// TODO: implement
 	return {CreateOption<Token::Type::Less>(),        CreateOption<Token::Type::LessAnd>(),
 	        CreateOption<Token::Type::Great>(),       CreateOption<Token::Type::GreatAnd>(),
 	        CreateOption<Token::Type::DoubleGreat>(), CreateOption<Token::Type::LessGreat>(),
@@ -34,15 +33,40 @@ static bool isRedirection(Token::Type type) {
 	}
 }
 
-optional<Ast::Node> IOFile::handler(vector<Ast::Node> &args) {
-	D_ASSERT(args.size() == 3);
-	auto redir = Ast::Redirection();
-	redir.left = make_unique<Ast::Node>(std::move(args[0]));
-	redir.right = make_unique<Ast::Node>(std::move(args[1]));
+size_t getDefaultIONumber(Token::Type type) {
+	static constexpr size_t STDIN = 0;
+	static constexpr size_t STDOUT = 1;
 
-	auto &literal = args[1].get<Ast::Literal>();
+	switch (type) {
+		case Token::Type::Less:
+			return STDIN;
+		case Token::Type::Great:
+		case Token::Type::Clobber:
+			return STDOUT;
+		case Token::Type::DoubleGreat:
+			return STDOUT;
+		case Token::Type::LessAnd:
+			return STDIN;
+		case Token::Type::GreatAnd:
+			return STDOUT;
+		case Token::Type::LessGreat:
+			return STDIN;
+		default:
+			throw std::runtime_error("Invalid redirection type encountered!");
+	}
+}
+
+optional<Ast::Node> IOFile::handler(vector<Ast::Node> &args) {
+	D_ASSERT(args.size() == 2);
+	auto redir = Ast::Redirection();
+
+	auto &file_name = args[1].get<Ast::Literal>();
+	redir.file_name = file_name.token.get<WordToken>().value;
+
+	auto &literal = args[0].get<Ast::Literal>();
 	auto &token = literal.token;
 	D_ASSERT(isRedirection(token.getType()));
+	redir.io_number = getDefaultIONumber(token.getType());
 
 	redir.redirection_type = token.getType();
 	return redir;
