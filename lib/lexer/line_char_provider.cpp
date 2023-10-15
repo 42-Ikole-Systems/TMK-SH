@@ -20,4 +20,18 @@ char LineCharProvider::consume() {
 	return line[index++];
 }
 
+void LineCharProvider::remove() {
+	if (index >= line.length()) {
+		return;
+	}
+	index++;
+}
+
+void LineCharProvider::unconsume() {
+	if (index == 0) {
+		return;
+	}
+	index--;
+}
+
 } // namespace shell
