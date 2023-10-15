@@ -19,13 +19,29 @@ public:
 		Token token;
 	};
 
+	struct List {
+	public:
+		List() = default;
+		List(List &&other);
+		List(Node node);
+		List(vector<Node> nodes);
+
+	public:
+		void append(Node node);
+		void print(int level) const;
+
+	public:
+		list<Node> entries;
+	};
+
 	struct Command {
 		Command(Command &&other);
-		Command(vector<string> &&args);
+		Command(const string &program_name, List &&arguments);
 		~Command();
 
 		void print(int level) const;
-		vector<string> args; // args[0] == program name
+		string program_name;
+		List arguments;
 	};
 
 	struct SeparatorOp {
@@ -53,11 +69,11 @@ public:
 
 	class Node {
 	public:
-		enum class Type { SeparatorOp, Command, Literal, Redirection };
+		enum class Type { SeparatorOp, Command, Literal, Redirection, List };
 
 	private:
 		Type type;
-		std::variant<Command, SeparatorOp, Literal, Redirection> variant;
+		std::variant<Command, SeparatorOp, Literal, Redirection, List> variant;
 
 	public:
 		Node(Node &&other);
@@ -65,6 +81,7 @@ public:
 		Node(SeparatorOp &&separator_op);
 		Node(Literal &&separator_op);
 		Node(Redirection &&separator_op);
+		Node(List &&list);
 
 		Type getType() const;
 

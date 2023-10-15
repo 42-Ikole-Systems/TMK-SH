@@ -16,6 +16,8 @@ Ast::Node::Node(Literal &&literal) : type(Type::Literal), variant(std::move(lite
 }
 Ast::Node::Node(Redirection &&redirection) : type(Type::Redirection), variant(std::move(redirection)) {
 }
+Ast::Node::Node(List &&list) : type(Type::List), variant(std::move(list)) {
+}
 
 Ast::Literal::Literal(Literal &&other) : token(std::move(other.token)) {
 }
@@ -24,9 +26,10 @@ Ast::Literal::Literal(Token &&token) : token(token) {
 Ast::Literal::~Literal() {
 }
 
-Ast::Command::Command(Command &&other) : args(std::move(other.args)) {
+Ast::Command::Command(Command &&other) : program_name(other.program_name), arguments(std::move(other.arguments)) {
 }
-Ast::Command::Command(vector<string> &&args) : args(args) {
+Ast::Command::Command(const string &program_name, List &&arguments)
+    : program_name(program_name), arguments(std::move(arguments)) {
 }
 Ast::Command::~Command() {
 }
@@ -39,6 +42,20 @@ Ast::SeparatorOp::~SeparatorOp() {
 Ast::Redirection::Redirection(Redirection &&other) : left(std::move(other.left)), right(std::move(other.right)) {
 }
 Ast::Redirection::~Redirection() {
+}
+
+Ast::List::List(List &&other) : entries(std::move(other.entries)) {
+}
+
+Ast::List::List(Node node) : entries() {
+	entries.push_back(std::move(node));
+}
+
+Ast::List::List(vector<Node> nodes) : entries(std::move_iterator(nodes.begin()), std::move_iterator(nodes.end())) {
+}
+
+void Ast::List::append(Node node) {
+	entries.insert(entries.begin(), std::move(node));
 }
 
 Ast::Node::Type Ast::Node::getType() const {
@@ -74,6 +91,9 @@ void Ast::Node::print(int level) const {
 		case Type::Redirection:
 			get<Redirection>().print(level);
 			break;
+		case Type::List:
+			get<List>().print(level);
+			break;
 	}
 }
 
@@ -87,14 +107,20 @@ void Ast::Literal::print(int level) const {
 void Ast::Command::print(int level) const {
 	tprintf("Command:\n");
 	printLevel(level + 1);
-	tprintf("Args: [ ");
-	for (int i = 0; i < (int)args.size(); i++) {
-		if (i != 0) {
-			tprintf(", ");
-		}
-		tprintf("%", args[i]);
+	tprintf("Name: %\n", program_name);
+	printLevel(level + 1);
+	arguments.print(level + 1);
+}
+
+void Ast::List::print(int level) const {
+	tprintf("List:\n");
+	printLevel(level + 1);
+	tprintf("Entries: [\n");
+	for (auto &entry : entries) {
+		entry.print(level + 2);
 	}
-	tprintf(" ]\n");
+	printLevel(level + 1);
+	tprintf("]\n");
 }
 
 void Ast::SeparatorOp::print(int level) const {

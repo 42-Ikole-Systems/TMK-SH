@@ -5,6 +5,7 @@
 #include "shell/grammar/rules/command_suffix.hpp"
 #include "shell/grammar/grammar_util.hpp"
 #include "shell/print.hpp"
+#include "shell/assert.hpp"
 
 namespace shell {
 
@@ -33,14 +34,10 @@ vector<Rule::Option> SimpleCommand::options() {
 
 optional<Ast::Node> SimpleCommand::singleCommand(vector<Ast::Node> &args) {
 	vector<string> arguments;
-	for (auto &arg : args) {
-		auto &lit = arg.get<Ast::Literal>();
-		auto &word_token = lit.token.get<WordToken>();
-		tprintf("arg: %\n", word_token.value);
-		arguments.push_back(word_token.value);
-	}
+	D_ASSERT(args.size() == 2);
 
-	return Ast::Command(std::move(arguments));
+	auto &command_name = args[0].get<Ast::Literal>().token.get<WordToken>().value;
+	return Ast::Command(command_name, std::move(args[1].get<Ast::List>()));
 }
 
 } // namespace shell

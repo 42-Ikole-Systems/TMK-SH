@@ -10,17 +10,13 @@ Rule CommandPrefix::make() {
 	};
 }
 
-// cmd_prefix       :            io_redirect
-//                 | cmd_prefix io_redirect
-//                 |            ASSIGNMENT_WORD
-//                 | cmd_prefix ASSIGNMENT_WORD
 vector<Rule::Option> CommandPrefix::options() {
-	// TODO: implement
 	auto placeholder = [](vector<Ast::Node> &args) -> optional<Ast::Node> {
 		return std::move(args[0]);
 	};
-	// FIXME: how do we implement lists of command prefixes?
-	return {Rule::NonTerminal(placeholder, {IORedirect::make()}),
+	return {Rule::NonTerminal(placeholder, {IORedirect::make(), CommandPrefix::make()}),
+	        Rule::NonTerminal(placeholder, {AssignmentWord::make(), CommandPrefix::make()}),
+	        Rule::NonTerminal(placeholder, {IORedirect::make()}),
 	        Rule::NonTerminal(placeholder, {AssignmentWord::make()})};
 }
 
