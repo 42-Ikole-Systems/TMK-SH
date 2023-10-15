@@ -69,7 +69,7 @@ ResultCode Executor::executeProcess(const string &program, const Ast::Command &c
 	} else if (pid == 0) {
 		// Child
 		auto args = convertArguments(command.args);
-		execve(programPath.value().c_str(), args.get(), Environment::getEnvironmentVariables().raw());
+		execve(programPath.value().c_str(), args.get(), Environment::getEnvironmentVariables());
 		SYSCALL_ERROR("execve");
 		if (errno == ENOEXEC) {
 			Builtin::exit(ResultCode::CommandNotExecutable);

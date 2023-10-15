@@ -23,7 +23,6 @@ static void initialize() {
 
 static int run(int argc, const char **argv, char *const *envp) {
 	initialize();
-	Environment::setEnvironmentVariables(envp);
 
 	using_history();
 	StdinReader reader = StdinReader(prompt);

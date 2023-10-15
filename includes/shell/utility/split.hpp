@@ -14,16 +14,16 @@ class ForwardLazySpliterator; // forward decleration
  * @brief Lazily split strings.
  */
 class LazySplit {
-	const string source;    /*!< -.*/
-	const string delimiter; /*!< -. */
+	const string source;
+	const string delimiter;
 
-	using iterator = ForwardLazySpliterator; /*!< -. */
+	using iterator = ForwardLazySpliterator;
 
 public:
 	/*!
-	 * @brief .-
-	 * @param source
-	 * @param delimiter
+	 * @brief
+	 * @param source String you want to split up.
+	 * @param delimiter Consecutive character(s) you want to split on.
 	 */
 	LazySplit(const string &source, const string &delimiter);
 
@@ -34,16 +34,7 @@ public:
 	 */
 	pair<size_t, std::string_view> next(size_t pos);
 
-	/*!
-	 * @brief -.
-	 * @return
-	 */
 	ForwardLazySpliterator begin();
-
-	/*!
-	 * @brief -.
-	 * @return
-	 */
 	ForwardLazySpliterator end();
 };
 
@@ -56,6 +47,13 @@ class ForwardLazySpliterator {
 	size_t pos;
 
 public:
+
+	/*!
+	 * @brief
+	 * @param view Of the substring that was split on.
+	 * @param splitter Reference to LazySplit instance for getting the next split.
+	 * @param pos Pos after delimiter last found.
+	*/
 	ForwardLazySpliterator(std::string_view view, LazySplit &splitter, size_t pos);
 
 	std::string_view &operator*();
