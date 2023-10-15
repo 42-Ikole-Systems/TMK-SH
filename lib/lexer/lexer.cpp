@@ -414,6 +414,9 @@ Lexer::State Lexer::backQuoteState() {
 	D_ASSERT(!state_data.states.empty());
 	while (true) {
 		char ch = chars.consume();
+		if (ch == EOF) {
+			syntaxError('`');
+		}
 		state_data.word.push_back(ch);
 		if (isBackslash(ch)) {
 			state_data.pushState(State::BackQuote);
