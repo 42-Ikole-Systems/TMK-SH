@@ -58,6 +58,24 @@ public:
 		as control operators*/
 		// SemicolonAnd, // ;&
 		// DoubleSemicolonAnd, // ;;&
+
+		/* reserved words */
+		If,     // if
+		Then,   // then
+		Else,   // else
+		Elif,   // elif
+		Fi,     // fi
+		Do,     // do
+		Done,   // done
+		Case,   // case
+		Esac,   // esac
+		While,  // while
+		Until,  // until
+		For,    // for
+		Lbrace, // {
+		Rbrace, // }
+		Bang,   // !
+		In      // in
 	};
 
 private:
@@ -65,6 +83,7 @@ private:
 	Variant variant;
 
 	static const vector<pair<string, Type>> operator_types;
+	static const vector<pair<string, Type>> reserved_word_types;
 
 public:
 	Token() = default;                   // remove
@@ -95,6 +114,8 @@ public:
 
 private:
 	static const string &getOperatorString(Token::Type type);
+	static const string &getReservedWordString(Token::Type type);
+	static bool isReservedWord(Token::Type type);
 	static bool isOperator(Token::Type type);
 	static bool isWord(Token::Type type);
 	static bool isIoNumber(Token::Type type);

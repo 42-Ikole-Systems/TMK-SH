@@ -37,7 +37,9 @@ string Token::toString() const {
 	if (isWord(type)) {
 		return type_string + "( " + get<WordToken>().toString() + " )";
 	} else if (isOperator(type)) {
-		return type_string + "( " + getOperatorString(type) + " )";
+		return type_string + "(" + getOperatorString(type) + ")";
+	} else if (isReservedWord(type)) {
+		return type_string + "(" + getReservedWordString(type) + ")";
 	} else if (isIoNumber(type)) {
 		return type_string + "( " + get<IoNumber>().toString() + " )";
 	} else if (isNewline(type)) {
@@ -77,6 +79,12 @@ const vector<pair<string, Token::Type>> Token::operator_types = {{";", Type::Sem
                                                                  {"<<-", Type::DoubleLessDash},
                                                                  {">|", Type::Clobber}};
 
+const vector<pair<string, Token::Type>> Token::reserved_word_types = {
+    {"if", Type::If},     {"then", Type::Then},   {"else", Type::Else},   {"elif", Type::Elif},
+    {"fi", Type::Fi},     {"do", Type::Do},       {"done", Type::Done},   {"case", Type::Case},
+    {"esac", Type::Esac}, {"while", Type::While}, {"until", Type::Until}, {"for", Type::For},
+    {"{", Type::Lbrace},  {"}", Type::Rbrace},    {"!", Type::Bang},      {"in", Type::In}};
+
 int Token::prefixOperatorMatches(const string &s) {
 	int count = 0;
 	for (auto &p : operator_types) {
@@ -105,6 +113,15 @@ const string &Token::getOperatorString(Token::Type type) {
 	throw std::runtime_error("operator token type not recognized");
 }
 
+const string &Token::getReservedWordString(Token::Type type) {
+	for (auto &p : reserved_word_types) {
+		if (p.second == type) {
+			return p.first;
+		}
+	}
+	throw std::runtime_error("operator token type not recognized");
+}
+
 bool Token::isWord(Token::Type type) {
 	return type == Token::Type::Word;
 }
@@ -115,6 +132,30 @@ bool Token::isIoNumber(Token::Type type) {
 
 bool Token::isNewline(Token::Type type) {
 	return type == Token::Type::Newline;
+}
+
+bool Token::isReservedWord(Token::Type type) {
+	switch (type) {
+		case Token::Type::If:
+		case Token::Type::Then:
+		case Token::Type::Else:
+		case Token::Type::Elif:
+		case Token::Type::Fi:
+		case Token::Type::Do:
+		case Token::Type::Done:
+		case Token::Type::Case:
+		case Token::Type::Esac:
+		case Token::Type::While:
+		case Token::Type::Until:
+		case Token::Type::For:
+		case Token::Type::Lbrace:
+		case Token::Type::Rbrace:
+		case Token::Type::Bang:
+		case Token::Type::In:
+			return true;
+		default:
+			return false;
+	}
 }
 
 bool Token::isOperator(Token::Type type) {
@@ -159,6 +200,8 @@ bool Token::equals(const Token &other) const {
 		}
 		return true;
 	} else if (isOperator(type)) {
+		return type == other.type;
+	} else if (isReservedWord(type)) {
 		return type == other.type;
 	} else if (isIoNumber(type)) {
 		auto &a = get<IoNumber>();
