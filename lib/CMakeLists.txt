@@ -7,6 +7,7 @@ add_library(
     assert.cpp
     environment.cpp
     exception.cpp
+    shell_environment.cpp
 )
 
 add_subdirectory(lexer)
