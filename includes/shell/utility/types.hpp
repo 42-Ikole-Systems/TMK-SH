@@ -17,20 +17,20 @@
 #include "shell/exception.hpp"
 
 namespace shell {
+using std::list;
 using std::make_pair;
 using std::make_shared;
 using std::make_unique;
 using std::map;
-using std::list;
 using std::nullopt;
 using std::optional;
 using std::pair;
 using std::set;
-using std::stack;
 using std::shared_ptr;
+using std::stack;
 using std::string;
-using std::unique_ptr;
 using std::string_view;
+using std::unique_ptr;
 using std::unordered_map;
 using std::unordered_set;
 using std::variant;

@@ -19,28 +19,27 @@ public:
 	virtual MaterializedEnvironment getEnvironmentVariables() = 0;
 
 	/*!
-	* @brief Adds variable to the environment variables, will overwrite if name already exits.
-	* @param variable In the form `name=value`
-	*/
+	 * @brief Adds variable to the environment variables, will overwrite if name already exits.
+	 * @param variable In the form `name=value`
+	 */
 	virtual void addEnvironmentVariable(const string &variable) = 0;
 
 	/*!
-	* @brief
-	* @param name
-	*/
+	 * @brief
+	 * @param name
+	 */
 	virtual void removeEnvironmentVariable(const string &name) = 0;
 
 	/*!
-	* @brief Gets value of environment variable.
-	* @param name
-	* @return
-	*/
+	 * @brief Gets value of environment variable.
+	 * @param name
+	 * @return
+	 */
 	virtual const char *get(const string &name) = 0;
 	/*!
-	* @brief
-	* @return
-	*/
+	 * @brief
+	 * @return
+	 */
 };
-
 
 } // namespace shell

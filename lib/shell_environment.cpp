@@ -38,18 +38,14 @@ std::pair<string_view, string_view> ShellEnvironment::VariableMap::getKeyValuePa
 	auto equal_sign = key.data() + key.length();
 	// Find the value part
 	auto value_length = strlen(equal_sign + 1);
-	string_view value(str, value_length);
+	string_view value(equal_sign + 1, value_length);
 	return std::make_pair(key, value);
 }
 
 void ShellEnvironment::VariableMap::addUnsafe(const char *raw) {
 	auto key_value = getKeyValueParts(raw);
 
-	auto entry = VariableEntry{
-		owned_strings.end(),
-		key_value.second,
-		true
-	};
+	auto entry = VariableEntry {owned_strings.end(), key_value.second, true};
 	// Finally add it to the environment map
 	environ.emplace(std::make_pair(key_value.first, entry));
 }
@@ -57,16 +53,12 @@ void ShellEnvironment::VariableMap::addUnsafe(const char *raw) {
 void ShellEnvironment::VariableMap::add(const string &variable) {
 	D_ASSERT(variable.find('=') != std::string::npos);
 	auto str = copyVariable(variable);
-	auto raw = (char*)str.get();
+	auto raw = (char *)str.get();
 
 	auto key_value = getKeyValueParts(raw);
 	// Add it to the owned strings list
 	auto it = owned_strings.insert(owned_strings.end(), str);
-	auto entry = VariableEntry{
-		it,
-		key_value.second,
-		false
-	};
+	auto entry = VariableEntry {it, key_value.second, false};
 	// Finally add it to the environment map
 	environ.emplace(std::make_pair(key_value.first, entry));
 }
@@ -107,8 +99,8 @@ MaterializedEnvironment ShellEnvironment::VariableMap::materialize() {
 	size_t env_size = environ.size();
 
 	// Set up the map
-	env->map = shared_ptr<char *const>(new char*[env_size + 1]);
-	auto modifiable_map = (char**)env->map.get();
+	env->map = shared_ptr<char *const>(new char *[env_size + 1]);
+	auto modifiable_map = (char **)env->map.get();
 
 	// Deliminate it with null
 	modifiable_map[env_size] = nullptr;
