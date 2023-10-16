@@ -9,11 +9,15 @@
 #include "shell/environment.hpp"
 
 #include <utility>
+#include "shell/lexer/reader_char_provider.hpp"
+#include "shell/error/error.hpp"
+#include "shell/logger.hpp"
 
 namespace shell {
 
 // todo: parse PS1
 static string prompt = "";
+static constexpr const char *SHELL = "TMK-SH";
 
 static void initialize() {
 	if (prompt.empty()) {
@@ -26,23 +30,28 @@ static int run(int argc, const char **argv, char *const *envp) {
 
 	using_history();
 	StdinReader reader = StdinReader(prompt);
-	// Lexer lexer = Lexer(reader);
-	// Parser parser = Parser();
 	while (true) {
-		auto line = reader.nextLine();
-		if (!line.has_value()) {
-			break;
+		try {
+			auto provider = ReaderCharProvider(reader);
+			auto lexer = Lexer(provider);
+			reader.setLexer(&lexer);
+			auto parser = Parser(lexer);
+			Ast ast = parser.parse();
+			ast.print();
+			if (provider.isEof()) {
+				break;
+			}
+			string line = provider.takeLine();
+			if (!line.empty()) {
+				add_history(line.c_str());
+			}
+			auto executor = Executor();
+			executor.execute(ast);
+		} catch (SyntaxErrorException e) {
+			LOG_ERROR("%: syntax error: %\n", SHELL, e.what());
+		} catch (RecoverableException e) {
+			LOG_ERROR("%: recoverable error: %\n", SHELL, e.what());
 		}
-		add_history(line.value().c_str());
-		line.value().push_back('\n');
-		auto chars = LineCharProvider(line.value());
-		auto lexer = Lexer(chars);
-		optional<Token> token;
-		auto parser = Parser(lexer);
-		Ast ast = parser.parse();
-		ast.print();
-		auto executor = Executor();
-		executor.execute(ast);
 	}
 	tprintf("\n");
 	return 0;

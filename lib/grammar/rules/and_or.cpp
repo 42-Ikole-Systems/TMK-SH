@@ -20,7 +20,7 @@ optional<Ast::Node> AndOr::handler(TokenProvider &tokens) {
 		if (!token.has_value()) {
 			break;
 		}
-		if (token->getType() != Token::Type::Word) {
+		if (token->getType() != Token::Type::Token) {
 			break;
 		}
 		auto &word_token = token->get<WordToken>();

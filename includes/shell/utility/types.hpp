@@ -11,6 +11,7 @@
 #include <variant>
 #include <utility>
 #include <filesystem>
+#include "shell/exception.hpp"
 
 namespace shell {
 using std::make_pair;

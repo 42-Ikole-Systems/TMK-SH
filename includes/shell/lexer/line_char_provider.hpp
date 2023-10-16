@@ -14,6 +14,9 @@ public:
 	LineCharProvider(const string &line);
 	char peek() override;
 	char consume() override;
+
+	void remove() override;
+	void unconsume() override;
 };
 
 } // namespace shell

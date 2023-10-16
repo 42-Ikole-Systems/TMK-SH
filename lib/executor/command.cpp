@@ -22,7 +22,7 @@ Command search and execution
 
 */
 
-static unique_ptr<char *const[]> convertArguments(const vector<string> &vec) {
+static unique_ptr<char *const []> convertArguments(const vector<string> &vec) {
 	std::unique_ptr<const char *[]> result(new const char *[vec.size() + 1]);
 	for (size_t i = 0; i < vec.size(); i++) {
 		result[i] = vec[i].c_str();

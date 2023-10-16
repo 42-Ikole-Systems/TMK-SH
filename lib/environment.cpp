@@ -5,16 +5,16 @@
 #include <sys/errno.h>
 #include <cstring>
 
-extern char* const* environ;
+extern char *const *environ;
 
 namespace shell {
 
-char* const* Environment::getEnvironmentVariables() {
+char *const *Environment::getEnvironmentVariables() {
 	return environ;
 }
 
-void Environment::addEnvironmentVariable(const string& variable) {
-	char* raw = new char[variable.length() + 1]; // Dont delete because it becomes part of env.
+void Environment::addEnvironmentVariable(const string &variable) {
+	char *raw = new char[variable.length() + 1]; // Dont delete because it becomes part of env.
 	std::memcpy(raw, variable.data(), variable.length() + 1);
 	if (putenv(raw) == -1) {
 		delete[] raw;
@@ -28,7 +28,7 @@ void Environment::removeEnvironmentVariable(const string &name) {
 	}
 }
 
-const char* Environment::get(const string &name) {
+const char *Environment::get(const string &name) {
 	return getenv(name.c_str());
 }
 

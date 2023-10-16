@@ -47,13 +47,12 @@ class ForwardLazySpliterator {
 	size_t pos;
 
 public:
-
 	/*!
 	 * @brief
 	 * @param view Of the substring that was split on.
 	 * @param splitter Reference to LazySplit instance for getting the next split.
 	 * @param pos Pos after delimiter last found.
-	*/
+	 */
 	ForwardLazySpliterator(std::string_view view, LazySplit &splitter, size_t pos);
 
 	std::string_view &operator*();

@@ -15,7 +15,7 @@ ResultCode Executor::execute(Ast::Node &node) {
 	using NodeType = Ast::Node::Type;
 	/*
 	 node.expand() :: Sequence -> no-op
-	 node.expend() :: Command -> expand args
+	 node.expand() :: Command -> expand args
 	*/
 	// expander.expand(node); // correct place to expand? `$(ls)`
 	// "$( echo "abc" )" -> "abc" -> abc
