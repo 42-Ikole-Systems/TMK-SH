@@ -17,7 +17,7 @@ Rule SimpleCommand::make() {
 
 vector<Rule::Option> SimpleCommand::options() {
 	auto placeholder = [](vector<Ast::Node> &args) -> optional<Ast::Node> {
-		throw std::runtime_error("Command with prefix not implemented yet");
+		throw NotImplementedException("SimpleCommand::options");
 	};
 	return {GrammarUtil::MakeOption<CommandPrefix, CommandWord, CommandSuffix>(
 	            // TODO implement
