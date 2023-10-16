@@ -12,17 +12,9 @@ public:
 
 	virtual optional<Token> peek() = 0;
 	virtual optional<Token> consume() = 0;
-	virtual optional<Token> consumeIf(std::function<bool(Token &token)> predicate) {
-		auto token = peek();
-		if (!token.has_value()) {
-			return nullopt;
-		}
-		if (predicate(token.value())) {
-			consume();
-			return token;
-		}
-		return nullopt;
-	}
+
+	using consume_predicate_t = std::function<bool(Token &token)>;
+	virtual optional<Token> consumeIf(consume_predicate_t predicate);
 };
 
 } // namespace shell
