@@ -17,7 +17,6 @@ vector<Rule::Option> IORedirect::options() {
 		return nullopt;
 	};
 	auto handler = [](vector<Ast::Node> &args) -> optional<Ast::Node> {
-		LOG_DEBUG("IORedirect: handler\n");
 		if (args.size() == 2) {
 			auto &io_number_token = args[0].get<Ast::Literal>().token.get<IoNumber>();
 			auto io_number = std::stoul(io_number_token.value);
@@ -31,7 +30,6 @@ vector<Rule::Option> IORedirect::options() {
 			return std::move(redirect_node);
 		}
 	};
-	// FIXME: the Lexer does not yet produce IoNumber tokens
 	return {Rule::NonTerminal(handler, {GrammarUtil::ConsumeIf<Token::Type::IoNumber>::make(), IOFile::make()}),
 	        Rule::NonTerminal(placeholder, {GrammarUtil::ConsumeIf<Token::Type::IoNumber>::make(), IOHere::make()}),
 	        Rule::NonTerminal(handler, {IOFile::make()}), Rule::NonTerminal(placeholder, {IOHere::make()})};
