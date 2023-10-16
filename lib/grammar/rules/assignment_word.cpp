@@ -27,7 +27,7 @@ bool AssignmentWord::isValidName(const string &input) {
 		auto is_underscore = ch == '_';
 		auto is_digit = isdigit(ch);
 		auto is_alpha = isalpha(ch);
-		if (!is_underscore && is_digit && is_alpha) {
+		if (!is_underscore && !is_digit && !is_alpha) {
 			return false;
 		}
 	}
