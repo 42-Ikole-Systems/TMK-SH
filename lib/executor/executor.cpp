@@ -8,7 +8,7 @@
 
 namespace shell {
 
-Executor::Executor() {
+Executor::Executor(Environment &environment) : environment(environment) {
 }
 
 ResultCode Executor::execute(Ast::Node &node) {

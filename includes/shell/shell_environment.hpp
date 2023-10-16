@@ -6,6 +6,8 @@
 namespace shell {
 
 class ShellEnvironment : public Environment {
+public:
+	ShellEnvironment();
 private:
 	struct VariableMap {
 	private:
@@ -13,6 +15,8 @@ private:
 			// Save where in the 'owned_strings' this is stored, for removal
 			list<shared_ptr<const char>>::iterator it;
 			string_view value_part;
+			// Is this fetched from the char **environ
+			bool is_base;
 		};
 	public:
 		unordered_map<string_view, VariableEntry> environ;
@@ -20,15 +24,16 @@ private:
 	public:
 		const char *get(const string &name);
 		void add(const string &variable);
+		// UNSAFE, DOES NOT MAKE A COPY
+		void addUnsafe(const char *variable);
 		void remove(const string &name);
 		void update(const string &variable);
 		MaterializedEnvironment materialize();
 	private:
 		shared_ptr<const char> copyVariable(const string &variable);
 		string_view extractKey(const char *variable);
+		std::pair<string_view, string_view> getKeyValueParts(const char *str);
 	};
-public:
-	ShellEnvironment();
 public:
 	MaterializedEnvironment getEnvironmentVariables() override;
 

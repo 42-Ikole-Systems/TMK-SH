@@ -6,12 +6,13 @@
 #include "shell/lexer/line_char_provider.hpp"
 #include "shell/print.hpp"
 #include "shell/executor/executor.hpp"
-#include "shell/environment.hpp"
+#include "shell/interfaces/environment.hpp"
 
 #include <utility>
 #include "shell/lexer/reader_char_provider.hpp"
 #include "shell/error/error.hpp"
 #include "shell/logger.hpp"
+#include "shell/shell_environment.hpp"
 
 namespace shell {
 
@@ -45,7 +46,8 @@ static int run(int argc, const char **argv, char *const *envp) {
 			if (!line.empty()) {
 				add_history(line.c_str());
 			}
-			auto executor = Executor();
+			ShellEnvironment environment;
+			auto executor = Executor(environment);
 			executor.execute(ast);
 		} catch (SyntaxErrorException e) {
 			LOG_ERROR("%: syntax error: %\n", SHELL, e.what());

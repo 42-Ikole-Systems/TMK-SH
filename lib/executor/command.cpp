@@ -2,7 +2,7 @@
 #include "shell/ast.hpp"
 #include "shell/assert.hpp"
 #include "shell/shell.hpp"
-#include "shell/environment.hpp"
+#include "shell/interfaces/environment.hpp"
 #include "shell/utility/split.hpp"
 
 #include <unistd.h>
@@ -35,12 +35,12 @@ static unique_ptr<char *const []> convertArguments(const vector<string> &vec) {
  * @brief Resolves program path.
  * @param command
  */
-static optional<string> resolvePath(const string &program) {
+optional<string> Executor::resolvePath(const string &program) {
 	if (program.find('/') != string::npos) {
 		return program;
 	}
 
-	const auto &path = Environment::get("PATH");
+	const auto &path = environment.get("PATH");
 	for (const auto location : LazySplit(path, ":")) {
 		const auto programPath = std::filesystem::path(location) / program;
 		if (std::filesystem::exists(programPath)) {
@@ -68,7 +68,8 @@ ResultCode Executor::execute(Ast::Command &command) {
 	} else if (pid == 0) {
 		// Child
 		auto args = convertArguments(command.args);
-		execve(programPath.value().c_str(), args.get(), Environment::getEnvironmentVariables());
+		auto environ = environment.getEnvironmentVariables();
+		execve(programPath.value().c_str(), args.get(), environ->map.get());
 		SYSCALL_ERROR("execve");
 		if (errno == ENOEXEC) {
 			Exit(ResultCode::CommandNotExecutable);
