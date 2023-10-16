@@ -3,6 +3,7 @@
 #include "shell/grammar/rules/io_file.hpp"
 #include "shell/grammar/rules/io_here.hpp"
 #include "shell/assert.hpp"
+#include "shell/error/error.hpp"
 
 namespace shell {
 
@@ -19,7 +20,13 @@ vector<Rule::Option> IORedirect::options() {
 	auto handler = [](vector<Ast::Node> &args) -> optional<Ast::Node> {
 		if (args.size() == 2) {
 			auto &io_number_token = args[0].get<Ast::Literal>().token.get<IoNumber>();
-			auto io_number = std::stoul(io_number_token.value);
+			int32_t io_number;
+			try {
+				io_number = std::stod(io_number_token.value);
+				D_ASSERT(io_number >= 0);
+			} catch (const std::out_of_range &e) {
+				throw SyntaxErrorException("Provided filedescriptor is invalid");
+			}
 
 			auto &redirect_node = args[1].get<Ast::Redirection>();
 			redirect_node.io_number = io_number;

@@ -22,6 +22,9 @@ static unique_ptr<char *const []> convertArguments(const Ast::List &list) {
 	std::unique_ptr<const char *[]> result(new const char *[vec.size() + 1]);
 	size_t i = 0;
 	for (auto &entry : vec) {
+		if (entry.getType() != Ast::Node::Type::Literal) {
+			throw NotImplementedException("Execution of Command with non-literal arguments not supported yet");
+		}
 		D_ASSERT(entry.getType() == Ast::Node::Type::Literal);
 		result[i] = entry.get<Ast::Literal>().token.get<WordToken>().value.c_str();
 		i++;

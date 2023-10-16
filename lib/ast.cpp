@@ -103,6 +103,7 @@ void Ast::Literal::print(int level) const {
 	printLevel(level + 1);
 	tprintf("Token: ");
 	token.print();
+	tprintf("\n");
 }
 
 void Ast::Command::print(int level) const {

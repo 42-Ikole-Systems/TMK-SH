@@ -7,7 +7,7 @@ Token::Token(Token::Type type, Variant &&variant) : type(type), variant(std::mov
 }
 
 void Token::print() const {
-	LOG_DEBUG("%\n", toString());
+	tprintf("%\n", toString());
 }
 
 static const map<Token::Type, string> token_type_strings = {{Token::Type::Token, "Token"},

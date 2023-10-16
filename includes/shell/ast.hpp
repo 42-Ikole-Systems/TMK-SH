@@ -66,7 +66,7 @@ public:
 	public:
 		string file_name;
 		Token::Type redirection_type;
-		size_t io_number;
+		int32_t io_number;
 	};
 
 	class Node {
