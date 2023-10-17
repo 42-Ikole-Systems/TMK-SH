@@ -16,14 +16,23 @@ public:
 	}
 
 	template <Token::Type TOKEN_TYPE>
-	static optional<Ast::Node> ConsumeIf(TokenProvider &tokens) {
-		auto token = tokens.peek();
-		if (token->getType() != TOKEN_TYPE) {
-			return nullopt;
+	struct ConsumeIf {
+	public:
+		static Rule make() {
+			return Rule {[]() -> vector<Rule::Option> {
+				return {Rule::Terminal {ConsumeIf<TOKEN_TYPE>::OP}};
+			}};
 		}
-		tokens.consume();
-		return Ast::Literal(std::move(token.value()));
-	}
+
+	public:
+		static optional<Ast::Node> OP(TokenProvider &tokens) {
+			auto token = tokens.consumeIf([](Token &token) { return token.getType() == TOKEN_TYPE; });
+			if (!token.has_value()) {
+				return nullopt;
+			}
+			return Ast::Literal(std::move(token.value()));
+		}
+	};
 };
 
 } // namespace shell

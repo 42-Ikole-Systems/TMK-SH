@@ -30,9 +30,8 @@ public:
 	};
 
 private:
-
 	struct StateData {
-		string word;    // is this enough state?
+		string word; // is this enough state?
 		std::stack<State> states;
 
 		void pushState(State state);

@@ -6,13 +6,13 @@
 
 namespace shell {
 
-class AndOr {
+class SimpleCommand {
 public:
 	static Rule make();
 	static vector<Rule::Option> options();
 
 private:
-	static optional<Ast::Node> handler(vector<Ast::Node> &args);
+	static optional<Ast::Node> singleCommand(vector<Ast::Node> &args);
 };
 
 } // namespace shell

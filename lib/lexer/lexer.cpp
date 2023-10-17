@@ -6,9 +6,8 @@
 #include "shell/exception.hpp"
 #include "shell/error/error.hpp"
 
-#define UNEXPECTED_EOF "unexpected end of file"
+#define UNEXPECTED_EOF             "unexpected end of file"
 #define UNEXPECTED_EOF_WHILE_ERROR "unexpected EOF while looking for matching"
-
 
 namespace shell {
 
@@ -59,8 +58,8 @@ void Lexer::delimit(Token &&token) {
 
 /*
 Handler requirements:
-	- Delimits at most one token in a single run
-	- Returns the next state in case of a state transition requirement
+    - Delimits at most one token in a single run
+    - Returns the next state in case of a state transition requirement
 Handlers are free to loop and process as many chars as necessary in order to delimit or encounter a state transition.
 */
 std::function<Lexer::State(Lexer &)> Lexer::getStateHandler() {
@@ -104,7 +103,7 @@ Lexer::State Lexer::emptyState() {
 	}
 }
 
-static bool isIoNumber(const string& word, char delimiter) {
+static bool isIoNumber(const string &word, char delimiter) {
 	if (delimiter != '>' && delimiter != '<') {
 		return false;
 	}
@@ -163,9 +162,9 @@ Lexer::State Lexer::wordState() {
 	// Handle delimit outside of loop: EOF, IFS, operator, comment
 	if (!state_data.word.empty()) {
 		if (isIoNumber(state_data.word, chars.peek())) {
-			delimit(Token(Token::Type::IoNumber, IoNumber{std::move(state_data.word)}));
+			delimit(Token(Token::Type::IoNumber, IoNumber {std::move(state_data.word)}));
 		} else {
-			delimit(Token{Token::Type::Token, WordToken{std::move(state_data.word)}});
+			delimit(Token {Token::Type::Token, WordToken {std::move(state_data.word)}});
 		}
 		state_data.word.clear();
 	}
@@ -253,8 +252,8 @@ Lexer::State Lexer::backslashState() {
 
 /*
 Preconditions:
-	- Starting single quote is consumed
-	- Previous state is on the stack
+    - Starting single quote is consumed
+    - Previous state is on the stack
 No transitions, everything is literal.
 */
 Lexer::State Lexer::singleQuoteState() {
@@ -273,8 +272,8 @@ Lexer::State Lexer::singleQuoteState() {
 
 /*
 Preconditions:
-	- Starting double quote is consumed
-	- Previous state is on the stack
+    - Starting double quote is consumed
+    - Previous state is on the stack
 Nested transitions: \, `, $ (expansions)
 */
 Lexer::State Lexer::doubleQuoteState() {
@@ -372,7 +371,6 @@ Lexer::State Lexer::generalExpansionHandler(State state, char terminator) {
 	state_data.pushState(state);
 	return current;
 }
-
 
 Lexer::State Lexer::parameterExpansionState() {
 	return generalExpansionHandler(state, '}');

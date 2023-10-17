@@ -10,9 +10,13 @@
 #include <memory>
 #include <variant>
 #include <utility>
+#include <deque>
+#include <list>
 #include "shell/exception.hpp"
 
 namespace shell {
+using std::deque;
+using std::list;
 using std::make_pair;
 using std::make_unique;
 using std::map;

@@ -17,19 +17,24 @@ Command search and execution
 
 */
 
-static unique_ptr<char *const []> convertArguments(const vector<string> &vec) {
+static unique_ptr<char *const []> convertArguments(const Ast::List &list) {
+	auto &vec = list.entries;
 	std::unique_ptr<const char *[]> result(new const char *[vec.size() + 1]);
-	for (size_t i = 0; i < vec.size(); i++) {
-		result[i] = vec[i].c_str();
+	size_t i = 0;
+	for (auto &entry : vec) {
+		if (entry.getType() != Ast::Node::Type::Literal) {
+			throw NotImplementedException("Execution of Command with non-literal arguments not supported yet");
+		}
+		D_ASSERT(entry.getType() == Ast::Node::Type::Literal);
+		result[i] = entry.get<Ast::Literal>().token.get<WordToken>().value.c_str();
+		i++;
 	}
 	result[vec.size()] = nullptr;
 	return unique_ptr<char *const[]>((char *const *)result.release());
 }
 
 ResultCode Executor::execute(Ast::Command &command) {
-	D_ASSERT(!command.args.empty());
-
-	const string &program = command.args[0];
+	const string &program = command.program_name;
 
 	// todo: add builtin support
 	// todo: path resolution
@@ -44,7 +49,7 @@ ResultCode Executor::execute(Ast::Command &command) {
 		return ResultCode::GeneralError;
 	} else if (pid == 0) {
 		// Child
-		auto args = convertArguments(command.args);
+		auto args = convertArguments(command.arguments);
 		execve(program.c_str(), args.get(), envp);
 		SYSCALL_ERROR("execve");
 		if (errno == ENOEXEC) {

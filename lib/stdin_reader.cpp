@@ -37,11 +37,11 @@ char StdinReader::nextChar() {
 	return line->at(index++);
 }
 
-void StdinReader::setLexer(Lexer* lexer) {
+void StdinReader::setLexer(Lexer *lexer) {
 	this->lexer = lexer;
 }
 
-const char* StdinReader::getPrompt() const {
+const char *StdinReader::getPrompt() const {
 	if (lexer == nullptr || lexer->getCurrentState() == Lexer::State::Empty) {
 		return prompt.c_str();
 	}

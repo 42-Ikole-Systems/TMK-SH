@@ -16,7 +16,7 @@ namespace shell {
 
 // todo: parse PS1
 static string prompt = "";
-static constexpr const char* SHELL = "TMK-SH";
+static constexpr const char *SHELL = "TMK-SH";
 
 static void initialize() {
 	if (prompt.empty()) {

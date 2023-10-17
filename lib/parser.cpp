@@ -57,19 +57,6 @@ void Parser::setState(size_t state) {
 	token_position = state;
 }
 
-/*
-a ; b ; c ; d => SeparatorOp (
-    Command(a),
-    SeparatorOp
-        Command(b),
-        SeparatorOp(
-            Command(c),
-            Command(d)
-        )
-    )
-)
-*/
-
 optional<Ast::Node> Parser::parse(Rule::NonTerminal &option) {
 	vector<Ast::Node> nodes;
 	auto &rules = option.sequence;
@@ -105,7 +92,7 @@ optional<Ast::Node> Parser::parse(Rule::Terminal &option) {
 	return result;
 }
 
-optional<Ast::Node> Parser::parse(Rule rule) {
+optional<Ast::Node> Parser::parse(Rule &rule) {
 	using OptionType = Rule::Option::Type;
 	auto options = rule.options();
 	for (auto &option : options) {
@@ -141,7 +128,7 @@ optional<Ast::Node> Parser::parse(Rule rule) {
 
 Ast Parser::parse() {
 	auto initial_rule = ListRule::make();
-	auto root_node = parse(std::move(initial_rule));
+	auto root_node = parse(initial_rule);
 
 	if (!root_node.has_value()) {
 		return Ast(nullptr);

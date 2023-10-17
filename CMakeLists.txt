@@ -13,7 +13,7 @@ include_directories(${CMAKE_SOURCE_DIR}/includes)
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
   set(CMAKE_CXX_FLAGS_DEBUG
-      "${CMAKE_CXX_FLAGS_DEBUG} -g3 -Wall -Wextra -Werror -fsanitize=address -DDEBUG"
+      "${CMAKE_CXX_FLAGS_DEBUG} -g3 -O0 -Wall -Wextra -Werror -fsanitize=address -DDEBUG"
   )
   set(CMAKE_CXX_FLAGS_DEBUG
       "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused -Wno-unused-parameter")
