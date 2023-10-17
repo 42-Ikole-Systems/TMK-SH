@@ -59,6 +59,11 @@ void ShellEnvironment::VariableMap::add(const string &variable) {
 	// Add it to the owned strings list
 	auto it = owned_strings.insert(owned_strings.end(), str);
 	auto entry = VariableEntry {it, key_value.second, false};
+
+	// Since our 'key' references memory we will free when the value gets deleted
+	// every add also needs to be a delete, because the key needs to be updated as well..
+	remove(key_value.first);
+
 	// Finally add it to the environment map
 	environ.emplace(std::make_pair(key_value.first, entry));
 }
@@ -81,7 +86,7 @@ void ShellEnvironment::VariableMap::update(const string &variable) {
 	add(variable);
 }
 
-void ShellEnvironment::VariableMap::remove(const string &name) {
+void ShellEnvironment::VariableMap::remove(string_view name) {
 	auto it = environ.find(name);
 	if (it == environ.end()) {
 		return;
@@ -92,6 +97,10 @@ void ShellEnvironment::VariableMap::remove(const string &name) {
 		owned_strings.erase(owned_string_entry);
 	}
 	environ.erase(it);
+}
+
+void ShellEnvironment::VariableMap::remove(const string &name) {
+	return remove(string_view(name.c_str(), name.length()));
 }
 
 MaterializedEnvironment ShellEnvironment::VariableMap::materialize() {

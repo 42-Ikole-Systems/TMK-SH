@@ -34,6 +34,7 @@ private:
 		MaterializedEnvironment materialize();
 
 	private:
+		void remove(string_view name);
 		shared_ptr<const char> copyVariable(const string &variable);
 		string_view extractKey(const char *variable);
 		std::pair<string_view, string_view> getKeyValueParts(const char *str);
