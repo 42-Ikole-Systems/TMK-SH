@@ -7,7 +7,7 @@ Token::Token(Token::Type type, Variant &&variant) : type(type), variant(std::mov
 }
 
 void Token::print() const {
-	LOG_DEBUG("%\n", toString());
+	tprintf("%\n", toString());
 }
 
 static const map<Token::Type, string> token_type_strings = {{Token::Type::Token, "Token"},
@@ -107,6 +107,15 @@ optional<Token::Type> Token::exactOperatorType(const string &s) {
 	return nullopt;
 }
 
+optional<Token::Type> Token::exactReservedWordType(const string &s) {
+	for (auto &p : reserved_word_types) {
+		if (p.first == s) {
+			return p.second;
+		}
+	}
+	return nullopt;
+}
+
 const string &Token::getOperatorString(Token::Type type) {
 	for (auto &p : operator_types) {
 		if (p.second == type) {
@@ -126,7 +135,15 @@ const string &Token::getReservedWordString(Token::Type type) {
 }
 
 bool Token::isToken(Token::Type type) {
-	return type == Token::Type::Token;
+	switch (type) {
+		case Token::Type::Token:
+		case Token::Type::Word:
+		case Token::Type::AssignmentWord:
+		case Token::Type::Name:
+			return true;
+		default:
+			return false;
+	}
 }
 
 bool Token::isIoNumber(Token::Type type) {

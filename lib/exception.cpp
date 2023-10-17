@@ -3,7 +3,7 @@
 namespace shell {
 
 const char *NotImplementedException::what() const noexcept {
-	return "not implemented";
+	return msg.c_str();
 }
 
 } // namespace shell

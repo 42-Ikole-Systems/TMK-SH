@@ -9,6 +9,7 @@ add_library(
 )
 
 add_subdirectory(lexer)
+add_subdirectory(parser)
 
 # Forward the declared variable to the parent scope
 set(TEST_OBJECT_FILES

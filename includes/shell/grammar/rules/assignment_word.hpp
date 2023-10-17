@@ -6,13 +6,14 @@
 
 namespace shell {
 
-class AndOr {
+class AssignmentWord {
 public:
 	static Rule make();
 	static vector<Rule::Option> options();
 
-private:
-	static optional<Ast::Node> handler(vector<Ast::Node> &args);
+public:
+	static optional<Ast::Node> handler(TokenProvider &tokens);
+	static bool isValidName(const string &value);
 };
 
 } // namespace shell
