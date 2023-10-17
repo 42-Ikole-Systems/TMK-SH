@@ -60,7 +60,7 @@ optional<string> Executor::resolvePath(const string &program) {
 		return program;
 	}
 
-	const auto &path = Environment::get("PATH");
+	const auto &path = env.get("PATH");
 	for (const auto location : LazySplit(path, ":")) {
 		const auto program_path = std::filesystem::path(location) / program;
 		if (std::filesystem::exists(program_path) && isExecutable(program_path)) {
@@ -86,7 +86,7 @@ ResultCode Executor::execute(Ast::Command &command) {
 	} else if (pid == 0) {
 		// Child
 		auto args = convertArguments(command.arguments);
-		execve(programPath.value().c_str(), args.get(), Environment::getEnvironmentVariables());
+		execve(programPath.value().c_str(), args.get(), env.materialize());
 		SYSCALL_ERROR("execve");
 		if (errno == ENOEXEC) {
 			Exit(ResultCode::CommandNotExecutable);

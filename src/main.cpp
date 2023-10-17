@@ -6,7 +6,7 @@
 #include "shell/lexer/line_char_provider.hpp"
 #include "shell/print.hpp"
 #include "shell/executor/executor.hpp"
-#include "shell/environment.hpp"
+#include "shell/global_environment.hpp"
 
 #include <utility>
 #include "shell/lexer/reader_char_provider.hpp"
@@ -28,6 +28,7 @@ static void initialize() {
 static int run(int argc, const char **argv, char *const *envp) {
 	initialize();
 
+	auto env = GlobalEnvironment();
 	using_history();
 	StdinReader reader = StdinReader(prompt);
 	while (true) {
@@ -45,7 +46,7 @@ static int run(int argc, const char **argv, char *const *envp) {
 			if (!line.empty()) {
 				add_history(line.c_str());
 			}
-			auto executor = Executor();
+			auto executor = Executor(env);
 			executor.execute(ast);
 		} catch (SyntaxErrorException e) {
 			LOG_ERROR("%: syntax error: %\n", SHELL, e.what());

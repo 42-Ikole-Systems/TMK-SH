@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <map>
 #include <unordered_map>
@@ -27,6 +28,7 @@ using std::pair;
 using std::set;
 using std::shared_ptr;
 using std::string;
+using std::string_view;
 using std::unique_ptr;
 using std::unordered_map;
 using std::unordered_set;

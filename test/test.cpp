@@ -9,12 +9,14 @@
 #include "shell/print.hpp"
 #include "shell/executor/executor.hpp"
 #include "shell/environment.hpp"
+#include "shell/global_environment.hpp"
 
 using namespace shell;
 
 extern char** environ;
 
 TEST_CASE("basic shell", "[shell]") {
+	GlobalEnvironment env;
 	char** envp = environ;
 	string line = "/bin/ls -la";
 
@@ -24,6 +26,6 @@ TEST_CASE("basic shell", "[shell]") {
 	auto parser = Parser(lexer);
 	Ast ast = parser.parse();
 	ast.print();
-	auto executor = Executor();
+	auto executor = Executor(env);
 	executor.execute(ast);
 }
