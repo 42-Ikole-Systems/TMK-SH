@@ -26,6 +26,7 @@ public:
 
 private:
 	[[noreturn]] void Exit(ResultCode code);
+	optional<string> resolvePath(const string &program);
 };
 
 } // namespace shell

@@ -10,6 +10,8 @@
 #include <ranges>
 #include <filesystem>
 
+#include <sys/stat.h>
+
 namespace shell {
 
 /*
@@ -38,20 +40,31 @@ static unique_ptr<char *const []> convertArguments(const Ast::List &list) {
 	return unique_ptr<char *const[]>((char *const *)result.release());
 }
 
+bool isExecutable(const string &filepath) {
+	struct stat file_info;
+	if (stat(filepath.c_str(), &file_info) == 0) {
+		// Check if the owner, group, or others have execute permission
+		if ((file_info.st_mode & S_IXUSR) || (file_info.st_mode & S_IXGRP) || (file_info.st_mode & S_IXOTH)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 /*!
  * @brief Resolves program path.
  * @param command
  */
-static optional<string> resolvePath(const string &program) {
+optional<string> Executor::resolvePath(const string &program) {
 	if (program.find('/') != string::npos) {
 		return program;
 	}
 
 	const auto &path = Environment::get("PATH");
 	for (const auto location : LazySplit(path, ":")) {
-		const auto programPath = std::filesystem::path(location) / program;
-		if (std::filesystem::exists(programPath)) {
-			return programPath.string();
+		const auto program_path = std::filesystem::path(location) / program;
+		if (std::filesystem::exists(program_path) && isExecutable(program_path)) {
+			return program_path.string();
 		}
 	}
 	return nullopt;
