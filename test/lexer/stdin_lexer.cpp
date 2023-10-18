@@ -3,6 +3,7 @@
 #include "shell/lexer/reader_char_provider.hpp"
 #include "shell/logger.hpp"
 #include "readline/readline.h"
+#include "readline/history.h"
 
 // skip, only run manually for testing stdin prompts
 TEST_CASE("lexer stdin test", "[.][manual][lexer]") {
