@@ -1,16 +1,19 @@
-#include <stdbool.h>
-#include <readline/readline.h>
 #include "shell/stdin_reader.hpp"
 #include "shell/parser.hpp"
 #include "shell/util.hpp"
 #include "shell/lexer/lexer.hpp"
 #include "shell/lexer/line_char_provider.hpp"
-#include <utility>
 #include "shell/print.hpp"
 #include "shell/executor/executor.hpp"
 #include "shell/lexer/reader_char_provider.hpp"
 #include "shell/error/error.hpp"
 #include "shell/logger.hpp"
+
+#include <readline/readline.h>
+#include <readline/history.h>
+
+#include <stdbool.h>
+#include <utility>
 
 namespace shell {
 
@@ -46,9 +49,9 @@ static int run(int argc, const char **argv, char *const *envp) {
 			}
 			auto executor = Executor(envp);
 			executor.execute(ast);
-		} catch (SyntaxErrorException e) {
+		} catch (SyntaxErrorException& e) {
 			LOG_ERROR("%: syntax error: %\n", SHELL, e.what());
-		} catch (RecoverableException e) {
+		} catch (RecoverableException& e) {
 			LOG_ERROR("%: recoverable error: %\n", SHELL, e.what());
 		}
 	}

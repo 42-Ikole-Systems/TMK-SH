@@ -2,6 +2,7 @@
 #include "shell/ast.hpp"
 #include "shell/assert.hpp"
 #include "shell/shell.hpp"
+#include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
 

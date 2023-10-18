@@ -1,6 +1,7 @@
 #include "shell/assert.hpp"
 #include <errno.h>
 #include <cstdio>
+#include <string.h>
 
 namespace shell {
 
