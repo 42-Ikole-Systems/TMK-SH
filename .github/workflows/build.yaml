@@ -20,8 +20,6 @@ jobs:
     
     - name: Update version
       run: sudo apt-get update
-    - name: Install Dependencies
-      run: sudo apt-get install cmake`
     - name: Build project
       run: make
 
@@ -37,7 +35,5 @@ jobs:
     
     - name: Update version
       run: brew update
-    - name: Install Dependencies
-      run: brew install cmake
     - name: Build project
       run: make
