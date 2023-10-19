@@ -18,10 +18,17 @@ Command search and execution
 
 */
 
-static unique_ptr<char *const []> convertArguments(const Ast::List &list) {
-	auto &vec = list.entries;
-	std::unique_ptr<const char *[]> result(new const char *[vec.size() + 1]);
-	size_t i = 0;
+/*!
+ * @brief Generates array of arguments for execve (first argument is program name).
+ * @param command
+ * @return
+*/
+static unique_ptr<char *const []> convertArguments(const Ast::Command &command) {
+	const auto &vec = command.arguments.entries;
+	std::unique_ptr<const char *[]> result(new const char *[vec.size() + 2]); // +1 for executable name, +1 for nullptr
+	result[0] = command.program_name.c_str();
+	std::cout << "program name: " << result[0] << std::endl;
+	size_t i = 1;
 	for (auto &entry : vec) {
 		if (entry.getType() != Ast::Node::Type::Literal) {
 			throw NotImplementedException("Execution of Command with non-literal arguments not supported yet");
@@ -30,7 +37,7 @@ static unique_ptr<char *const []> convertArguments(const Ast::List &list) {
 		result[i] = entry.get<Ast::Literal>().token.get<WordToken>().value.c_str();
 		i++;
 	}
-	result[vec.size()] = nullptr;
+	result[i] = nullptr;
 	return unique_ptr<char *const[]>((char *const *)result.release());
 }
 
@@ -50,7 +57,7 @@ ResultCode Executor::execute(Ast::Command &command) {
 		return ResultCode::GeneralError;
 	} else if (pid == 0) {
 		// Child
-		auto args = convertArguments(command.arguments);
+		auto args = convertArguments(command);
 		execve(program.c_str(), args.get(), envp);
 		SYSCALL_ERROR("execve");
 		if (errno == ENOEXEC) {
