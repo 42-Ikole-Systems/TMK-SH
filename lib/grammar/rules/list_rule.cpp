@@ -30,7 +30,7 @@ optional<Ast::Node> ListRule::separatedList(vector<Ast::Node> &nodes) {
 	auto separator = Ast::SeparatorOp();
 	separator.left = make_unique<Ast::Node>(std::move(command));
 	separator.right = make_unique<Ast::Node>(std::move(list));
-	return std::move(separator);
+	return separator;
 }
 
 } // namespace shell

@@ -1,10 +1,14 @@
 #include "shell/lexer/lexer.hpp"
 #include "shell/utility/types.hpp"
 #include <stdio.h>
+
 #include "shell/logger.hpp"
 #include "shell/assert.hpp"
 #include "shell/exception.hpp"
 #include "shell/error/error.hpp"
+
+#include <stdio.h>
+#include <cstring>
 
 #define UNEXPECTED_EOF             "unexpected end of file"
 #define UNEXPECTED_EOF_WHILE_ERROR "unexpected EOF while looking for matching"
@@ -65,6 +69,7 @@ Handlers are free to loop and process as many chars as necessary in order to del
 std::function<Lexer::State(Lexer &)> Lexer::getStateHandler() {
 	static const std::function<State(Lexer &)> handlers[] = {
 	    [(int)Lexer::State::Empty] = &Lexer::emptyState,
+		[(int)Lexer::State::Done] = nullptr,
 	    [(int)Lexer::State::Word] = &Lexer::wordState,
 	    [(int)Lexer::State::Operator] = &Lexer::operatorState,
 	    [(int)Lexer::State::Comment] = &Lexer::commentState,
@@ -73,10 +78,10 @@ std::function<Lexer::State(Lexer &)> Lexer::getStateHandler() {
 	    [(int)Lexer::State::DoubleQuote] = &Lexer::doubleQuoteState,
 	    [(int)Lexer::State::InnerBackslash] = &Lexer::innerBackslashState,
 	    [(int)Lexer::State::ExpansionStart] = &Lexer::expansionStartState,
-	    [(int)Lexer::State::BackQuote] = &Lexer::backQuoteState,
 	    [(int)Lexer::State::ParameterExpansion] = &Lexer::parameterExpansionState,
-	    [(int)Lexer::State::ArithmeticExpansion] = &Lexer::arithmeticExpansionState,
 	    [(int)Lexer::State::CommandSubstitution] = &Lexer::commandSubstitutionState,
+	    [(int)Lexer::State::BackQuote] = &Lexer::backQuoteState,
+	    [(int)Lexer::State::ArithmeticExpansion] = &Lexer::arithmeticExpansionState,
 	};
 	D_ASSERT((size_t)state < (sizeof(handlers) / sizeof(handlers[0])));
 	D_ASSERT(handlers[(int)state] != nullptr);

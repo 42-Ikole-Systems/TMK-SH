@@ -3,6 +3,8 @@
 #include "shell/lexer/token.hpp"
 #include "shell/utility/types.hpp"
 
+#include <functional>
+
 namespace shell {
 
 class TokenProvider {

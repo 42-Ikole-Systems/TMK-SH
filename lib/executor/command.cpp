@@ -5,6 +5,7 @@
 #include "shell/environment.hpp"
 #include "shell/utility/split.hpp"
 
+#include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <ranges>

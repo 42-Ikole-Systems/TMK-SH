@@ -13,6 +13,12 @@
 #include "shell/error/error.hpp"
 #include "shell/logger.hpp"
 
+#include <readline/readline.h>
+#include <readline/history.h>
+
+#include <stdbool.h>
+#include <utility>
+
 namespace shell {
 
 // todo: parse PS1
@@ -48,9 +54,9 @@ static int run(int argc, const char **argv, char *const *envp) {
 			}
 			auto executor = Executor(env);
 			executor.execute(ast);
-		} catch (SyntaxErrorException e) {
+		} catch (SyntaxErrorException& e) {
 			LOG_ERROR("%: syntax error: %\n", SHELL, e.what());
-		} catch (RecoverableException e) {
+		} catch (RecoverableException& e) {
 			LOG_ERROR("%: recoverable error: %\n", SHELL, e.what());
 		}
 	}
