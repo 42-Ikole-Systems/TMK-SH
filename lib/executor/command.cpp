@@ -27,7 +27,7 @@ Command search and execution
  * @brief Generates array of arguments for execve (first argument is program name).
  * @param command
  * @return
-*/
+ */
 static unique_ptr<char *const []> convertArguments(const Ast::Command &command) {
 	const auto &vec = command.arguments.entries;
 	std::unique_ptr<const char *[]> result(new const char *[vec.size() + 2]); // +1 for executable name, +1 for nullptr
