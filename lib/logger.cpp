@@ -23,6 +23,8 @@ const string Logger::getLogLevelPrefix(LogLevel logLevel) {
 			return string("[Error]: ");
 		case LogLevel::Debug:
 			return string("[Debug]: ");
+		default:
+			assert(logLevel != LogLevel::Debug);
 	};
 }
 
