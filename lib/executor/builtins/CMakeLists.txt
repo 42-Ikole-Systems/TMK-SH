@@ -3,6 +3,10 @@ add_library(
     OBJECT
     echo.cpp
 	exit.cpp
+	export.cpp
+	set.cpp
+	unset.cpp
+	getenv.cpp
 )
 
 # Forward the declared variable to the parent scope
