@@ -30,7 +30,7 @@ Command search and execution
  * @param command
  * @return
  */
-static unique_ptr<char *const []> convertArguments(const Ast::Command &command) {
+static unique_ptr<char *const[]> convertArguments(const Ast::Command &command) {
 	const auto &vec = command.arguments.entries;
 	std::unique_ptr<const char *[]> result(new const char *[vec.size() + 2]); // +1 for executable name, +1 for nullptr
 	result[0] = command.program_name.c_str();
@@ -48,10 +48,10 @@ static unique_ptr<char *const []> convertArguments(const Ast::Command &command) 
 }
 
 static bool isExecutable(const string &filepath) {
-	const auto& permissions = std::filesystem::status(filepath).permissions();
-	return (bool)(permissions & std::filesystem::perms::owner_exec)
-		|| (bool)(permissions & std::filesystem::perms::group_exec)
-		|| (bool)(permissions & std::filesystem::perms::others_exec);
+	const auto &permissions = std::filesystem::status(filepath).permissions();
+	return (bool)(permissions & std::filesystem::perms::owner_exec) ||
+	       (bool)(permissions & std::filesystem::perms::group_exec) ||
+	       (bool)(permissions & std::filesystem::perms::others_exec);
 }
 
 /*!
