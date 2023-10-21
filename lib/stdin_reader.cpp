@@ -1,18 +1,19 @@
 #include "shell/stdin_reader.hpp"
 #include <readline/readline.h>
 #include <stdlib.h>
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
+#include "shell/lexer/lexer.hpp"
 
 namespace shell {
 
-StdinReader::StdinReader(const string &prompt) : prompt(prompt), line(nullopt) {
+StdinReader::StdinReader(const string &prompt) : prompt(prompt), line(nullopt), lexer(nullptr) {
 }
 
 StdinReader::~StdinReader() {
 }
 
 optional<string> StdinReader::nextLine() {
-	char *line = readline(prompt.c_str());
+	char *line = readline(getPrompt());
 	if (line == nullptr) {
 		return nullopt;
 	}
@@ -34,6 +35,17 @@ char StdinReader::nextChar() {
 		return '\n';
 	}
 	return line->at(index++);
+}
+
+void StdinReader::setLexer(Lexer *lexer) {
+	this->lexer = lexer;
+}
+
+const char *StdinReader::getPrompt() const {
+	if (lexer == nullptr || lexer->getCurrentState() == Lexer::State::Empty) {
+		return prompt.c_str();
+	}
+	return "> ";
 }
 
 } // namespace shell

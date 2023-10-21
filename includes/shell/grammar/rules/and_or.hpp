@@ -12,7 +12,7 @@ public:
 	static vector<Rule::Option> options();
 
 private:
-	static optional<Ast::Node> handler(TokenProvider &tokens);
+	static optional<Ast::Node> handler(vector<Ast::Node> &args);
 };
 
 } // namespace shell

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shell/ast.hpp"
+#include "shell/interfaces/environment.hpp"
 
 namespace shell {
 
@@ -16,10 +17,8 @@ enum class ResultCode : uint8_t {
 
 class Executor {
 private:
-	char *const *envp;
-
 public:
-	Executor(char *const *envp);
+	Executor(Environment &environment);
 
 	ResultCode execute(Ast &ast);
 	ResultCode execute(Ast::Node &node);
@@ -28,6 +27,10 @@ public:
 
 private:
 	[[noreturn]] void Exit(ResultCode code);
+	optional<string> resolvePath(const string &program);
+
+private:
+	Environment &environment;
 };
 
 } // namespace shell

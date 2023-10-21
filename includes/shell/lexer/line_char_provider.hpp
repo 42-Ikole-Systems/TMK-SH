@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 #include "shell/interfaces/provider.hpp"
 
 namespace shell {
@@ -14,6 +14,9 @@ public:
 	LineCharProvider(const string &line);
 	char peek() override;
 	char consume() override;
+
+	void remove() override;
+	void unconsume() override;
 };
 
 } // namespace shell

@@ -2,12 +2,14 @@
 #include "catch.hpp"
 #include "shell/stdin_reader.hpp"
 #include "shell/parser.hpp"
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 #include "shell/lexer/lexer.hpp"
 #include "shell/lexer/line_char_provider.hpp"
 #include <utility>
 #include "shell/print.hpp"
 #include "shell/executor/executor.hpp"
+#include "shell/interfaces/environment.hpp"
+#include "shell/shell_environment.hpp"
 
 using namespace shell;
 
@@ -23,6 +25,7 @@ TEST_CASE("basic shell", "[shell]") {
 	auto parser = Parser(lexer);
 	Ast ast = parser.parse();
 	ast.print();
-	auto executor = Executor(envp);
+	ShellEnvironment environment;
+	auto executor = Executor(environment);
 	executor.execute(ast);
 }

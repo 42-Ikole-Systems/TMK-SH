@@ -10,8 +10,8 @@ Rule SeparatorOp::make() {
 }
 
 vector<Rule::Option> SeparatorOp::options() {
-	return {Rule::Terminal {GrammarUtil::ConsumeIf<Token::Type::Semicolon>},
-	        Rule::Terminal {GrammarUtil::ConsumeIf<Token::Type::And>}};
+	return {Rule::Terminal {GrammarUtil::ConsumeIf<Token::Type::Semicolon>::OP},
+	        Rule::Terminal {GrammarUtil::ConsumeIf<Token::Type::And>::OP}};
 }
 
 } // namespace shell

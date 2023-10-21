@@ -14,6 +14,10 @@ Ast::Node::Node(SeparatorOp &&separator_op) : type(Type::SeparatorOp), variant(s
 }
 Ast::Node::Node(Literal &&literal) : type(Type::Literal), variant(std::move(literal)) {
 }
+Ast::Node::Node(Redirection &&redirection) : type(Type::Redirection), variant(std::move(redirection)) {
+}
+Ast::Node::Node(List &&list) : type(Type::List), variant(std::move(list)) {
+}
 
 Ast::Literal::Literal(Literal &&other) : token(std::move(other.token)) {
 }
@@ -22,9 +26,10 @@ Ast::Literal::Literal(Token &&token) : token(token) {
 Ast::Literal::~Literal() {
 }
 
-Ast::Command::Command(Command &&other) : args(std::move(other.args)) {
+Ast::Command::Command(Command &&other) : program_name(other.program_name), arguments(std::move(other.arguments)) {
 }
-Ast::Command::Command(vector<string> &&args) : args(args) {
+Ast::Command::Command(const string &program_name, List &&arguments)
+    : program_name(program_name), arguments(std::move(arguments)) {
 }
 Ast::Command::~Command() {
 }
@@ -32,6 +37,26 @@ Ast::Command::~Command() {
 Ast::SeparatorOp::SeparatorOp(SeparatorOp &&other) : left(std::move(other.left)), right(std::move(other.right)) {
 }
 Ast::SeparatorOp::~SeparatorOp() {
+}
+
+Ast::Redirection::Redirection(Redirection &&other)
+    : file_name(other.file_name), redirection_type(other.redirection_type), io_number(other.io_number) {
+}
+Ast::Redirection::~Redirection() {
+}
+
+Ast::List::List(List &&other) : entries(std::move(other.entries)) {
+}
+
+Ast::List::List(Node node) : entries() {
+	entries.push_back(std::move(node));
+}
+
+Ast::List::List(vector<Node> nodes) : entries(std::move_iterator(nodes.begin()), std::move_iterator(nodes.end())) {
+}
+
+void Ast::List::append(Node node) {
+	entries.insert(entries.begin(), std::move(node));
 }
 
 Ast::Node::Type Ast::Node::getType() const {
@@ -65,27 +90,39 @@ void Ast::Node::print(int level, BLogger &logger) const {
 		case Type::Literal:
 			get<Literal>().print(level, logger);
 			break;
+		case Type::Redirection:
+			get<Redirection>().print(level, logger);
+			break;
+		case Type::List:
+			get<List>().print(level, logger);
+			break;
 	}
 }
 
 void Ast::Literal::print(int level, BLogger &logger) const {
-	tprintf("Literal:\n");
+	logger << "Literal:\n";
 	printLevel(level + 1, logger);
-	tprintf("Token: ");
-	logger << token.toString();
+	logger << ("Token: ");
+	logger << token.toString() << "\n";
 }
 
 void Ast::Command::print(int level, BLogger &logger) const {
-	tprintf("Command:\n");
+	logger << "Command:\n";
 	printLevel(level + 1, logger);
-	tprintf("Args: [ ");
-	for (int i = 0; i < (int)args.size(); i++) {
-		if (i != 0) {
-			logger << ", ";
-		}
-		logger << args[i];
+	logger << "Name: " << program_name << "\n";
+	printLevel(level + 1, logger);
+	arguments.print(level + 1, logger);
+}
+
+void Ast::List::print(int level, BLogger &logger) const {
+	logger << "List:\n";
+	printLevel(level + 1, logger);
+	logger << "Entries: [\n";
+	for (auto &entry : entries) {
+		entry.print(level + 2, logger);
 	}
-	logger << " ]\n";
+	printLevel(level + 1, logger);
+	logger << "]\n";
 }
 
 void Ast::SeparatorOp::print(int level, BLogger &logger) const {
@@ -102,6 +139,16 @@ void Ast::SeparatorOp::print(int level, BLogger &logger) const {
 	} else {
 		right->print(level + 1, logger);
 	}
+}
+
+void Ast::Redirection::print(int level, BLogger &logger) const {
+	logger << "Redirection:\n";
+	printLevel(level + 1, logger);
+	logger << "Filename: %\n", file_name;
+	printLevel(level + 1, logger);
+	logger << "Redirection Type: %\n", Token::getOperatorString(redirection_type);
+	printLevel(level + 1, logger);
+	logger << "Filedescriptor: %\n", io_number;
 }
 
 } // namespace shell

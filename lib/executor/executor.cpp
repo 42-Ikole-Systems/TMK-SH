@@ -1,21 +1,21 @@
 #include "shell/executor/executor.hpp"
 
 #include "shell/logger.hpp"
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 #include <stdexcept>
 #include <cassert>
 #include <stdio.h>
 
 namespace shell {
 
-Executor::Executor(char *const *envp) : envp(envp) {
+Executor::Executor(Environment &environment) : environment(environment) {
 }
 
 ResultCode Executor::execute(Ast::Node &node) {
 	using NodeType = Ast::Node::Type;
 	/*
 	 node.expand() :: Sequence -> no-op
-	 node.expend() :: Command -> expand args
+	 node.expand() :: Command -> expand args
 	*/
 	// expander.expand(node); // correct place to expand? `$(ls)`
 	// "$( echo "abc" )" -> "abc" -> abc

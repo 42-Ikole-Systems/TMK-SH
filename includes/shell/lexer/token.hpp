@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 
 namespace shell {
 
@@ -12,6 +12,8 @@ struct WordToken {
 
 struct OperatorToken {};
 
+struct ReservedWordToken {};
+
 struct IoNumber {
 	string value; // numeric string
 	string toString() const;
@@ -21,19 +23,15 @@ struct Newline {};
 
 struct Token {
 public:
-	using Variant = std::variant<WordToken, OperatorToken, IoNumber, Newline>;
+	using Variant = std::variant<WordToken, OperatorToken, ReservedWordToken, IoNumber, Newline>;
 
 	// https://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_10_01
 	enum class Type {
+		/* Tokens produced by the lexer */
 		/* token / word */
-		// Token, // Word, Name, or Assignment depending on context
-		Word,
-		// AssignmentWord, // Assignment (?)
-		// Name,
-
-		IoNumber, // e.g. 5>
+		Token,    // Word, Name, or AssignmentWord depending on context
+		IoNumber, // e.g. 5> makes IoNumber("5"), OperatorToken(Great)
 		Newline,
-
 		/* operators */
 		Semicolon,        // ;
 		And,              // &
@@ -58,6 +56,29 @@ public:
 		as control operators*/
 		// SemicolonAnd, // ;&
 		// DoubleSemicolonAnd, // ;;&
+
+		/* Tokens produced by the parser */
+		Word,
+		AssignmentWord, // Assignment
+		Name,
+
+		/* reserved words */
+		If,     // if
+		Then,   // then
+		Else,   // else
+		Elif,   // elif
+		Fi,     // fi
+		Do,     // do
+		Done,   // done
+		Case,   // case
+		Esac,   // esac
+		While,  // while
+		Until,  // until
+		For,    // for
+		Lbrace, // {
+		Rbrace, // }
+		Bang,   // !
+		In      // in
 	};
 
 private:
@@ -65,6 +86,7 @@ private:
 	Variant variant;
 
 	static const vector<pair<string, Type>> operator_types;
+	static const vector<pair<string, Type>> reserved_word_types;
 
 public:
 	Token() = default;                   // remove
@@ -78,6 +100,8 @@ public:
 	void print() const;
 	string toString() const;
 
+	bool equals(const Token &other) const;
+
 	template <typename T>
 	T &get() {
 		return std::get<T>(variant);
@@ -90,9 +114,19 @@ public:
 
 	static int prefixOperatorMatches(const string &s);
 	static optional<Type> exactOperatorType(const string &s);
+	static optional<Type> exactReservedWordType(const string &s);
+	static const string &getOperatorString(Token::Type type);
+	static const string &getReservedWordString(Token::Type type);
 
 private:
-	static const string &getOperatorString(Token::Type type);
+	static bool isReservedWord(Token::Type type);
+	static bool isOperator(Token::Type type);
+	static bool isToken(Token::Type type);
+	static bool isIoNumber(Token::Type type);
+	static bool isNewline(Token::Type type);
 };
+
+bool operator==(const Token &lhs, const Token &rhs);
+std::ostream &operator<<(std::ostream &lhs, const Token &rhs);
 
 } // namespace shell

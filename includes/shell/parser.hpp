@@ -2,7 +2,7 @@
 
 #include "shell/lexer/token_provider.hpp"
 #include "shell/lexer/token.hpp"
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 #include "shell/ast.hpp"
 #include "shell/grammar/rule.hpp"
 
@@ -32,7 +32,7 @@ private:
 	void setState(size_t state);
 	size_t unconsumedTokens();
 
-	optional<Ast::Node> parse(Rule rule);
+	optional<Ast::Node> parse(Rule &rule);
 	optional<Ast::Node> parse(Rule::NonTerminal &non_terminal);
 	optional<Ast::Node> parse(Rule::Terminal &terminal);
 	BufferedTokenProvider tokenProvider();

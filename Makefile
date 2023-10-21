@@ -2,6 +2,8 @@ all: debug
 
 GENERATOR ?=
 NAME := app
+BUILD_DIR := build
+DEBUG_DIR := $(BUILD_DIR)/debug
 TARGET := build/debug/$(NAME)
 
 ifeq ($(GEN),ninja)
@@ -22,6 +24,9 @@ debug:
 	cd build/debug && \
 	cmake $(GENERATOR) -DCMAKE_BUILD_TYPE=Debug ../.. && \
 	cmake --build . --config Debug
+
+test: debug
+	$(DEBUG_DIR)/test/test
 
 clean:
 	rm -rf build

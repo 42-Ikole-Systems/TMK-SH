@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 #include <variant>
 #include "shell/logger.hpp"
 #include "shell/lexer/token.hpp"
@@ -20,13 +20,29 @@ public:
 		Token token;
 	};
 
+	struct List {
+	public:
+		List() = default;
+		List(List &&other);
+		List(Node node);
+		List(vector<Node> nodes);
+
+	public:
+		void append(Node node);
+		void print(int level, BLogger &logger) const;
+
+	public:
+		list<Node> entries;
+	};
+
 	struct Command {
 		Command(Command &&other);
-		Command(vector<string> &&args);
+		Command(const string &program_name, List &&arguments);
 		~Command();
 
 		void print(int level, BLogger &logger) const;
-		vector<string> args; // args[0] == program name
+		string program_name;
+		List arguments;
 	};
 
 	struct SeparatorOp {
@@ -39,19 +55,36 @@ public:
 		unique_ptr<Node> right;
 	};
 
+	struct Redirection {
+	public:
+		Redirection() = default;
+		Redirection(Redirection &&other);
+		~Redirection();
+
+	public:
+		void print(int level, BLogger &logger) const;
+
+	public:
+		string file_name;
+		Token::Type redirection_type;
+		int32_t io_number;
+	};
+
 	class Node {
 	public:
-		enum class Type { SeparatorOp, Command, Literal };
+		enum class Type { SeparatorOp, Command, Literal, Redirection, List };
 
 	private:
 		Type type;
-		std::variant<Command, SeparatorOp, Literal> variant;
+		std::variant<Command, SeparatorOp, Literal, Redirection, List> variant;
 
 	public:
 		Node(Node &&other);
 		Node(Command &&command);
 		Node(SeparatorOp &&separator_op);
 		Node(Literal &&separator_op);
+		Node(Redirection &&separator_op);
+		Node(List &&list);
 
 		Type getType() const;
 

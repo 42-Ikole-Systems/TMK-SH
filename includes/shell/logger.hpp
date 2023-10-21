@@ -2,7 +2,7 @@
 
 #include "shell/settings.hpp"
 #include "shell/print.hpp"
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 
 #include <sstream>
 
