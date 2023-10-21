@@ -3,6 +3,7 @@
 
 #include "shell/ast.hpp"
 #include "executor.hpp"
+#include <functional>
 
 namespace shell
 {
