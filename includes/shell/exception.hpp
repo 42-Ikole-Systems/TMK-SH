@@ -2,6 +2,7 @@
 
 #include <exception>
 #include "shell/utility/types.hpp"
+#include <string>
 
 namespace shell {
 

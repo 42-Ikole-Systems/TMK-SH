@@ -6,7 +6,9 @@
 #include "shell/lexer/line_char_provider.hpp"
 #include "shell/print.hpp"
 #include "shell/executor/executor.hpp"
-#include "shell/global_environment.hpp"
+#include "shell/error/error.hpp"
+#include "shell/shell_environment.hpp"
+#include "shell/lexer/reader_char_provider.hpp"
 
 #include <utility>
 #include "shell/lexer/reader_char_provider.hpp"
@@ -34,7 +36,7 @@ static void initialize() {
 static int run(int argc, const char **argv, char *const *envp) {
 	initialize();
 
-	auto env = GlobalEnvironment();
+	ShellEnvironment environment;
 	using_history();
 	StdinReader reader = StdinReader(prompt);
 	while (true) {
@@ -52,11 +54,11 @@ static int run(int argc, const char **argv, char *const *envp) {
 			if (!line.empty()) {
 				add_history(line.c_str());
 			}
-			auto executor = Executor(env);
+			auto executor = Executor(environment);
 			executor.execute(ast);
-		} catch (SyntaxErrorException& e) {
+		} catch (const SyntaxErrorException &e) {
 			LOG_ERROR("%: syntax error: %\n", SHELL, e.what());
-		} catch (RecoverableException& e) {
+		} catch (const RecoverableException &e) {
 			LOG_ERROR("%: recoverable error: %\n", SHELL, e.what());
 		}
 	}

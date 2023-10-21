@@ -7,7 +7,6 @@
 #include "shell/exception.hpp"
 #include "shell/error/error.hpp"
 
-#include <stdio.h>
 #include <cstring>
 
 #define UNEXPECTED_EOF             "unexpected end of file"
@@ -69,7 +68,7 @@ Handlers are free to loop and process as many chars as necessary in order to del
 std::function<Lexer::State(Lexer &)> Lexer::getStateHandler() {
 	static const std::function<State(Lexer &)> handlers[] = {
 	    [(int)Lexer::State::Empty] = &Lexer::emptyState,
-		[(int)Lexer::State::Done] = nullptr,
+	    [(int)Lexer::State::Done] = nullptr,
 	    [(int)Lexer::State::Word] = &Lexer::wordState,
 	    [(int)Lexer::State::Operator] = &Lexer::operatorState,
 	    [(int)Lexer::State::Comment] = &Lexer::commentState,

@@ -2,7 +2,7 @@
 #include "shell/ast.hpp"
 #include "shell/assert.hpp"
 #include "shell/shell.hpp"
-#include "shell/environment.hpp"
+#include "shell/interfaces/environment.hpp"
 #include "shell/utility/split.hpp"
 
 #include <sys/wait.h>
@@ -29,12 +29,11 @@ Command search and execution
  * @brief Generates array of arguments for execve (first argument is program name).
  * @param command
  * @return
-*/
-static unique_ptr<char *const []> convertArguments(const Ast::Command &command) {
+ */
+static unique_ptr<char *const[]> convertArguments(const Ast::Command &command) {
 	const auto &vec = command.arguments.entries;
 	std::unique_ptr<const char *[]> result(new const char *[vec.size() + 2]); // +1 for executable name, +1 for nullptr
 	result[0] = command.program_name.c_str();
-	std::cout << "program name: " << result[0] << std::endl;
 	size_t i = 1;
 	for (auto &entry : vec) {
 		if (entry.getType() != Ast::Node::Type::Literal) {
@@ -48,15 +47,11 @@ static unique_ptr<char *const []> convertArguments(const Ast::Command &command) 
 	return unique_ptr<char *const[]>((char *const *)result.release());
 }
 
-bool isExecutable(const string &filepath) {
-	struct stat file_info;
-	if (stat(filepath.c_str(), &file_info) == 0) {
-		// Check if the owner, group, or others have execute permission
-		if ((file_info.st_mode & S_IXUSR) || (file_info.st_mode & S_IXGRP) || (file_info.st_mode & S_IXOTH)) {
-			return true;
-		}
-	}
-	return false;
+static bool isExecutable(const string &filepath) {
+	const auto &permissions = std::filesystem::status(filepath).permissions();
+	return (bool)(permissions & std::filesystem::perms::owner_exec) ||
+	       (bool)(permissions & std::filesystem::perms::group_exec) ||
+	       (bool)(permissions & std::filesystem::perms::others_exec);
 }
 
 /*!
@@ -68,7 +63,7 @@ optional<string> Executor::resolvePath(const string &program) {
 		return program;
 	}
 
-	const auto &path = env.get("PATH");
+	const auto &path = environment.get("PATH");
 	for (const auto location : LazySplit(path, ":")) {
 		const auto program_path = std::filesystem::path(location) / program;
 		if (std::filesystem::exists(program_path) && isExecutable(program_path)) {
@@ -93,8 +88,9 @@ ResultCode Executor::execute(Ast::Command &command) {
 		return ResultCode::GeneralError;
 	} else if (pid == 0) {
 		// Child
-		auto args = convertArguments(command);
-		execve(programPath.value().c_str(), args.get(), env.materialize());
+		const auto args = convertArguments(command);
+		const auto env = environment.materialize();
+		execve(programPath.value().c_str(), args.get(), env->map.get());
 		SYSCALL_ERROR("execve");
 		if (errno == ENOEXEC) {
 			Exit(ResultCode::CommandNotExecutable);
