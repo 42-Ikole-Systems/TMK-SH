@@ -48,7 +48,7 @@ protected:
 class SingletonLogger : public Logger {
 
 	/*!
-	 * @brief -.
+	 * @brief
 	 */
 	SingletonLogger() = default;
 
@@ -63,6 +63,21 @@ public:
 	void write(LogLevel logLevel, const char *format, Args &&...args) {
 		tprintf("%", getLogLevelPrefix(logLevel));
 		tprintf(format, std::forward<Args>(args)...);
+	}
+
+	/*!
+	 * @brief Writes message
+	 */
+	template <class T>
+	SingletonLogger &operator<<(const T &val) {
+		tprintf("%", val);
+		return *this;
+	}
+
+	template <>
+	SingletonLogger &operator<<(const LogLevel& logLevel) {
+		tprintf("%", getLogLevelPrefix(logLevel));
+		return *this;
 	}
 
 	/*!
@@ -98,6 +113,42 @@ public:
 	 * @brief .-
 	 */
 	~BufferedLogger();
+
+	/*!
+	 * @brief Write base function.
+	 * @param format
+	*/
+	void write(const char *format)
+	{
+		buffer << format;
+	}
+
+	/*!
+	 * @brief Write base fuction.
+	 * @param format
+	*/
+	void write(const string& format)
+	{
+		buffer << format;
+	}
+
+	/*!
+	 * @brief Writes message like printf to buffer.
+	 * @param format
+	 * @param args
+	 */
+	template <class T, class... Args>
+	void write(const char *format, const T& value, Args &&... Fargs) {
+		for (; *format != '\0'; format++) {
+		if (*format == '%') {
+			buffer << value;
+			write(format + 1, Fargs...); // recursive call
+			return;
+		}
+		buffer << *format;
+	}
+
+	}
 
 	/*!
 	 * @brief Adds value to buffer.

@@ -15,7 +15,7 @@ static void tprintf(const string &format) {
 }
 
 template <typename T, typename... Targs>
-void tprintf(const char *format, T value, Targs... Fargs) // recursive variadic function
+void tprintf(const char *format, const T& value, Targs... Fargs) // recursive variadic function
 {
 	for (; *format != '\0'; format++) {
 		if (*format == '%') {
