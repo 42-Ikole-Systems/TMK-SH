@@ -17,7 +17,6 @@ enum class ResultCode : uint8_t {
 
 class Executor {
 private:
-
 public:
 	Executor(Environment &environment);
 

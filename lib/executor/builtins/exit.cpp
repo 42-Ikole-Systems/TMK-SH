@@ -1,10 +1,9 @@
 
 #include "shell/executor/builtins.hpp"
 
-namespace shell
-{
+namespace shell {
 
-[[noreturn]] void Builtin::exit(const vector<string>& args) {
+[[noreturn]] void Builtin::exit(const vector<string> &args) {
 	if (args.empty()) {
 		exit(ResultCode::Ok);
 	}
@@ -15,4 +14,4 @@ namespace shell
 	::exit(static_cast<int>(code));
 }
 
-}
+} // namespace shell
