@@ -3,7 +3,6 @@
 #include "shell/assert.hpp"
 #include "shell/shell.hpp"
 #include "shell/interfaces/environment.hpp"
-//#include "shell/environment.hpp"
 #include "shell/utility/split.hpp"
 
 #include <sys/wait.h>

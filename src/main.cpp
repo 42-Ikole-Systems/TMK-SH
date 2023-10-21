@@ -9,7 +9,6 @@
 #include "shell/error/error.hpp"
 #include "shell/shell_environment.hpp"
 #include "shell/lexer/reader_char_provider.hpp"
-//#include "shell/global_environment.hpp"
 
 #include <utility>
 #include "shell/lexer/reader_char_provider.hpp"

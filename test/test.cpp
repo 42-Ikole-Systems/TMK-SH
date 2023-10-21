@@ -10,8 +10,6 @@
 #include "shell/executor/executor.hpp"
 #include "shell/interfaces/environment.hpp"
 #include "shell/shell_environment.hpp"
-//#include "shell/environment.hpp"
-//#include "shell/global_environment.hpp"
 
 using namespace shell;
 
