@@ -5,10 +5,10 @@ namespace shell
 {
 
 [[noreturn]] void Builtin::exit(const vector<string>& args) {
-	if (args.size() == 1) {
+	if (args.empty()) {
 		exit(ResultCode::Ok);
 	}
-	::exit(std::stoi(args[1]));
+	::exit(std::stoi(args[0]));
 }
 
 [[noreturn]] void Builtin::exit(ResultCode code) {

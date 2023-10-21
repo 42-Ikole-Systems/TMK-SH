@@ -2,14 +2,17 @@
 #include "shell/ast.hpp"
 #include "shell/assert.hpp"
 #include "shell/shell.hpp"
-#include "shell/environment.hpp"
+#include "shell/interfaces/environment.hpp"
 #include "shell/utility/split.hpp"
 #include "shell/executor/builtins.hpp"
 
+#include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <ranges>
 #include <filesystem>
+
+#include <sys/stat.h>
 
 namespace shell {
 
@@ -23,20 +26,40 @@ Command search and execution
 
 */
 
-static unique_ptr<char *const[]> convertArguments(const vector<string> &vec) {
-	std::unique_ptr<const char *[]> result(new const char *[vec.size() + 1]);
-	for (size_t i = 0; i < vec.size(); i++) {
-		result[i] = vec[i].c_str();
+/*!
+ * @brief Generates array of arguments for execve (first argument is program name).
+ * @param command
+ * @return
+ */
+static unique_ptr<char *const[]> convertArguments(const Ast::Command &command) {
+	const auto &vec = command.arguments.entries;
+	std::unique_ptr<const char *[]> result(new const char *[vec.size() + 2]); // +1 for executable name, +1 for nullptr
+	result[0] = command.program_name.c_str();
+	size_t i = 1;
+	for (auto &entry : vec) {
+		if (entry.getType() != Ast::Node::Type::Literal) {
+			throw NotImplementedException("Execution of Command with non-literal arguments not supported yet");
+		}
+		D_ASSERT(entry.getType() == Ast::Node::Type::Literal);
+		result[i] = entry.get<Ast::Literal>().token.get<WordToken>().value.c_str();
+		i++;
 	}
-	result[vec.size()] = nullptr;
+	result[i] = nullptr;
 	return unique_ptr<char *const[]>((char *const *)result.release());
+}
+
+static bool isExecutable(const string &filepath) {
+	const auto &permissions = std::filesystem::status(filepath).permissions();
+	return (bool)(permissions & std::filesystem::perms::owner_exec) ||
+	       (bool)(permissions & std::filesystem::perms::group_exec) ||
+	       (bool)(permissions & std::filesystem::perms::others_exec);
 }
 
 /*!
  * @brief Resolves program path.
  * @param command
  */
-static optional<string> resolvePath(const string &program) {
+optional<string> Executor::resolvePath(const string &program) {
 	if (program.find('/') != string::npos) {
 		if (std::filesystem::exists(program)) {
 			return program;
@@ -45,11 +68,11 @@ static optional<string> resolvePath(const string &program) {
 		}
 	}
 
-	const auto &path = Environment::get("PATH");
+	const auto &path = environment.get("PATH");
 	for (const auto location : LazySplit(path, ":")) {
-		const auto programPath = std::filesystem::path(location) / program;
-		if (std::filesystem::exists(programPath)) {
-			return programPath.string();
+		const auto program_path = std::filesystem::path(location) / program;
+		if (std::filesystem::exists(program_path) && isExecutable(program_path)) {
+			return program_path.string();
 		}
 	}
 	return nullopt;
@@ -68,8 +91,9 @@ ResultCode Executor::executeProcess(const string &program, const Ast::Command &c
 		return ResultCode::GeneralError;
 	} else if (pid == 0) {
 		// Child
-		auto args = convertArguments(command.args);
-		execve(programPath.value().c_str(), args.get(), Environment::getEnvironmentVariables());
+		const auto args = convertArguments(command);
+		const auto env = environment.materialize();
+		execve(programPath.value().c_str(), args.get(), env->map.get());
 		SYSCALL_ERROR("execve");
 		if (errno == ENOEXEC) {
 			Builtin::exit(ResultCode::CommandNotExecutable);
@@ -86,12 +110,11 @@ ResultCode Executor::executeProcess(const string &program, const Ast::Command &c
 }
 
 ResultCode Executor::execute(Ast::Command &command) {
-	D_ASSERT(!command.args.empty());
-	const auto &program = command.args[0];
+	const auto &program = command.program_name;
 
 	auto builtin = Builtin::getBuiltin(program);
 	if (builtin.has_value()) {
-		return (*builtin)(command);
+		return (*builtin)(command, environment);
 	} else {
 		return executeProcess(program, command);
 	}

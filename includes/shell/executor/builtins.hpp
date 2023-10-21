@@ -11,7 +11,7 @@ namespace shell
 	*/
 	class Builtin
 	{
-		using builtinFunction = std::function<ResultCode(const Ast::Command&)>;
+		using builtinFunction = std::function<ResultCode(const Ast::Command&, Environment&)>;
 		
 		std::map<string, builtinFunction> builtins;
 	

@@ -7,10 +7,13 @@ Token::Token(Token::Type type, Variant &&variant) : type(type), variant(std::mov
 }
 
 void Token::print() const {
-	LOG_DEBUG("%\n", toString());
+	tprintf("%\n", toString());
 }
 
-static const map<Token::Type, string> token_type_strings = {{Token::Type::Word, "Word"},
+static const map<Token::Type, string> token_type_strings = {{Token::Type::Token, "Token"},
+                                                            {Token::Type::Word, "Word"},
+                                                            {Token::Type::AssignmentWord, "AssignmentWord"},
+                                                            {Token::Type::Name, "Name"},
                                                             {Token::Type::IoNumber, "IoNumber"},
                                                             {Token::Type::Newline, "Newline"},
                                                             {Token::Type::Semicolon, "Semicolon"},
@@ -34,35 +37,18 @@ static const map<Token::Type, string> token_type_strings = {{Token::Type::Word, 
 
 string Token::toString() const {
 	const string &type_string = token_type_strings.at(type);
-	switch (type) {
-		case Token::Type::Word:
-			return type_string + "(" + get<WordToken>().toString() + ")";
-		/* operators */
-		case Token::Type::Semicolon:
-		case Token::Type::And:
-		case Token::Type::Pipe:
-		case Token::Type::PipeAnd:
-		case Token::Type::ParenthesisOpen:
-		case Token::Type::ParenthesisClose:
-		case Token::Type::AndIf:
-		case Token::Type::OrIf:
-		case Token::Type::DoubleSemicolon:
-		case Token::Type::Less:
-		case Token::Type::Great:
-		case Token::Type::DoubleLess:
-		case Token::Type::DoubleGreat:
-		case Token::Type::LessAnd:
-		case Token::Type::GreatAnd:
-		case Token::Type::LessGreat:
-		case Token::Type::DoubleLessDash:
-		case Token::Type::Clobber:
-			return type_string + "(" + getOperatorString(type) + ")";
-		case Token::Type::Newline:
-			return type_string;
-		case Token::Type::IoNumber:
-			return type_string + "(" + get<IoNumber>().toString();
-		default:
-			throw std::runtime_error("token not supported");
+	if (isToken(type)) {
+		return type_string + "(`" + get<WordToken>().toString() + "')";
+	} else if (isOperator(type)) {
+		return type_string + "(`" + getOperatorString(type) + "')";
+	} else if (isReservedWord(type)) {
+		return type_string + "(`" + getReservedWordString(type) + "')";
+	} else if (isIoNumber(type)) {
+		return type_string + "(`" + get<IoNumber>().toString() + "')";
+	} else if (isNewline(type)) {
+		return type_string;
+	} else {
+		throw std::runtime_error("token type not supported");
 	}
 }
 
@@ -96,6 +82,12 @@ const vector<pair<string, Token::Type>> Token::operator_types = {{";", Type::Sem
                                                                  {"<<-", Type::DoubleLessDash},
                                                                  {">|", Type::Clobber}};
 
+const vector<pair<string, Token::Type>> Token::reserved_word_types = {
+    {"if", Type::If},     {"then", Type::Then},   {"else", Type::Else},   {"elif", Type::Elif},
+    {"fi", Type::Fi},     {"do", Type::Do},       {"done", Type::Done},   {"case", Type::Case},
+    {"esac", Type::Esac}, {"while", Type::While}, {"until", Type::Until}, {"for", Type::For},
+    {"{", Type::Lbrace},  {"}", Type::Rbrace},    {"!", Type::Bang},      {"in", Type::In}};
+
 int Token::prefixOperatorMatches(const string &s) {
 	int count = 0;
 	for (auto &p : operator_types) {
@@ -115,6 +107,15 @@ optional<Token::Type> Token::exactOperatorType(const string &s) {
 	return nullopt;
 }
 
+optional<Token::Type> Token::exactReservedWordType(const string &s) {
+	for (auto &p : reserved_word_types) {
+		if (p.first == s) {
+			return p.second;
+		}
+	}
+	return nullopt;
+}
+
 const string &Token::getOperatorString(Token::Type type) {
 	for (auto &p : operator_types) {
 		if (p.second == type) {
@@ -122,6 +123,123 @@ const string &Token::getOperatorString(Token::Type type) {
 		}
 	}
 	throw std::runtime_error("operator token type not recognized");
+}
+
+const string &Token::getReservedWordString(Token::Type type) {
+	for (auto &p : reserved_word_types) {
+		if (p.second == type) {
+			return p.first;
+		}
+	}
+	throw std::runtime_error("operator token type not recognized");
+}
+
+bool Token::isToken(Token::Type type) {
+	switch (type) {
+		case Token::Type::Token:
+		case Token::Type::Word:
+		case Token::Type::AssignmentWord:
+		case Token::Type::Name:
+			return true;
+		default:
+			return false;
+	}
+}
+
+bool Token::isIoNumber(Token::Type type) {
+	return type == Token::Type::IoNumber;
+}
+
+bool Token::isNewline(Token::Type type) {
+	return type == Token::Type::Newline;
+}
+
+bool Token::isReservedWord(Token::Type type) {
+	switch (type) {
+		case Token::Type::If:
+		case Token::Type::Then:
+		case Token::Type::Else:
+		case Token::Type::Elif:
+		case Token::Type::Fi:
+		case Token::Type::Do:
+		case Token::Type::Done:
+		case Token::Type::Case:
+		case Token::Type::Esac:
+		case Token::Type::While:
+		case Token::Type::Until:
+		case Token::Type::For:
+		case Token::Type::Lbrace:
+		case Token::Type::Rbrace:
+		case Token::Type::Bang:
+		case Token::Type::In:
+			return true;
+		default:
+			return false;
+	}
+}
+
+bool Token::isOperator(Token::Type type) {
+	switch (type) {
+		case Token::Type::Semicolon:
+		case Token::Type::And:
+		case Token::Type::Pipe:
+		case Token::Type::PipeAnd:
+		case Token::Type::ParenthesisOpen:
+		case Token::Type::ParenthesisClose:
+		case Token::Type::AndIf:
+		case Token::Type::OrIf:
+		case Token::Type::DoubleSemicolon:
+		case Token::Type::Less:
+		case Token::Type::Great:
+		case Token::Type::DoubleLess:
+		case Token::Type::DoubleGreat:
+		case Token::Type::LessAnd:
+		case Token::Type::GreatAnd:
+		case Token::Type::LessGreat:
+		case Token::Type::DoubleLessDash:
+		case Token::Type::Clobber:
+			return true;
+		default:
+			return false;
+	}
+}
+
+bool operator==(const Token &lhs, const Token &rhs) {
+	return lhs.equals(rhs);
+}
+
+bool Token::equals(const Token &other) const {
+	if (type != other.type) {
+		return false;
+	}
+	if (isToken(type)) {
+		auto &a = get<WordToken>();
+		auto &b = other.get<WordToken>();
+		if (a.value != b.value) {
+			return false;
+		}
+		return true;
+	} else if (isOperator(type)) {
+		return type == other.type;
+	} else if (isReservedWord(type)) {
+		return type == other.type;
+	} else if (isIoNumber(type)) {
+		auto &a = get<IoNumber>();
+		auto &b = other.get<IoNumber>();
+		if (a.value != b.value) {
+			return false;
+		}
+		return true;
+	} else if (isNewline(type)) {
+		return type == other.type;
+	} else {
+		throw std::runtime_error("token type not supported");
+	}
+}
+
+std::ostream &operator<<(std::ostream &lhs, const Token &rhs) {
+	lhs << rhs.toString();
+	return lhs;
 }
 
 } // namespace shell

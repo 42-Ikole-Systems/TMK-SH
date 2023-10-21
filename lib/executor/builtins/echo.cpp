@@ -6,9 +6,9 @@
 namespace shell
 {
 	ResultCode Builtin::echo(const vector<string>& args) {
-		size_t i = 1;
+		size_t i = 0;
 		bool new_line_at_end = true;
-		if (args[i].find("-n") == 0) {
+		if (args.size() > i && args[i].find("-n") == 0) {
 			new_line_at_end = false;
 			i++;
 		}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shell/ast.hpp"
+#include "shell/interfaces/environment.hpp"
 
 namespace shell {
 
@@ -18,7 +19,7 @@ class Executor {
 private:
 
 public:
-	Executor();
+	Executor(Environment &environment);
 
 	ResultCode execute(Ast &ast);
 	ResultCode execute(Ast::Node &node);
@@ -27,6 +28,10 @@ public:
 
 private:
 	ResultCode executeProcess(const string &program, const Ast::Command &command);
+	optional<string> resolvePath(const string &program);
+
+private:
+	Environment &environment;
 };
 
 } // namespace shell
