@@ -4,6 +4,7 @@
 #include "shell/shell.hpp"
 #include "shell/interfaces/environment.hpp"
 #include "shell/utility/split.hpp"
+#include "shell/executor/builtins.hpp"
 
 #include <sys/wait.h>
 #include <unistd.h>
@@ -60,7 +61,11 @@ static bool isExecutable(const string &filepath) {
  */
 optional<string> Executor::resolvePath(const string &program) {
 	if (program.find('/') != string::npos) {
-		return program;
+		if (std::filesystem::exists(program)) {
+			return program;
+		} else {
+			return nullopt;
+		}
 	}
 
 	const auto &path = environment.get("PATH");
@@ -73,9 +78,7 @@ optional<string> Executor::resolvePath(const string &program) {
 	return nullopt;
 }
 
-ResultCode Executor::execute(Ast::Command &command) {
-	// todo: add builtin support
-	const auto &program = command.program_name;
+ResultCode Executor::executeProcess(const string &program, const Ast::Command &command) {
 	const auto programPath = resolvePath(program);
 	if (!programPath.has_value()) {
 		LOG_ERROR("%: command not found\n", program);
@@ -93,9 +96,9 @@ ResultCode Executor::execute(Ast::Command &command) {
 		execve(programPath.value().c_str(), args.get(), env->map.get());
 		SYSCALL_ERROR("execve");
 		if (errno == ENOEXEC) {
-			Exit(ResultCode::CommandNotExecutable);
+			Builtin::exit(ResultCode::CommandNotExecutable);
 		}
-		Exit(ResultCode::GeneralError);
+		Builtin::exit(ResultCode::GeneralError);
 	} else {
 		// Parent
 		// extract exit status from child
@@ -104,6 +107,17 @@ ResultCode Executor::execute(Ast::Command &command) {
 		}
 	}
 	return ResultCode::Ok;
+}
+
+ResultCode Executor::execute(Ast::Command &command) {
+	const auto &program = command.program_name;
+
+	auto builtin = Builtin::getBuiltin(program);
+	if (builtin.has_value()) {
+		return (*builtin)(command, environment);
+	} else {
+		return executeProcess(program, command);
+	}
 }
 
 } // namespace shell

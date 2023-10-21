@@ -4,7 +4,10 @@ add_library(
     command.cpp
     executor.cpp
     separator_op.cpp
+    builtin.cpp
 )
+
+add_subdirectory(builtins)
 
 # Forward the declared variable to the parent scope
 set(ALL_OBJECT_FILES
