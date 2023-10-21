@@ -1,4 +1,3 @@
-#include <readline/readline.h>
 #include "shell/stdin_reader.hpp"
 #include "shell/parser.hpp"
 #include "shell/utility/types.hpp"
@@ -6,13 +5,16 @@
 #include "shell/lexer/line_char_provider.hpp"
 #include "shell/print.hpp"
 #include "shell/executor/executor.hpp"
-#include "shell/interfaces/environment.hpp"
-
-#include <utility>
-#include "shell/lexer/reader_char_provider.hpp"
 #include "shell/error/error.hpp"
-#include "shell/logger.hpp"
 #include "shell/shell_environment.hpp"
+#include "shell/lexer/reader_char_provider.hpp"
+#include "shell/logger.hpp"
+
+#include <readline/readline.h>
+#include <readline/history.h>
+
+#include <stdbool.h>
+#include <utility>
 
 namespace shell {
 
@@ -49,9 +51,9 @@ static int run(int argc, const char **argv, char *const *envp) {
 			ShellEnvironment environment;
 			auto executor = Executor(environment);
 			executor.execute(ast);
-		} catch (SyntaxErrorException e) {
+		} catch (const SyntaxErrorException e) {
 			LOG_ERROR("%: syntax error: %\n", SHELL, e.what());
-		} catch (RecoverableException e) {
+		} catch (const RecoverableException e) {
 			LOG_ERROR("%: recoverable error: %\n", SHELL, e.what());
 		}
 	}

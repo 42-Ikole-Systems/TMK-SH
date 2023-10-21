@@ -5,6 +5,7 @@ add_library(
     line_char_provider.cpp
     reader_char_provider.cpp
     token.cpp
+    token_provider.cpp
 )
 
 # Forward the declared variable to the parent scope

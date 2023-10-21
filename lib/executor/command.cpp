@@ -5,6 +5,7 @@
 #include "shell/interfaces/environment.hpp"
 #include "shell/utility/split.hpp"
 
+#include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <ranges>
@@ -22,12 +23,26 @@ Command search and execution
 
 */
 
-static unique_ptr<char *const []> convertArguments(const vector<string> &vec) {
-	std::unique_ptr<const char *[]> result(new const char *[vec.size() + 1]);
-	for (size_t i = 0; i < vec.size(); i++) {
-		result[i] = vec[i].c_str();
+/*!
+ * @brief Generates array of arguments for execve (first argument is program name).
+ * @param command
+ * @return
+*/
+static unique_ptr<char *const []> convertArguments(const Ast::Command &command) {
+	const auto &vec = command.arguments.entries;
+	std::unique_ptr<const char *[]> result(new const char *[vec.size() + 2]); // +1 for executable name, +1 for nullptr
+	result[0] = command.program_name.c_str();
+	std::cout << "program name: " << result[0] << std::endl;
+	size_t i = 1;
+	for (auto &entry : vec) {
+		if (entry.getType() != Ast::Node::Type::Literal) {
+			throw NotImplementedException("Execution of Command with non-literal arguments not supported yet");
+		}
+		D_ASSERT(entry.getType() == Ast::Node::Type::Literal);
+		result[i] = entry.get<Ast::Literal>().token.get<WordToken>().value.c_str();
+		i++;
 	}
-	result[vec.size()] = nullptr;
+	result[i] = nullptr;
 	return unique_ptr<char *const[]>((char *const *)result.release());
 }
 
@@ -51,10 +66,8 @@ optional<string> Executor::resolvePath(const string &program) {
 }
 
 ResultCode Executor::execute(Ast::Command &command) {
-	D_ASSERT(!command.args.empty());
-
 	// todo: add builtin support
-	const auto &program = command.args[0];
+	const auto &program = command.program_name;
 	const auto programPath = resolvePath(program);
 	if (!programPath.has_value()) {
 		LOG_ERROR("%: command not found\n", program);
@@ -67,9 +80,9 @@ ResultCode Executor::execute(Ast::Command &command) {
 		return ResultCode::GeneralError;
 	} else if (pid == 0) {
 		// Child
-		auto args = convertArguments(command.args);
-		auto environ = environment.getEnvironmentVariables();
-		execve(programPath.value().c_str(), args.get(), environ->map.get());
+		const auto args = convertArguments(command);
+		const auto env = environment.getEnvironmentVariables();
+		execve(programPath.value().c_str(), args.get(), env->map.get());
 		SYSCALL_ERROR("execve");
 		if (errno == ENOEXEC) {
 			Exit(ResultCode::CommandNotExecutable);

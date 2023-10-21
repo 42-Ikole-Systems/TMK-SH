@@ -6,13 +6,10 @@
 
 namespace shell {
 
-class AndOr {
+class CommandSuffix {
 public:
 	static Rule make();
 	static vector<Rule::Option> options();
-
-private:
-	static optional<Ast::Node> handler(vector<Ast::Node> &args);
 };
 
 } // namespace shell

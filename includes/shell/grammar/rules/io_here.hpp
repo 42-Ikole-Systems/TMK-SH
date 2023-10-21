@@ -6,7 +6,7 @@
 
 namespace shell {
 
-class AndOr {
+class IOHere {
 public:
 	static Rule make();
 	static vector<Rule::Option> options();

@@ -14,9 +14,11 @@
 #include <utility>
 #include <filesystem>
 #include <string_view>
+#include <deque>
 #include "shell/exception.hpp"
 
 namespace shell {
+using std::deque;
 using std::list;
 using std::make_pair;
 using std::make_shared;
