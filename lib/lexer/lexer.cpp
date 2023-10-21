@@ -1,9 +1,13 @@
 #include "shell/lexer/lexer.hpp"
 #include "shell/utility/types.hpp"
+#include <stdio.h>
+
 #include "shell/logger.hpp"
 #include "shell/assert.hpp"
 #include "shell/exception.hpp"
 #include "shell/error/error.hpp"
+
+#include <cstring>
 
 #define UNEXPECTED_EOF             "unexpected end of file"
 #define UNEXPECTED_EOF_WHILE_ERROR "unexpected EOF while looking for matching"

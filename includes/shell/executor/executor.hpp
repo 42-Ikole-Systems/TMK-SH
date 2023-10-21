@@ -2,6 +2,7 @@
 
 #include "shell/ast.hpp"
 #include "shell/interfaces/environment.hpp"
+//#include "shell/environment.hpp"
 
 namespace shell {
 

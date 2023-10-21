@@ -1,3 +1,4 @@
+#include <readline/readline.h>
 #include "shell/stdin_reader.hpp"
 #include "shell/parser.hpp"
 #include "shell/utility/types.hpp"
@@ -8,6 +9,11 @@
 #include "shell/error/error.hpp"
 #include "shell/shell_environment.hpp"
 #include "shell/lexer/reader_char_provider.hpp"
+//#include "shell/global_environment.hpp"
+
+#include <utility>
+#include "shell/lexer/reader_char_provider.hpp"
+#include "shell/error/error.hpp"
 #include "shell/logger.hpp"
 
 #include <readline/readline.h>
@@ -31,6 +37,7 @@ static void initialize() {
 static int run(int argc, const char **argv, char *const *envp) {
 	initialize();
 
+	ShellEnvironment environment;
 	using_history();
 	StdinReader reader = StdinReader(prompt);
 	while (true) {
@@ -48,7 +55,6 @@ static int run(int argc, const char **argv, char *const *envp) {
 			if (!line.empty()) {
 				add_history(line.c_str());
 			}
-			ShellEnvironment environment;
 			auto executor = Executor(environment);
 			executor.execute(ast);
 		} catch (const SyntaxErrorException e) {

@@ -3,6 +3,7 @@
 #include "shell/assert.hpp"
 #include "shell/shell.hpp"
 #include "shell/interfaces/environment.hpp"
+//#include "shell/environment.hpp"
 #include "shell/utility/split.hpp"
 
 #include <sys/wait.h>
@@ -10,6 +11,8 @@
 #include <stdlib.h>
 #include <ranges>
 #include <filesystem>
+
+#include <sys/stat.h>
 
 namespace shell {
 
@@ -46,6 +49,17 @@ static unique_ptr<char *const []> convertArguments(const Ast::Command &command) 
 	return unique_ptr<char *const[]>((char *const *)result.release());
 }
 
+bool isExecutable(const string &filepath) {
+	struct stat file_info;
+	if (stat(filepath.c_str(), &file_info) == 0) {
+		// Check if the owner, group, or others have execute permission
+		if ((file_info.st_mode & S_IXUSR) || (file_info.st_mode & S_IXGRP) || (file_info.st_mode & S_IXOTH)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 /*!
  * @brief Resolves program path.
  * @param command
@@ -57,9 +71,9 @@ optional<string> Executor::resolvePath(const string &program) {
 
 	const auto &path = environment.get("PATH");
 	for (const auto location : LazySplit(path, ":")) {
-		const auto programPath = std::filesystem::path(location) / program;
-		if (std::filesystem::exists(programPath)) {
-			return programPath.string();
+		const auto program_path = std::filesystem::path(location) / program;
+		if (std::filesystem::exists(program_path) && isExecutable(program_path)) {
+			return program_path.string();
 		}
 	}
 	return nullopt;

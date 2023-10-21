@@ -5,6 +5,7 @@ add_library(
     stdin_reader.cpp
     ast.cpp
     assert.cpp
+    global_environment.cpp
     exception.cpp
     shell_environment.cpp
 )

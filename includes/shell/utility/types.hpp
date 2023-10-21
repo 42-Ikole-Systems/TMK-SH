@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <stack>
 #include <map>
@@ -15,6 +16,7 @@
 #include <filesystem>
 #include <string_view>
 #include <deque>
+#include <list>
 #include "shell/exception.hpp"
 
 namespace shell {
