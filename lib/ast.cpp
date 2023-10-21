@@ -64,7 +64,7 @@ Ast::Node::Type Ast::Node::getType() const {
 }
 
 void Ast::print() const {
-	BLogger logger(LogLevel::Debug);
+	BufferedLogger logger(LogLevel::Debug);
 	if (root == nullptr) {
 		logger << "<null>\n";
 		return;
@@ -72,13 +72,13 @@ void Ast::print() const {
 	root->print(0, logger);
 }
 
-static void printLevel(int level, BLogger &logger) {
+static void printLevel(int level, BufferedLogger &logger) {
 	for (int i = 0; i < level; i++) {
 		logger << "    ";
 	}
 }
 
-void Ast::Node::print(int level, BLogger &logger) const {
+void Ast::Node::print(int level, BufferedLogger &logger) const {
 	printLevel(level, logger);
 	switch (type) {
 		case Type::Command:
@@ -99,14 +99,14 @@ void Ast::Node::print(int level, BLogger &logger) const {
 	}
 }
 
-void Ast::Literal::print(int level, BLogger &logger) const {
+void Ast::Literal::print(int level, BufferedLogger &logger) const {
 	logger << "Literal:\n";
 	printLevel(level + 1, logger);
 	logger << ("Token: ");
 	logger << token.toString() << "\n";
 }
 
-void Ast::Command::print(int level, BLogger &logger) const {
+void Ast::Command::print(int level, BufferedLogger &logger) const {
 	logger << "Command:\n";
 	printLevel(level + 1, logger);
 	logger << "Name: " << program_name << "\n";
@@ -114,7 +114,7 @@ void Ast::Command::print(int level, BLogger &logger) const {
 	arguments.print(level + 1, logger);
 }
 
-void Ast::List::print(int level, BLogger &logger) const {
+void Ast::List::print(int level, BufferedLogger &logger) const {
 	logger << "List:\n";
 	printLevel(level + 1, logger);
 	logger << "Entries: [\n";
@@ -125,7 +125,7 @@ void Ast::List::print(int level, BLogger &logger) const {
 	logger << "]\n";
 }
 
-void Ast::SeparatorOp::print(int level, BLogger &logger) const {
+void Ast::SeparatorOp::print(int level, BufferedLogger &logger) const {
 	logger << "SeparatorOp:\n";
 	if (left == nullptr) {
 		printLevel(level + 1, logger);
@@ -141,7 +141,7 @@ void Ast::SeparatorOp::print(int level, BLogger &logger) const {
 	}
 }
 
-void Ast::Redirection::print(int level, BLogger &logger) const {
+void Ast::Redirection::print(int level, BufferedLogger &logger) const {
 	logger << "Redirection:\n";
 	printLevel(level + 1, logger);
 	logger << "Filename: %\n", file_name;

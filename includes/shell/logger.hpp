@@ -6,12 +6,12 @@
 
 #include <sstream>
 
-#define LOG_INFO(format, ...)    shell::SLogger::getInstance().write(shell::LogLevel::Info, format, ##__VA_ARGS__)
-#define LOG_ERROR(format, ...)   shell::SLogger::getInstance().write(shell::LogLevel::Error, format, ##__VA_ARGS__)
-#define LOG_WARNING(format, ...) shell::SLogger::getInstance().write(shell::LogLevel::Warning, format, ##__VA_ARGS__)
+#define LOG_INFO(format, ...)    shell::SingletonLogger::getInstance().write(shell::LogLevel::Info, format, ##__VA_ARGS__)
+#define LOG_ERROR(format, ...)   shell::SingletonLogger::getInstance().write(shell::LogLevel::Error, format, ##__VA_ARGS__)
+#define LOG_WARNING(format, ...) shell::SingletonLogger::getInstance().write(shell::LogLevel::Warning, format, ##__VA_ARGS__)
 
 #ifdef DEBUG
-#define LOG_DEBUG(format, ...) shell::SLogger::getInstance().write(shell::LogLevel::Debug, format, ##__VA_ARGS__)
+#define LOG_DEBUG(format, ...) shell::SingletonLogger::getInstance().write(shell::LogLevel::Debug, format, ##__VA_ARGS__)
 #else
 #define LOG_DEBUG(format, ...)
 #endif
@@ -24,7 +24,7 @@ namespace shell {
 enum class LogLevel { Info, Warning, Error, Debug };
 
 /*!
- * @brief Logger baseclass can only be instantiated by derived class.
+ * @brief Logger interface.
  */
 class Logger {
 protected:
@@ -45,12 +45,12 @@ protected:
  * @brief Singleton Logging class.
  * @note This implementation is not thread safe.
  */
-class SLogger : public Logger {
+class SingletonLogger : public Logger {
 
 	/*!
 	 * @brief -.
 	 */
-	SLogger() = default;
+	SingletonLogger() = default;
 
 public:
 	/*!
@@ -69,13 +69,13 @@ public:
 	 * @brief Get singleton instance.
 	 * @return
 	 */
-	static SLogger &getInstance();
+	static SingletonLogger &getInstance();
 };
 
 /*!
  * @brief Buffered logging class
  */
-class BLogger : public Logger {
+class BufferedLogger : public Logger {
 	const LogLevel logLevel;  /*!< -. */
 	std::stringstream buffer; /*!< -. */
 
@@ -92,18 +92,18 @@ public:
 	 * 		  Nothing will be written when the global loglevel is lower than the loglevel you try to write with.
 	 * @param logLevel
 	 */
-	BLogger(LogLevel logLevel_);
+	BufferedLogger(LogLevel logLevel_);
 
 	/*!
 	 * @brief .-
 	 */
-	~BLogger();
+	~BufferedLogger();
 
 	/*!
 	 * @brief Adds value to buffer.
 	 */
 	template <class T>
-	BLogger &operator<<(const T &val) {
+	BufferedLogger &operator<<(const T &val) {
 		addToBuffer(val);
 		return *this;
 	}

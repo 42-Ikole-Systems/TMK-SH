@@ -26,20 +26,20 @@ const string Logger::getLogLevelPrefix(LogLevel logLevel) {
 	};
 }
 
-SLogger &SLogger::getInstance() {
-	static SLogger logger;
+SingletonLogger &SingletonLogger::getInstance() {
+	static SingletonLogger logger;
 	return logger;
 }
 
-BLogger::BLogger(LogLevel logLevel_) : logLevel(logLevel_) {
+BufferedLogger::BufferedLogger(LogLevel logLevel_) : logLevel(logLevel_) {
 	addToBuffer(getLogLevelPrefix(logLevel));
 }
 
-BLogger::~BLogger() {
+BufferedLogger::~BufferedLogger() {
 	flush();
 }
 
-void BLogger::flush() {
+void BufferedLogger::flush() {
 	std::cout << buffer.str();
 	buffer.clear();
 	addToBuffer(getLogLevelPrefix(logLevel));
