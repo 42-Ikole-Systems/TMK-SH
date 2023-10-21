@@ -17,8 +17,8 @@ ShellEnvironment::ShellEnvironment() {
 	}
 }
 
-shared_ptr<const char> ShellEnvironment::VariableMap::copyVariable(const string &variable) {
-	auto copy = shared_ptr<const char>(new char[variable.length() + 1]);
+shared_ptr<const char[]> ShellEnvironment::VariableMap::copyVariable(const string &variable) {
+	auto copy = shared_ptr<const char[]>(new char[variable.length() + 1]);
 	std::memcpy((char *)copy.get(), variable.data(), variable.length() + 1);
 	return copy;
 }
