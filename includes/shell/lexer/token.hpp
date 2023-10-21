@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 
 namespace shell {
 

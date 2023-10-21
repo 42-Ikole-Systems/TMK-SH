@@ -1,7 +1,7 @@
 #include "shell/stdin_reader.hpp"
 #include <readline/readline.h>
 #include <stdlib.h>
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 #include "shell/lexer/lexer.hpp"
 
 namespace shell {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "shell/lexer/token.hpp"
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 
 #include <functional>
 

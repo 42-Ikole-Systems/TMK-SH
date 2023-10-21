@@ -1,8 +1,7 @@
 #pragma once
 
 #include <exception>
-#include "shell/util.hpp"
-#include <string>
+#include "shell/utility/types.hpp"
 
 namespace shell {
 

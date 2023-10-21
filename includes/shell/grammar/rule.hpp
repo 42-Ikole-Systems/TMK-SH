@@ -1,7 +1,7 @@
 #pragma once
 
 #include <optional>
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 #include "shell/interfaces/provider.hpp"
 #include "shell/lexer/token_provider.hpp"
 #include "shell/ast.hpp"

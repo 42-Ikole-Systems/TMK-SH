@@ -1,14 +1,14 @@
 #include "shell/executor/executor.hpp"
 
 #include "shell/logger.hpp"
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 #include <stdexcept>
 #include <cassert>
 #include <stdio.h>
 
 namespace shell {
 
-Executor::Executor(char *const *envp) : envp(envp) {
+Executor::Executor(Environment &env) : env(env) {
 }
 
 ResultCode Executor::execute(Ast::Node &node) {

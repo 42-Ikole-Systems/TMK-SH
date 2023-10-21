@@ -2,9 +2,16 @@
 #include "shell/ast.hpp"
 #include "shell/assert.hpp"
 #include "shell/shell.hpp"
+#include "shell/environment.hpp"
+#include "shell/utility/split.hpp"
+
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <ranges>
+#include <filesystem>
+
+#include <sys/stat.h>
 
 namespace shell {
 
@@ -41,14 +48,43 @@ static unique_ptr<char *const []> convertArguments(const Ast::Command &command) 
 	return unique_ptr<char *const[]>((char *const *)result.release());
 }
 
-ResultCode Executor::execute(Ast::Command &command) {
-	const string &program = command.program_name;
+bool isExecutable(const string &filepath) {
+	struct stat file_info;
+	if (stat(filepath.c_str(), &file_info) == 0) {
+		// Check if the owner, group, or others have execute permission
+		if ((file_info.st_mode & S_IXUSR) || (file_info.st_mode & S_IXGRP) || (file_info.st_mode & S_IXOTH)) {
+			return true;
+		}
+	}
+	return false;
+}
 
+/*!
+ * @brief Resolves program path.
+ * @param command
+ */
+optional<string> Executor::resolvePath(const string &program) {
+	if (program.find('/') != string::npos) {
+		return program;
+	}
+
+	const auto &path = env.get("PATH");
+	for (const auto location : LazySplit(path, ":")) {
+		const auto program_path = std::filesystem::path(location) / program;
+		if (std::filesystem::exists(program_path) && isExecutable(program_path)) {
+			return program_path.string();
+		}
+	}
+	return nullopt;
+}
+
+ResultCode Executor::execute(Ast::Command &command) {
 	// todo: add builtin support
-	// todo: path resolution
-	if (program.find('/') == string::npos) {
-		LOG_WARNING("execution without '/' in name is not implemented\n");
-		return ResultCode::GeneralError;
+	const auto &program = command.program_name;
+	const auto programPath = resolvePath(program);
+	if (!programPath.has_value()) {
+		LOG_ERROR("%: command not found\n", program);
+		return ResultCode::CommandNotFound;
 	}
 
 	pid_t pid = fork();
@@ -58,7 +94,7 @@ ResultCode Executor::execute(Ast::Command &command) {
 	} else if (pid == 0) {
 		// Child
 		auto args = convertArguments(command);
-		execve(program.c_str(), args.get(), envp);
+		execve(programPath.value().c_str(), args.get(), env.materialize());
 		SYSCALL_ERROR("execve");
 		if (errno == ENOEXEC) {
 			Exit(ResultCode::CommandNotExecutable);

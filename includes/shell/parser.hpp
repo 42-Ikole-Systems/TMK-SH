@@ -2,7 +2,7 @@
 
 #include "shell/lexer/token_provider.hpp"
 #include "shell/lexer/token.hpp"
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 #include "shell/ast.hpp"
 #include "shell/grammar/rule.hpp"
 

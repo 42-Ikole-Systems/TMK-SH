@@ -5,12 +5,14 @@ add_library(
     stdin_reader.cpp
     ast.cpp
     assert.cpp
+    global_environment.cpp
     exception.cpp
 )
 
 add_subdirectory(lexer)
 add_subdirectory(grammar)
 add_subdirectory(executor)
+add_subdirectory(utility)
 add_subdirectory(error)
 
 # Forward the declared variable to the parent scope

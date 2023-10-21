@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shell/util.hpp"
+#include "shell/utility/types.hpp"
 #include <variant>
 #include "shell/lexer/token.hpp"
 
