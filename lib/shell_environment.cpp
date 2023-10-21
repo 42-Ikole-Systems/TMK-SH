@@ -108,7 +108,7 @@ MaterializedEnvironment ShellEnvironment::VariableMap::materialize() {
 	size_t env_size = environ.size();
 
 	// Set up the map
-	env->map = shared_ptr<char *const>(new char *[env_size + 1]);
+	env->map = shared_ptr<char* const[]>(new char *[env_size + 1]);
 	auto modifiable_map = (char **)env->map.get();
 
 	// Deliminate it with null
@@ -117,7 +117,7 @@ MaterializedEnvironment ShellEnvironment::VariableMap::materialize() {
 	// Populate the map and get a shared_ptr to the variables we hold
 	size_t index = 0;
 	for (auto &entry : owned_strings) {
-		env->owned_strings.push_back(entry);
+		env->owned_strings.push_back(entry); // Share ownership with cache.
 		modifiable_map[index++] = (char *)entry.get();
 	}
 	return env;

@@ -6,9 +6,9 @@ namespace shell {
 
 struct EnvironmentVariables {
 	// The char** holding the variables
-	shared_ptr<char *const> map;
+	shared_ptr<char* const[]> map;
 	// The strings that make up the data of the environment
-	list<shared_ptr<const char>> owned_strings;
+	list<shared_ptr<const char[]>> owned_strings;
 };
 
 using MaterializedEnvironment = shared_ptr<EnvironmentVariables>;

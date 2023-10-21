@@ -14,7 +14,7 @@ private:
 	private:
 		struct VariableEntry {
 			// Save where in the 'owned_strings' this is stored, for removal
-			list<shared_ptr<const char>>::iterator it;
+			list<shared_ptr<const char[]>>::iterator it;
 			string_view value_part;
 			// Is this fetched from the char **environ
 			bool is_base;
@@ -22,7 +22,7 @@ private:
 
 	public:
 		unordered_map<string_view, VariableEntry> environ;
-		list<shared_ptr<const char>> owned_strings;
+		list<shared_ptr<const char[]>> owned_strings;
 
 	public:
 		const char *get(const string &name);
