@@ -56,9 +56,9 @@ static int run(int argc, const char **argv, char *const *envp) {
 			}
 			auto executor = Executor(environment);
 			executor.execute(ast);
-		} catch (const SyntaxErrorException e) {
+		} catch (const SyntaxErrorException& e) {
 			LOG_ERROR("%: syntax error: %\n", SHELL, e.what());
-		} catch (const RecoverableException e) {
+		} catch (const RecoverableException& e) {
 			LOG_ERROR("%: recoverable error: %\n", SHELL, e.what());
 		}
 	}
