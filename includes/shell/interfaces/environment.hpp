@@ -15,31 +15,12 @@ using MaterializedEnvironment = shared_ptr<EnvironmentVariables>;
 
 class Environment {
 public:
-public:
-	virtual MaterializedEnvironment getEnvironmentVariables() = 0;
-
-	/*!
-	 * @brief Adds variable to the environment variables, will overwrite if name already exits.
-	 * @param variable In the form `name=value`
-	 */
-	virtual void addEnvironmentVariable(const string &variable) = 0;
-
-	/*!
-	 * @brief
-	 * @param name
-	 */
-	virtual void removeEnvironmentVariable(const string &name) = 0;
-
-	/*!
-	 * @brief Gets value of environment variable.
-	 * @param name
-	 * @return
-	 */
-	virtual const char *get(const string &name) = 0;
-	/*!
-	 * @brief
-	 * @return
-	 */
+	virtual string get(const string &name) const = 0;
+	virtual void add(const string &variable) = 0;
+	virtual void remove(const string &name) = 0;
+	virtual void exportVariable(const string &variable) = 0;
+	virtual bool isExported(const string &name) const = 0;
+	virtual MaterializedEnvironment materialize() = 0;
 };
 
 } // namespace shell

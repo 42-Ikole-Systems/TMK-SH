@@ -1,7 +1,7 @@
 #pragma once
 
 #include "shell/utility/types.hpp"
-#include "shell/environment.hpp"
+#include "shell/interfaces/environment.hpp"
 
 namespace shell {
 
@@ -16,7 +16,7 @@ public:
 	void exportVariable(const string &variable) override;
 	bool isExported(const string &name) const override;
 
-	char *const *materialize() const override;
+	MaterializedEnvironment materialize() override;
 
 public:
 	string_view extractKey(const char *variable);

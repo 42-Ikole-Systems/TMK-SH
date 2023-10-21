@@ -45,12 +45,12 @@ std::pair<string_view, string_view> ShellEnvironment::VariableMap::getKeyValuePa
 void ShellEnvironment::VariableMap::addUnsafe(const char *raw) {
 	auto key_value = getKeyValueParts(raw);
 
-	auto entry = VariableEntry {owned_strings.end(), key_value.second, true};
+	auto entry = VariableEntry {owned_strings.end(), key_value.second, true, true};
 	// Finally add it to the environment map
-	environ.emplace(std::make_pair(key_value.first, entry));
+	environment.emplace(std::make_pair(key_value.first, entry));
 }
 
-void ShellEnvironment::VariableMap::add(const string &variable) {
+void ShellEnvironment::VariableMap::addInternal(const string &variable, bool exported) {
 	D_ASSERT(variable.find('=') != std::string::npos);
 	auto str = copyVariable(variable);
 	auto raw = (char *)str.get();
@@ -58,19 +58,23 @@ void ShellEnvironment::VariableMap::add(const string &variable) {
 	auto key_value = getKeyValueParts(raw);
 	// Add it to the owned strings list
 	auto it = owned_strings.insert(owned_strings.end(), str);
-	auto entry = VariableEntry {it, key_value.second, false};
+	auto entry = VariableEntry {it, key_value.second, exported, false};
 
 	// Since our 'key' references memory we will free when the value gets deleted
 	// every add also needs to be a delete, because the key needs to be updated as well..
 	remove(key_value.first);
 
 	// Finally add it to the environment map
-	environ.emplace(std::make_pair(key_value.first, entry));
+	environment.emplace(std::make_pair(key_value.first, entry));
 }
 
-const char *ShellEnvironment::VariableMap::get(const string &name) {
-	auto it = environ.find(name);
-	if (it == environ.end()) {
+void ShellEnvironment::VariableMap::add(const string &variable) {
+	addInternal(variable, false);
+}
+
+const char *ShellEnvironment::VariableMap::get(const string &name) const {
+	auto it = environment.find(name);
+	if (it == environment.end()) {
 		return nullptr;
 	}
 	return it->second.value_part.data();
@@ -78,17 +82,39 @@ const char *ShellEnvironment::VariableMap::get(const string &name) {
 
 void ShellEnvironment::VariableMap::update(const string &variable) {
 	auto key = extractKey(variable.data());
-	auto it = environ.find(key);
-	if (it == environ.end()) {
+	auto it = environment.find(key);
+	if (it == environment.end()) {
 		return;
 	}
 	remove(std::string(key));
 	add(variable);
 }
 
+void ShellEnvironment::VariableMap::markAsExported(const string &variable) {
+	if (variable.find('=') == std::string::npos) {
+		// Not an assignment, just marking an existing variable as exported
+		auto it = environment.find(variable);
+		if (it == environment.end()) {
+			// Not an existing variable, just return
+			return;
+		}
+		it->second.exported = true;
+	} else {
+		addInternal(variable, true);
+	}
+}
+
+bool ShellEnvironment::VariableMap::isExported(const string &name) const {
+	auto it = environment.find(name);
+	if (it == environment.end()) {
+		return false;
+	}
+	return it->second.exported;
+}
+
 void ShellEnvironment::VariableMap::remove(string_view name) {
-	auto it = environ.find(name);
-	if (it == environ.end()) {
+	auto it = environment.find(name);
+	if (it == environment.end()) {
 		return;
 	}
 	if (!it->second.is_base) {
@@ -96,7 +122,7 @@ void ShellEnvironment::VariableMap::remove(string_view name) {
 		auto owned_string_entry = it->second.it;
 		owned_strings.erase(owned_string_entry);
 	}
-	environ.erase(it);
+	environment.erase(it);
 }
 
 void ShellEnvironment::VariableMap::remove(const string &name) {
@@ -105,7 +131,7 @@ void ShellEnvironment::VariableMap::remove(const string &name) {
 
 MaterializedEnvironment ShellEnvironment::VariableMap::materialize() {
 	auto env = make_shared<EnvironmentVariables>();
-	size_t env_size = environ.size();
+	size_t env_size = environment.size();
 
 	// Set up the map
 	env->map = shared_ptr<char *const[]>(new char *[env_size + 1]);
@@ -116,7 +142,7 @@ MaterializedEnvironment ShellEnvironment::VariableMap::materialize() {
 
 	// Populate the map and get a shared_ptr to the variables we hold
 	size_t index = 0;
-	for (auto &[key, value] : environ) {
+	for (auto &[key, value] : environment) {
 		if (!value.is_base) {
 			auto it = value.it;
 			env->owned_strings.push_back(*it); // Share ownership with cache.
@@ -126,7 +152,7 @@ MaterializedEnvironment ShellEnvironment::VariableMap::materialize() {
 	return env;
 }
 
-MaterializedEnvironment ShellEnvironment::getEnvironmentVariables() {
+MaterializedEnvironment ShellEnvironment::materialize() {
 	if (!modified) {
 		return cached_environment;
 	}
@@ -134,18 +160,26 @@ MaterializedEnvironment ShellEnvironment::getEnvironmentVariables() {
 	return cached_environment;
 }
 
-void ShellEnvironment::addEnvironmentVariable(const string &variable) {
+void ShellEnvironment::add(const string &variable) {
 	modified = true;
 	variable_map.add(variable);
 }
 
-void ShellEnvironment::removeEnvironmentVariable(const string &name) {
+void ShellEnvironment::remove(const string &name) {
 	modified = true;
 	variable_map.remove(name);
 }
 
-const char *ShellEnvironment::get(const string &name) {
-	return variable_map.get(name);
+string ShellEnvironment::get(const string &name) const {
+	return string(variable_map.get(name));
+}
+
+void ShellEnvironment::exportVariable(const string &variable) {
+	variable_map.markAsExported(variable);
+}
+
+bool ShellEnvironment::isExported(const string &name) const {
+	return variable_map.isExported(name);
 }
 
 } // namespace shell

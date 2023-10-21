@@ -95,7 +95,7 @@ ResultCode Executor::execute(Ast::Command &command) {
 	} else if (pid == 0) {
 		// Child
 		const auto args = convertArguments(command);
-		const auto env = environment.getEnvironmentVariables();
+		const auto env = environment.materialize();
 		execve(programPath.value().c_str(), args.get(), env->map.get());
 		SYSCALL_ERROR("execve");
 		if (errno == ENOEXEC) {

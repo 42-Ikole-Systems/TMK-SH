@@ -37,6 +37,7 @@ std::pair<string_view, string_view> GlobalEnvironment::getKeyValueParts(const ch
 }
 
 string GlobalEnvironment::get(const string &name) const {
+	// FIXME: this only returns the value, not the key=value
 	auto res = getenv(name.c_str());
 	if (!res) {
 		return string();
@@ -86,9 +87,11 @@ bool GlobalEnvironment::isExported(const string &name) const {
 	return it->second.exported == true;
 }
 
-char *const *GlobalEnvironment::materialize() const {
+MaterializedEnvironment GlobalEnvironment::materialize() {
 	// For the allocation, lets just assume everything is exported, doesn't matter if we overshoot a little
-	auto envs = new char *[variables.size() + 1];
+	auto environment = make_shared<EnvironmentVariables>();
+	environment->map = shared_ptr<char *const[]>(new char *[variables.size() + 1]);
+	auto envs = (char **)environment->map.get();
 	size_t idx = 0;
 	for (auto &var : variables) {
 		if (!var.second.exported) {
@@ -98,7 +101,7 @@ char *const *GlobalEnvironment::materialize() const {
 		envs[idx++] = getenv(var.first.c_str());
 	}
 	envs[idx] = nullptr;
-	return envs;
+	return environment;
 }
 
 } // namespace shell
