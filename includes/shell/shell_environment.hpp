@@ -53,7 +53,7 @@ public:
 
 	void remove(const string &name) override;
 
-	string get(const string &name) const override;
+	optional<string> get(const string &name) const override;
 
 	void exportVariable(const string &variable) override;
 

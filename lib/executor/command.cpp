@@ -31,7 +31,7 @@ Command search and execution
  * @param command
  * @return
  */
-static unique_ptr<char *const[]> convertArguments(const Ast::Command &command) {
+static unique_ptr<char *const []> convertArguments(const Ast::Command &command) {
 	const auto &vec = command.arguments.entries;
 	std::unique_ptr<const char *[]> result(new const char *[vec.size() + 2]); // +1 for executable name, +1 for nullptr
 	result[0] = command.program_name.c_str();
@@ -69,7 +69,10 @@ optional<string> Executor::resolvePath(const string &program) {
 	}
 
 	const auto &path = environment.get("PATH");
-	for (const auto location : LazySplit(path, ":")) {
+	if (!path.has_value()) {
+		return nullopt;
+	}
+	for (const auto location : LazySplit(path.value(), ":")) {
 		const auto program_path = std::filesystem::path(location) / program;
 		if (std::filesystem::exists(program_path) && isExecutable(program_path)) {
 			return program_path.string();

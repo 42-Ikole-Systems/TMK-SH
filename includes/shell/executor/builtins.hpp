@@ -32,5 +32,10 @@ public:
 	 * @param args
 	 */
 	static ResultCode echo(const vector<string> &args);
+
+	static ResultCode export_variable(const vector<string> &args, Environment &env);
+	static ResultCode set_variable(const vector<string> &args, Environment &env);
+	static ResultCode unset_variable(const vector<string> &args, Environment &env);
+	static ResultCode get_variable(const vector<string> &args, Environment &env);
 };
 } // namespace shell
