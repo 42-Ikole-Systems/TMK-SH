@@ -33,6 +33,11 @@ SingletonLogger &SingletonLogger::getInstance() {
 	return logger;
 }
 
+SingletonLogger &SingletonLogger::operator<<(const LogLevel& logLevel) {
+		tprintf("%", getLogLevelPrefix(logLevel));
+		return *this;
+	}
+
 BufferedLogger::BufferedLogger(LogLevel logLevel_) : logLevel(logLevel_) {
 	addToBuffer(getLogLevelPrefix(logLevel));
 }

@@ -66,6 +66,11 @@ public:
 	}
 
 	/*!
+	 * @brief
+	*/
+	SingletonLogger &operator<<(const LogLevel& logLevel);
+
+	/*!
 	 * @brief Writes message
 	 */
 	template <class T>
@@ -74,11 +79,6 @@ public:
 		return *this;
 	}
 
-	template <>
-	SingletonLogger &operator<<(const LogLevel& logLevel) {
-		tprintf("%", getLogLevelPrefix(logLevel));
-		return *this;
-	}
 
 	/*!
 	 * @brief Get singleton instance.
