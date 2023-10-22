@@ -1,5 +1,6 @@
 #include "shell/lexer/lexer.hpp"
 #include "shell/utility/types.hpp"
+#include "shell/utility/characters.hpp"
 #include <stdio.h>
 
 #include "shell/logger.hpp"
@@ -475,30 +476,6 @@ bool isOperatorCharacter(char ch) {
 
 bool isOperatorStart(char ch) {
 	return contains(OPERATOR_START_CHARACTERS, ch);
-}
-
-bool isNewline(char ch) {
-	return ch == '\n';
-}
-
-bool isBackslash(char ch) {
-	return ch == '\\';
-}
-
-bool isSingleQuote(char ch) {
-	return ch == '\'';
-}
-
-bool isDoubleQuote(char ch) {
-	return ch == '\"';
-}
-
-bool isDollarSign(char ch) {
-	return ch == '$';
-}
-
-bool isBackQuote(char ch) {
-	return ch == '`';
 }
 
 }; // namespace shell
