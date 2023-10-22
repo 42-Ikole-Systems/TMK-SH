@@ -10,7 +10,7 @@ public:
 	GlobalEnvironment();
 
 public:
-	string get(const string &name) const override;
+	optional<string> get(const string &name) const override;
 	void add(const string &variable) override;
 	void remove(const string &name) override;
 	void exportVariable(const string &variable) override;

@@ -15,7 +15,7 @@ using MaterializedEnvironment = shared_ptr<EnvironmentVariables>;
 
 class Environment {
 public:
-	virtual string get(const string &name) const = 0;
+	virtual optional<string> get(const string &name) const = 0;
 	virtual void add(const string &variable) = 0;
 	virtual void remove(const string &name) = 0;
 	virtual void exportVariable(const string &variable) = 0;

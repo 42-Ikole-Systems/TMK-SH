@@ -174,10 +174,10 @@ void ShellEnvironment::remove(const string &name) {
 	variable_map.remove(name);
 }
 
-string ShellEnvironment::get(const string &name) const {
+optional<string> ShellEnvironment::get(const string &name) const {
 	auto res = variable_map.get(name);
 	if (!res) {
-		return "NULL";
+		return nullopt;
 	}
 	return string(res);
 }
