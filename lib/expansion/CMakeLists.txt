@@ -1,13 +1,10 @@
 add_library(
-    lib_grammar
+    lib_expansion
     OBJECT
-    rule.cpp
-	list.cpp
+    quote_removal.cpp
 )
-
-add_subdirectory(rules)
 
 # Forward the declared variable to the parent scope
 set(ALL_OBJECT_FILES
-    ${ALL_OBJECT_FILES} $<TARGET_OBJECTS:lib_grammar>
+    ${ALL_OBJECT_FILES} $<TARGET_OBJECTS:lib_expansion>
     PARENT_SCOPE)
