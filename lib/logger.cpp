@@ -22,7 +22,7 @@ Logger::Logger()
 
 const string Logger::getLogLevelPrefix(LogLevel logLevel) {
 	static auto& environment = SingletonShellEnvironment::getInstance();
-	static const bool true_color = environment.get("COLORTERM") == "truecolor";
+	static const bool true_color = environment.get("COLORTERM").value_or("") == "truecolor";
 	if (true_color) {
 		switch (logLevel) {
 			case LogLevel::Info:
