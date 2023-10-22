@@ -61,24 +61,12 @@ public:
 	 */
 	template <class... Args>
 	void write(LogLevel logLevel, const char *format, Args &&...args) {
+		if (logLevel > g_logLevel) {
+			return;
+		}
 		tprintf("%", getLogLevelPrefix(logLevel));
 		tprintf(format, std::forward<Args>(args)...);
 	}
-
-	/*!
-	 * @brief
-	*/
-	SingletonLogger &operator<<(const LogLevel& logLevel);
-
-	/*!
-	 * @brief Writes message
-	 */
-	template <class T>
-	SingletonLogger &operator<<(const T &val) {
-		tprintf("%", val);
-		return *this;
-	}
-
 
 	/*!
 	 * @brief Get singleton instance.
@@ -120,7 +108,7 @@ public:
 	*/
 	void write(const char *format)
 	{
-		buffer << format;
+		addToBuffer(format);
 	}
 
 	/*!
@@ -129,7 +117,7 @@ public:
 	*/
 	void write(const string& format)
 	{
-		buffer << format;
+		addToBuffer(format);
 	}
 
 	/*!
@@ -139,6 +127,9 @@ public:
 	 */
 	template <class T, class... Args>
 	void write(const char *format, const T& value, Args &&... Fargs) {
+		if (logLevel > g_logLevel) {
+			return;
+		}
 		for (; *format != '\0'; format++) {
 		if (*format == '%') {
 			buffer << value;
