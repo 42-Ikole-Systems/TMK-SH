@@ -1,6 +1,7 @@
 #include "shell/grammar/rules/command_prefix.hpp"
 #include "shell/grammar/rules/io_redirect.hpp"
 #include "shell/grammar/rules/assignment_word.hpp"
+#include "shell/grammar/list.hpp"
 #include "shell/assert.hpp"
 
 namespace shell {
@@ -12,21 +13,26 @@ Rule CommandPrefix::make() {
 }
 
 vector<Rule::Option> CommandPrefix::options() {
-	auto handler = [](vector<Ast::Node> &args) -> optional<Ast::Node> {
-		D_ASSERT(args.size() == 1);
-		return Ast::List(std::move(args));
-	};
-	auto appender = [](vector<Ast::Node> &args) -> optional<Ast::Node> {
-		D_ASSERT(args.size() == 2);
-		auto &list_arg = args[1].get<Ast::List>();
 
-		list_arg.append(std::move(args[0]));
-		LOG_DEBUG("CommandPrefix: Append to list\n");
-		return std::move(list_arg);
+	auto redirection = [](Ast::Node node) -> Ast::Node {
+		return node;
 	};
-	return {Rule::NonTerminal(appender, {IORedirect::make(), CommandPrefix::make()}),
-	        Rule::NonTerminal(appender, {AssignmentWord::make(), CommandPrefix::make()}),
-	        Rule::NonTerminal(handler, {IORedirect::make()}), Rule::NonTerminal(handler, {AssignmentWord::make()})};
+	auto assignment = [](Ast::Node node) -> Ast::Node {
+		// TODO:
+		// Each variable assignment shall be expanded:
+		// - tilde expansion
+		// - parameter expansion
+		// - command substitution
+		// - arithmetic expansion
+		// - and quote removal
+		return node;
+	};
+
+	return {
+	    Rule::NonTerminal(ListConstructor::ListAppender(redirection), {IORedirect::make(), CommandPrefix::make()}),
+	    Rule::NonTerminal(ListConstructor::ListAppender(assignment), {AssignmentWord::make(), CommandPrefix::make()}),
+	    Rule::NonTerminal(ListConstructor::ListCreator(redirection), {IORedirect::make()}),
+	    Rule::NonTerminal(ListConstructor::ListCreator(assignment), {AssignmentWord::make()})};
 }
 
 } // namespace shell

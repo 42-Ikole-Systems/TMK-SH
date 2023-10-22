@@ -2,6 +2,7 @@ add_library(
     lib_grammar
     OBJECT
     rule.cpp
+	list.cpp
 )
 
 add_subdirectory(rules)

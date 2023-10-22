@@ -15,6 +15,11 @@ vector<Rule::Option> HereEnd::options() {
 }
 
 optional<Ast::Node> HereEnd::handler(TokenProvider &tokens) {
+	// TODO:
+	// If any character in word is quoted:
+	// - Delimiter shall be the result of quote removal
+	// - Produced line shall not be expanded
+
 	// TODO: implement
 	// Rule 3
 	return nullopt;

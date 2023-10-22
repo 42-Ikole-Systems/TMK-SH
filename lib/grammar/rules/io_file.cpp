@@ -60,6 +60,14 @@ optional<Ast::Node> IOFile::handler(vector<Ast::Node> &args) {
 	D_ASSERT(args.size() == 2);
 	auto redir = Ast::Redirection();
 
+	// TODO:
+	// The word that follows the redirection operator shall be subjected to;
+	// - tilde expansion
+	// - parameter expansion
+	// - command substitution
+	// - arithmetic expansion
+	// - quote removal
+
 	auto &file_name = args[1].get<Ast::Literal>();
 	redir.file_name = file_name.token.get<WordToken>().value;
 
