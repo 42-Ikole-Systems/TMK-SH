@@ -1,5 +1,12 @@
 
 #include "shell/logger.hpp"
+#include "shell/environments/singleton_shell_environment.hpp"
+
+# define COLOR_RESET	 "\033[0m"
+# define COLOR_INFO		 "\e[38;5;13m"
+# define COLOR_WARNING	 "\e[38;5;208m"
+# define COLOR_ERROR	 "\e[38;5;160m"
+# define COLOR_DEBUG	 "\e[38;5;21m"
 
 namespace shell {
 
@@ -14,18 +21,33 @@ Logger::Logger()
 }
 
 const string Logger::getLogLevelPrefix(LogLevel logLevel) {
-	switch (logLevel) {
-		case LogLevel::Info:
-			return string("[Info]: ");
-		case LogLevel::Warning:
-			return string("[Warning]: ");
-		case LogLevel::Error:
-			return string("[Error]: ");
-		case LogLevel::Debug:
-			return string("[Debug]: ");
-		default:
-			return "";
-	};
+	static auto& environment = SingletonShellEnvironment::getInstance();
+	static bool true_color = environment.get("COLORTERM") == "truecolor";
+	if (true_color) {
+		switch (logLevel) {
+			case LogLevel::Info:
+				return COLOR_INFO "[Info]: " COLOR_RESET;
+			case LogLevel::Warning:
+				return COLOR_WARNING "[Warning]: " COLOR_RESET;
+			case LogLevel::Error:
+				return COLOR_ERROR "[Error]: " COLOR_RESET;
+			case LogLevel::Debug:
+				return COLOR_DEBUG "[Debug]: " COLOR_RESET;
+		};
+	}
+	else {
+		switch (logLevel) {
+			case LogLevel::Info:
+				return "[Info]: ";
+			case LogLevel::Warning:
+				return "[Warning]: ";
+			case LogLevel::Error:
+				return "[Error]: ";
+			case LogLevel::Debug:
+				return "[Debug]: ";
+		};
+	}
+	return "";
 }
 
 SingletonLogger &SingletonLogger::getInstance() {
