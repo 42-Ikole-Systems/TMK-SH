@@ -36,12 +36,12 @@ std::pair<string_view, string_view> GlobalEnvironment::getKeyValueParts(const ch
 	return std::make_pair(key, value);
 }
 
-string GlobalEnvironment::get(const string &name) const {
-	// FIXME: this only returns the value, not the key=value
+optional<string> GlobalEnvironment::get(const string &name) const {
 	auto res = getenv(name.c_str());
 	if (!res) {
-		return string();
+		return nullopt;
 	}
+	res = res - 1 - name.size(); // go back to the beginning of the string by going back over the '=' and the key length
 	return string(res);
 }
 

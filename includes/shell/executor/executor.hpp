@@ -26,7 +26,7 @@ public:
 	ResultCode execute(Ast::SeparatorOp &node);
 
 private:
-	[[noreturn]] void Exit(ResultCode code);
+	ResultCode executeProcess(const string &program, const Ast::Command &command);
 	optional<string> resolvePath(const string &program);
 
 private:

@@ -39,8 +39,4 @@ ResultCode Executor::execute(Ast &ast) {
 	return execute(*ast.root);
 }
 
-[[noreturn]] void Executor::Exit(ResultCode code) {
-	exit(static_cast<int>(code));
-}
-
 }; // namespace shell
