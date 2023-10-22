@@ -9,7 +9,7 @@
 #include "shell/print.hpp"
 #include "shell/executor/executor.hpp"
 #include "shell/interfaces/environment.hpp"
-#include "shell/shell_environment.hpp"
+#include "shell/environments/shell_environment.hpp"
 
 using namespace shell;
 
@@ -25,7 +25,7 @@ TEST_CASE("basic shell", "[shell]") {
 	auto parser = Parser(lexer);
 	Ast ast = parser.parse();
 	ast.print();
-	ShellEnvironment environment;
+	ShellEnvironment environment(environ);
 	auto executor = Executor(environment);
 	executor.execute(ast);
 }

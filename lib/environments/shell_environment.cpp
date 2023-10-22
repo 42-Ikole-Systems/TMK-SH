@@ -1,5 +1,5 @@
 
-#include "shell/shell_environment.hpp"
+#include "shell/environments/shell_environment.hpp"
 
 #include <stdlib.h>
 #include <sys/errno.h>
@@ -7,13 +7,14 @@
 #include "shell/utility/types.hpp"
 #include "shell/assert.hpp"
 
-extern char *const *environ;
-
 namespace shell {
 
-ShellEnvironment::ShellEnvironment() {
-	for (size_t i = 0; environ[i]; i++) {
-		variable_map.addUnsafe(environ[i]);
+ShellEnvironment::ShellEnvironment(char* const* envp) {
+	if (!envp) {
+		return;
+	}
+	for (size_t i = 0; envp[i]; i++) {
+		variable_map.addUnsafe(envp[i]);
 	}
 }
 

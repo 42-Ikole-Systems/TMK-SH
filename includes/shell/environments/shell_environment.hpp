@@ -7,7 +7,12 @@ namespace shell {
 
 class ShellEnvironment : public Environment {
 public:
-	ShellEnvironment();
+	/*!
+	 * @brief Instantiates a shell environment
+	 * @param envp All the environment variables you want to add to the environment on construction.
+	 * @note All the envp variables will not be copied but just stored directly, so do not delete / free them.
+	*/
+	ShellEnvironment(char* const* envp);
 
 private:
 	struct VariableMap {
