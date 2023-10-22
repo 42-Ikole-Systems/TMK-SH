@@ -69,7 +69,9 @@ optional<string> Executor::resolvePath(const string &program) {
 	}
 
 	const auto &path = environment.get("PATH");
-	D_ASSERT(path.has_value());
+	if (!path.has_value()) {
+		return nullopt;
+	}
 	for (const auto location : LazySplit(path.value(), ":")) {
 		const auto program_path = std::filesystem::path(location) / program;
 		if (std::filesystem::exists(program_path) && isExecutable(program_path)) {
