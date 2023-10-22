@@ -21,10 +21,34 @@ vector<Rule::Option> CommandSuffix::options() {
 		return node;
 	};
 
-	return {Rule::NonTerminal(ListConstructor::ListAppender(redirection), {IORedirect::make(), CommandSuffix::make()}),
-	        Rule::NonTerminal(ListConstructor::ListAppender(word), {Word::make(), CommandSuffix::make()}),
-	        Rule::NonTerminal(ListConstructor::ListCreator(redirection), {IORedirect::make()}),
-	        Rule::NonTerminal(ListConstructor::ListCreator(word), {Word::make()})};
+	return {
+		Rule::NonTerminal(
+			ListConstructor::ListAppender(redirection),
+			{
+				IORedirect::make(),
+				CommandSuffix::make()
+			}
+		),
+		Rule::NonTerminal(
+			ListConstructor::ListAppender(word),
+			{
+				Word::make(),
+				CommandSuffix::make()
+			}
+		),
+		Rule::NonTerminal(
+			ListConstructor::ListCreator(redirection),
+			{
+				IORedirect::make()
+			}
+		),
+		Rule::NonTerminal(
+			ListConstructor::ListCreator(word),
+			{
+				Word::make()
+			}
+		)
+	};
 }
 
 } // namespace shell
