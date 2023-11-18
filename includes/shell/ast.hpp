@@ -2,6 +2,7 @@
 
 #include "shell/utility/types.hpp"
 #include <variant>
+#include "shell/logger.hpp"
 #include "shell/lexer/token.hpp"
 
 namespace shell {
@@ -15,7 +16,7 @@ public:
 		Literal(Token &&token);
 		~Literal();
 
-		void print(int level) const;
+		void print(int level, BufferedLogger &logger) const;
 		Token token;
 	};
 
@@ -28,7 +29,7 @@ public:
 
 	public:
 		void append(Node node);
-		void print(int level) const;
+		void print(int level, BufferedLogger &logger) const;
 
 	public:
 		list<Node> entries;
@@ -39,7 +40,7 @@ public:
 		Command(const string &program_name, List &&arguments);
 		~Command();
 
-		void print(int level) const;
+		void print(int level, BufferedLogger &logger) const;
 		string program_name;
 		List arguments;
 	};
@@ -49,7 +50,7 @@ public:
 		SeparatorOp(SeparatorOp &&other);
 		~SeparatorOp();
 
-		void print(int level) const;
+		void print(int level, BufferedLogger &logger) const;
 		unique_ptr<Node> left;
 		unique_ptr<Node> right;
 	};
@@ -61,7 +62,7 @@ public:
 		~Redirection();
 
 	public:
-		void print(int level) const;
+		void print(int level, BufferedLogger &logger) const;
 
 	public:
 		string file_name;
@@ -97,7 +98,7 @@ public:
 			return std::get<T>(variant);
 		}
 
-		void print(int level) const;
+		void print(int level, BufferedLogger &logger) const;
 	};
 
 public:

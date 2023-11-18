@@ -7,7 +7,7 @@
 #include "shell/print.hpp"
 #include "shell/executor/executor.hpp"
 #include "shell/error/error.hpp"
-#include "shell/shell_environment.hpp"
+#include "shell/environments/singleton_shell_environment.hpp"
 #include "shell/lexer/reader_char_provider.hpp"
 
 #include <utility>
@@ -36,7 +36,7 @@ static void initialize() {
 static int run(int argc, const char **argv, char *const *envp) {
 	initialize();
 
-	ShellEnvironment environment;
+	auto& environment = SingletonShellEnvironment::getInstance();
 	using_history();
 	StdinReader reader = StdinReader(prompt);
 	while (true) {

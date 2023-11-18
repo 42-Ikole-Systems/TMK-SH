@@ -64,91 +64,91 @@ Ast::Node::Type Ast::Node::getType() const {
 }
 
 void Ast::print() const {
+	BufferedLogger logger(LogLevel::Debug);
 	if (root == nullptr) {
-		tprintf("<null>\n");
+		logger << "<null>\n";
 		return;
 	}
-	root->print(0);
+	root->print(0, logger);
 }
 
-static void printLevel(int level) {
+static void printLevel(int level, BufferedLogger &logger) {
 	for (int i = 0; i < level; i++) {
-		tprintf("    ");
+		logger << "    ";
 	}
 }
 
-void Ast::Node::print(int level) const {
-	printLevel(level);
+void Ast::Node::print(int level, BufferedLogger &logger) const {
+	printLevel(level, logger);
 	switch (type) {
 		case Type::Command:
-			get<Command>().print(level);
+			get<Command>().print(level, logger);
 			break;
 		case Type::SeparatorOp:
-			get<SeparatorOp>().print(level);
+			get<SeparatorOp>().print(level, logger);
 			break;
 		case Type::Literal:
-			get<Literal>().print(level);
+			get<Literal>().print(level, logger);
 			break;
 		case Type::Redirection:
-			get<Redirection>().print(level);
+			get<Redirection>().print(level, logger);
 			break;
 		case Type::List:
-			get<List>().print(level);
+			get<List>().print(level, logger);
 			break;
 	}
 }
 
-void Ast::Literal::print(int level) const {
-	tprintf("Literal:\n");
-	printLevel(level + 1);
-	tprintf("Token: ");
-	token.print();
-	tprintf("\n");
+void Ast::Literal::print(int level, BufferedLogger &logger) const {
+	logger << "Literal:\n";
+	printLevel(level + 1, logger);
+	logger << ("Token: ");
+	logger << token.toString() << "\n";
 }
 
-void Ast::Command::print(int level) const {
-	tprintf("Command:\n");
-	printLevel(level + 1);
-	tprintf("Name: %\n", program_name);
-	printLevel(level + 1);
-	arguments.print(level + 1);
+void Ast::Command::print(int level, BufferedLogger &logger) const {
+	logger << "Command:\n";
+	printLevel(level + 1, logger);
+	logger << "Name: " << program_name << "\n";
+	printLevel(level + 1, logger);
+	arguments.print(level + 1, logger);
 }
 
-void Ast::List::print(int level) const {
-	tprintf("List:\n");
-	printLevel(level + 1);
-	tprintf("Entries: [\n");
+void Ast::List::print(int level, BufferedLogger &logger) const {
+	logger << "List:\n";
+	printLevel(level + 1, logger);
+	logger << "Entries: [\n";
 	for (auto &entry : entries) {
-		entry.print(level + 2);
+		entry.print(level + 2, logger);
 	}
-	printLevel(level + 1);
-	tprintf("]\n");
+	printLevel(level + 1, logger);
+	logger << "]\n";
 }
 
-void Ast::SeparatorOp::print(int level) const {
-	tprintf("SeparatorOp:\n");
+void Ast::SeparatorOp::print(int level, BufferedLogger &logger) const {
+	logger << "SeparatorOp:\n";
 	if (left == nullptr) {
-		printLevel(level + 1);
-		tprintf("<null>\n");
+		printLevel(level + 1, logger);
+		logger << "<null>\n";
 	} else {
-		left->print(level + 1);
+		left->print(level + 1, logger);
 	}
 	if (right == nullptr) {
-		printLevel(level + 1);
-		tprintf("<null>\n");
+		printLevel(level + 1, logger);
+		logger << "<null>\n";
 	} else {
-		right->print(level + 1);
+		right->print(level + 1, logger);
 	}
 }
 
-void Ast::Redirection::print(int level) const {
-	tprintf("Redirection:\n");
-	printLevel(level + 1);
-	tprintf("Filename: %\n", file_name);
-	printLevel(level + 1);
-	tprintf("Redirection Type: %\n", Token::getOperatorString(redirection_type));
-	printLevel(level + 1);
-	tprintf("Filedescriptor: %\n", io_number);
+void Ast::Redirection::print(int level, BufferedLogger &logger) const {
+	logger << "Redirection:\n";
+	printLevel(level + 1, logger);
+	logger << "Filename: %\n", file_name;
+	printLevel(level + 1, logger);
+	logger << "Redirection Type: %\n", Token::getOperatorString(redirection_type);
+	printLevel(level + 1, logger);
+	logger << "Filedescriptor: %\n", io_number;
 }
 
 } // namespace shell

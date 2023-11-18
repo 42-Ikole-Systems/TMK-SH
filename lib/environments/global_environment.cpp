@@ -1,5 +1,5 @@
 
-#include "shell/global_environment.hpp"
+#include "shell/environments/global_environment.hpp"
 
 #include <stdlib.h>
 #include <sys/errno.h>
